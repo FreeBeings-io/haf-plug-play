@@ -125,17 +125,13 @@ class DbSetup:
                         SELECT 
                             id,
                             block_num,
-                            body::json->'value'->'required_auths',
-                            body::json->'value'->'required_posting_auths',
+                            body::json -> 'value' -> 'required_auths',
+                            body::json -> 'value' -> 'required_posting_auths',
                             body::json->'value'->'id',
                             body::json->'value'->'json'
                         FROM hive.{APPLICATION_CONTEXT}_operations_view ppov
                         WHERE ppov.block_num >= _first_block AND ppov.block_num <= _last_block
                         AND ppov.op_type_id = 18;
-                    EXCEPTION WHEN OTHERS THEN
-                        RAISE NOTICE 'Value: (%)', value;
-                        RAISE NOTICE 'Block: (%)', block;
-                        RAISE NOTICE 'TID: (%)', tid;
                     END;
                     $function$
             """, None
