@@ -1,0 +1,25 @@
+stages:
+  - deploy
+
+variables:
+  DEPLOY_DIR: "/home/ubuntu/deployed/haf-plug-play/"
+
+
+deploy:
+  stage: deploy
+  script:
+    - pwd
+    - whoami
+    - rm -rf $DEPLOY_DIR
+    - mkdir -p $DEPLOY_DIR
+    - cp -r * $DEPLOY_DIR
+    - cd $DEPLOY_DIR
+    - pwd
+    - sudo pip3 install .
+    - cd hive_plug_play
+    - sudo pkill -f run_plug_play.py || true
+    - sudo nohup python3 -u run_plug_play.py >> /home/ubuntu/plug_play.log 2>&1&
+  only:
+    - master
+  tags:
+    - haf-plug-play
