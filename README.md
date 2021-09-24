@@ -4,6 +4,20 @@
 
 *This project is under heavy development and is not stable enough to run in production.*
 
+## HAF
+
+Plug & Play uses the Hive Application Framework to retrieve `custom_json` ops from Hive blocks.
+
+For an overview of how HAF works read this post: https://hive.blog/hive-139531/@mickiewicz/what-is-haf
+
+Install HAF:
+
+- Install the `postgresql` extension: https://gitlab.syncad.com/hive/psql_tools/-/blob/master/src/hive_fork_manager/Readme.md
+
+
+- Current HAF sync script (still basic, functions for syncing plugs are still WIP): https://github.com/imwatsi/haf-plug-play/blob/master/haf_plug_play/database/haf_sync.py
+
+
 ## Development
 
 ### Dependencies:
