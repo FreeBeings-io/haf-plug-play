@@ -140,3 +140,20 @@ class PlugPlayDb:
 
     def _save(self):
         self.db.commit()
+
+    # OPS
+
+    def get_ops_by_block(self, block_num):
+        cols = ['transaction_id', 'req_auths', 'req_posting_auths', 'op_id', 'op_json']
+        _res = self.db.select(
+            f"""
+                SELECT transaction_id, req_auths, req_posting_auths, op_id, op_json
+                    FROM public.plug_play_ops
+                    WHERE block_num = {block_num};
+            """
+        )
+        if _res is None: return []
+        result = []
+        for r in _res:
+            result.append(self._populate_by_schema(r, cols))
+        return result
