@@ -85,7 +85,7 @@ class DbSetup:
                 CREATE TABLE IF NOT EXISTS public.plug_play_ops(
                     id integer PRIMARY KEY,
                     block_num integer NOT NULL,
-                    transaction_id char(82) NOT NULL,
+                    transaction_id char(40) NOT NULL,
                     req_auths json,
                     req_posting_auths json,
                     op_id varchar(128) NOT NULL,
