@@ -85,8 +85,9 @@ class DbSetup:
                 CREATE TABLE IF NOT EXISTS public.plug_play_ops(
                     id integer PRIMARY KEY,
                     block_num integer NOT NULL,
-                    req_auths varchar(256),
-                    req_posting_auths varchar(256),
+                    transaction_id char(82) NOT NULL,
+                    req_auths json,
+                    req_posting_auths json,
                     op_id varchar(128) NOT NULL,
                     op_json varchar(5096) NOT NULL
                 )
@@ -121,15 +122,19 @@ class DbSetup:
                 VOLATILE AS $function$
                     BEGIN
                         INSERT INTO public.plug_play_ops as ppops(
-                            id, block_num, req_auths, req_posting_auths, op_id, op_json)
+                            id, block_num, transaction_id, req_auths, req_posting_auths, op_id, op_json)
                         SELECT 
-                            id,
-                            block_num,
-                            body::json -> 'value' -> 'required_auths',
-                            body::json -> 'value' -> 'required_posting_auths',
-                            body::json->'value'->'id',
-                            body::json->'value'->'json'
+                            ppov.id,
+                            ppov.block_num,
+                            encode(pptv.trx_hash::bytea,'escape'),
+                            (ppov.body::json -> 'value' -> 'required_auths')::json,
+                            (ppov.body::json -> 'value' -> 'required_posting_auths')::json,
+                            ppov.body::json->'value'->>'id',
+                            ppov.body::json->'value'->'json'
                         FROM hive.{APPLICATION_CONTEXT}_operations_view ppov
+                        JOIN hive.{APPLICATION_CONTEXT}_transactions_view pptv
+                            ON ppov.block_num = pptv.block_num
+                            AND ppov.trx_in_block = pptv.trx_in_block
                         WHERE ppov.block_num >= _first_block AND ppov.block_num <= _last_block
                         AND ppov.op_type_id = 18;
                     END;
