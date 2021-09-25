@@ -18,6 +18,12 @@ Install HAF:
 - Current HAF sync script (still basic, functions for syncing plugs are still WIP): https://github.com/imwatsi/haf-plug-play/blob/master/haf_plug_play/database/haf_sync.py
 
 
+## Documentation
+
+Documentation can be found here:
+
+- [API Documentation](docs/api/api.md)
+
 ## Development
 
 ### Dependencies:
