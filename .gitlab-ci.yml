@@ -20,6 +20,6 @@ deploy:
     - sudo pkill -f run_plug_play.py || true
     - sudo nohup python3 -u run_plug_play.py >> /home/ubuntu/plug_play.log 2>&1&
   only:
-    - master
+    - dev
   tags:
     - haf-plug-play-dev
