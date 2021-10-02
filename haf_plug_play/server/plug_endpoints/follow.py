@@ -61,5 +61,7 @@ async def get_account_followers(account):
     result = []
     res = db.db.select(sql) or []
     for entry in res:
-        result.append(entry, ['account', 'what'])
+        result.append(populate_by_schema(
+            entry, ['account', 'what']
+        ))
     return Success(result)
