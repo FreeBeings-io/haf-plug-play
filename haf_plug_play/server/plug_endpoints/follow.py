@@ -3,7 +3,7 @@ import json
 from jsonrpcserver import method, Result, Success, Error
 
 from haf_plug_play.database.access import DbAccess
-from haf_plug_play.plugs.follow.follow import SearchOps
+from haf_plug_play.plugs.follow.follow import SearchOps, StateOps
 from haf_plug_play.server.system_status import SystemStatus
 from haf_plug_play.server.normalize import populate_by_schema
 
@@ -50,4 +50,18 @@ async def get_reblog_ops(reblog_account=None, author=None, permlink=None, block_
             result.append(populate_by_schema(
                 entry, ['acc_auths', 'account', 'author', 'permlink']
             ))
+    return Success(result)
+
+@method(name="plug_play_api.follow.get_account_followers")
+async def get_account_followers(account):
+    """Returns the list of accounts a Hive account is following."""
+    assert isinstance(account, str), "the Hive account must be a string"
+    assert len(account) <= 16, "Hive account names must be no more than 16 characters"
+    sql = StateOps.followers(account)
+    result = []
+    res = db.db.select(sql) or []
+    for entry in res:
+        result.append(populate_by_schema(
+            entry, ['account', 'what']
+        ))
     return Success(result)

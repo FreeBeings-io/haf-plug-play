@@ -73,3 +73,14 @@ class SearchOps:
         query += ")AS reblog_ops;"
 
         return query
+
+class StateOps:
+
+    @classmethod
+    def followers(cls, account):
+        query = f"""
+            SELECT account, what
+                FROM hpp_follow_state
+                WHERE following = '{account}';
+        """
+        return query

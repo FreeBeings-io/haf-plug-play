@@ -96,20 +96,53 @@ class DbSetup:
         )
         db.execute(
             f"""
-                CREATE TABLE IF NOT EXISTS public.app_sync(
-                    app_name varchar(32),
-                    reversible_block integer DEFAULT 0,
-                    irreversible_block integer DEFAULT 0
-                );
+                CREATE INDEX IF NOT EXISTS custom_json_ops_ix_block_num
+                ON public.plug_play_ops (block_num);
+            """, None
+        )
+        db.execute(
+            f"""
+                CREATE INDEX IF  NOT EXISTS custom_json_ops_ix_op_id
+                ON public.plug_play_ops (op_id);
             """, None
         )
         db.execute(
             f"""
                 CREATE TABLE IF NOT EXISTS public.apps(
-                    app_name varchar(32),
+                    app_name varchar(32) PRIMARY KEY,
                     op_ids varchar(16)[],
-                    last_updated timestamp
+                    last_updated timestamp DEFAULT NOW(),
+                    enabled boolean
                 );
+            """, None
+        )
+        db.execute(
+            f"""
+                CREATE TABLE IF NOT EXISTS public.app_sync(
+                    app_name varchar(32) NOT NULL REFERENCES apps (app_name),
+                    latest_hive_rowid integer,
+                    state_hive_rowid integer
+                );
+            """, None
+        )
+        db.execute(
+            """
+                INSERT INTO public.apps (app_name, op_ids, enabled)
+                VALUES ('global','{"follow", "community"}',true);
+            """, None
+        )
+        db.execute(
+            f"""
+                CREATE TABLE IF NOT EXISTS public.global_props(
+                    head_hive_rowid integer
+                );
+            """, None
+        )
+        db.execute(
+            f"""
+                INSERT INTO public.global_props (head_hive_rowid)
+                SELECT '0'
+                WHERE NOT EXISTS (SELECT * FROM public.global_props);
             """, None
         )
         db.commit()
@@ -123,20 +156,23 @@ class DbSetup:
                     BEGIN
                         INSERT INTO public.plug_play_ops as ppops(
                             id, block_num, transaction_id, req_auths, req_posting_auths, op_id, op_json)
-                        SELECT 
+                        SELECT
                             ppov.id,
                             ppov.block_num,
                             encode(pptv.trx_hash::bytea,'escape'),
                             (ppov.body::json -> 'value' -> 'required_auths')::json,
                             (ppov.body::json -> 'value' -> 'required_posting_auths')::json,
                             ppov.body::json->'value'->>'id',
-                            ppov.body::json->'value'->'json'
+                            ppov.body::json->'value'->>'json'
                         FROM hive.{APPLICATION_CONTEXT}_operations_view ppov
                         JOIN hive.{APPLICATION_CONTEXT}_transactions_view pptv
                             ON ppov.block_num = pptv.block_num
                             AND ppov.trx_in_block = pptv.trx_in_block
-                        WHERE ppov.block_num >= _first_block AND ppov.block_num <= _last_block
-                        AND ppov.op_type_id = 18;
+                        WHERE ppov.block_num >= _first_block
+                            AND ppov.block_num <= _last_block
+                            AND ppov.op_type_id = 18;
+                    UPDATE public.global_props
+                        SET head_hive_rowid = (SELECT MAX(hive_rowid) FROM public.plug_play_ops);
                     END;
                     $function$
             """, None

@@ -16,10 +16,10 @@ deploy:
     - cd $DEPLOY_DIR
     - pwd
     - sudo pip3 install .
-    - cd hive_plug_play
+    - cd haf_plug_play
     - sudo pkill -f run_plug_play.py || true
     - sudo nohup python3 -u run_plug_play.py >> /home/ubuntu/plug_play.log 2>&1&
   only:
-    - master
+    - dev
   tags:
-    - haf-plug-play
+    - haf-plug-play-dev
