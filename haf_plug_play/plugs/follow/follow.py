@@ -81,6 +81,6 @@ class StateOps:
         query = f"""
             SELECT account, what
                 FROM hpp_follow_state
-                WHERE following = {account};
+                WHERE following = '{account}';
         """
         return query
