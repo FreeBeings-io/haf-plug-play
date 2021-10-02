@@ -52,7 +52,7 @@ async def get_reblog_ops(reblog_account=None, author=None, permlink=None, block_
             ))
     return Success(result)
 
-@method(name="plug_play_api.follow.get_reblog_ops")
+@method(name="plug_play_api.follow.get_account_followers")
 async def get_account_followers(account):
     """Returns the list of accounts a Hive account is following."""
     assert isinstance(account, str), "the Hive account must be a string"
