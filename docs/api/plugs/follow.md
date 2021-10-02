@@ -4,6 +4,8 @@ Search endpoints for the Follow protocol
 
 **Dev Server:** https://beta.plug-play.imwatsi.com/
 
+---
+
 ### get_follow_ops
 
 *Returns a list of global follow ops within the specified block range (or last 24 hours if not specified)*
@@ -44,6 +46,8 @@ Example response:
     "id": 1
 }
 ```
+
+---
 
 ### get_reblog_ops
 
@@ -89,5 +93,72 @@ Example response:
         },
         ...
     ]
+}
+```
+
+---
+
+### get_account_followers
+
+*Returns a list of Hive accounts that are following the provided Hive account*
+
+**Params:**
+
+- `account`: <hive_account>
+
+Example payload:
+
+```
+{
+    "jsonrpc": "2.0",
+    "method": "plug_play_api.follow.get_account_followers",
+    "params": {
+        "account": "dan"
+        },
+    "id": 1
+}
+```
+
+Example response:
+
+```
+{
+  "jsonrpc": "2.0",
+  "result": [
+    {
+      "account": "thedashguy",
+      "what": [
+        "posts",
+        "blog"
+      ]
+    },
+    {
+      "account": "infovore",
+      "what": [
+        "posts",
+        "blog"
+      ]
+    },
+    {
+      "account": "samtoland",
+      "what": [
+        "posts",
+        "blog"
+      ]
+    },
+    {
+      "account": "sonsy",
+      "what": [
+        "posts",
+        "blog"
+      ]
+    },
+    {
+      "account": "abit",
+      "what": [
+        "posts",
+        "blog"
+      ]
+    },...
 }
 ```
