@@ -179,11 +179,11 @@ class DbSetup:
         )
         db.commit()
         cls.conn.close()
-    
+
+db = DbSession()
 
 def main_loop():
     while True:
-        db = DbSession()
         # get blocks range
         blocks_range = db.select(f"SELECT * FROM hive.app_next_block('{APPLICATION_CONTEXT}');")[0]
         print(f"Blocks range: {blocks_range}")
@@ -205,8 +205,9 @@ def main_loop():
 
         print(db.select(f"SELECT public.update_plug_play_ops( {first_block}, {last_block} );"))
         db.commit()
-        
+
 
 DbSetup.check_db()
 DbSetup.prepare_app_data()
-#main_loop()
+
+main_loop()
