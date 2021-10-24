@@ -39,7 +39,7 @@ apt-get install -y \
     libboost-test-dev \
     libboost-thread-dev
 
-apt install python3 python3-pip postgresql libpq-dev apt install postgresql-server-dev-all
+apt-get install python3 python3-pip postgresql libpq-dev libpqxx-dev postgresql-server-dev-all
 ```
 
 ### Setup PostgreSQL
