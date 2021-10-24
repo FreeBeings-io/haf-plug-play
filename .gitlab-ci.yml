@@ -2,7 +2,7 @@ stages:
   - deploy
 
 variables:
-  DEPLOY_DIR: "/home/ubuntu/deployed/haf-plug-play/"
+  DEPLOY_DIR: "/home/gitlab-runner/deployed/haf-plug-play/"
 
 
 deploy:
@@ -15,10 +15,10 @@ deploy:
     - cp -r * $DEPLOY_DIR
     - cd $DEPLOY_DIR
     - pwd
-    - sudo pip3 install .
+    - pip3 install .
     - cd haf_plug_play
-    - sudo pkill -f run_plug_play.py || true
-    - sudo nohup python3 -u run_plug_play.py >> /home/ubuntu/plug_play.log 2>&1&
+    - pkill -f run_plug_play.py || true
+    - nohup python3 -u run_plug_play.py >> plug_play.log 2>&1&
   only:
     - dev
   tags:
