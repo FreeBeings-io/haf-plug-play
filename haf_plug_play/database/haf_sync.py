@@ -18,7 +18,7 @@ class DbSession:
         self.conn = psycopg2.connect(f"dbname=haf user={config['db_username']} password={config['db_password']}")
         self.conn.autocommit = False
         self.cur = self.conn.cursor()
-    
+
     def select(self, sql):
         self.cur.execute(sql)
         res = self.cur.fetchall()
@@ -26,14 +26,14 @@ class DbSession:
             return None
         else:
             return res
-    
+
     def execute_immediate(self, sql,  data):
         self.cur.execute(sql, data)
         self.conn.commit()
-    
+
     def get_query(self,sql, data):
         return self.cur.mogrify(sql,data)
-    
+
     def execute(self, sql, data):
         try:
             if data:
@@ -47,7 +47,7 @@ class DbSession:
             print(f"DATA:   {data}")
             self.conn.rollback()
             raise Exception ('DB error occurred')
-    
+
     def commit(self):
         self.conn.commit()
 
@@ -69,12 +69,23 @@ class DbSetup:
                 os._exit(1)
     
     @classmethod
+    def prepare_global_data(cls):
+        app_entry = db.select(f"SELECT 1 FROM public.apps WHERE app_name='global';")[0][0] == 1
+        if not app_entry:
+            db.execute(
+                """
+                    INSERT INTO public.apps (app_name, op_ids, enabled)
+                    VALUES ('global','{"follow", "community"}',true);
+                """, None
+            )
+        
+    @classmethod
     def prepare_app_data(cls):
         # prepare app data
         db = DbSession()
         exists = db.select(
             f"SELECT hive.app_context_exists( '{APPLICATION_CONTEXT}' );"
-        )[0]
+        )[0][0]
         print(exists)
         if exists == False:
             db.select(f"SELECT hive.app_create_context( '{APPLICATION_CONTEXT}' );")
@@ -123,12 +134,6 @@ class DbSetup:
                     latest_hive_rowid integer,
                     state_hive_rowid integer
                 );
-            """, None
-        )
-        db.execute(
-            """
-                INSERT INTO public.apps (app_name, op_ids, enabled)
-                VALUES ('global','{"follow", "community"}',true);
             """, None
         )
         db.execute(
