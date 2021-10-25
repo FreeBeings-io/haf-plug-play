@@ -2,6 +2,7 @@ import os
 import psycopg2
 
 APPLICATION_CONTEXT = "plug_play"
+BATCH_PROCESS_SIZE = 100
 
 config = {
     'db_username': 'postgres',
@@ -187,6 +188,22 @@ class DbSetup:
 
 db = DbSession()
 
+def split(first, last, size):
+    count = 0
+    result = []
+    for i in range(first, last+1):
+        if i == last:
+            result.append((_first, i))
+        if count == 0:
+            _first = i
+        elif count == size:
+            _last = i
+            result.append((_first,_last))
+            count = 0
+            continue
+        count += 1
+    return result
+
 def main_loop():
     while True:
         # get blocks range
@@ -199,14 +216,17 @@ def main_loop():
             continue
 
         if (last_block - first_block) > 100:
-            db.select(f"SELECT hive.app_context_detach( '{APPLICATION_CONTEXT}' );")
-            print("context detached")
-            db.select(f"SELECT public.update_plug_play_ops( {first_block}, {last_block} );")
-            print("massive sync done")
-            db.select(f"SELECT hive.app_context_attach( '{APPLICATION_CONTEXT}', {last_block} );")
-            print("context attached again")
-            db.commit()
-            continue
+            steps = split(first_block, last_block, BATCH_PROCESS_SIZE)
+            for s in steps:
+                db.select(f"SELECT hive.app_context_detach( '{APPLICATION_CONTEXT}' );")
+                print("context detached")
+                print(f"processing {s[0]} to {s[1]}")
+                db.select(f"SELECT public.update_plug_play_ops( {s[0]}, {s[1]} );")
+                print("batch sync done")
+                db.select(f"SELECT hive.app_context_attach( '{APPLICATION_CONTEXT}', {s[1]} );")
+                print("context attached again")
+                db.commit()
+                continue
 
         print(db.select(f"SELECT public.update_plug_play_ops( {first_block}, {last_block} );"))
         db.commit()
@@ -214,5 +234,7 @@ def main_loop():
 
 DbSetup.check_db()
 DbSetup.prepare_app_data()
+DbSetup.prepare_global_data()
 
-main_loop()
+if __name__ == "__main__":
+    main_loop()
