@@ -2,12 +2,12 @@ import os
 import psycopg2
 
 APPLICATION_CONTEXT = "plug_play"
-BATCH_PROCESS_SIZE = 100
+BATCH_PROCESS_SIZE = 100000
 
 config = {
     'db_username': 'postgres',
     'db_password': 'pass.word',
-    'server_host': '0.0.0.0',
+    'server_host': '127.0.0.0',
     'server_port': '8080',
     'ssl_cert': '',
     'ssl_key': ''
@@ -71,15 +71,15 @@ class DbSetup:
     
     @classmethod
     def prepare_global_data(cls):
-        app_entry = db.select(f"SELECT 1 FROM public.apps WHERE app_name='global';")[0][0] == 1
-        if not app_entry:
+        app_entry = db.select(f"SELECT 1 FROM public.apps WHERE app_name='global';")
+        if app_entry is None:
             db.execute(
                 """
                     INSERT INTO public.apps (app_name, op_ids, enabled)
                     VALUES ('global','{"follow", "community"}',true);
                 """, None
             )
-        
+
     @classmethod
     def prepare_app_data(cls):
         # prepare app data
@@ -101,7 +101,7 @@ class DbSetup:
                     req_auths json,
                     req_posting_auths json,
                     op_id varchar(128) NOT NULL,
-                    op_json varchar(5096) NOT NULL
+                    op_json varchar(10192) NOT NULL
                 )
                 INHERITS( hive.{APPLICATION_CONTEXT} );
             """, None
