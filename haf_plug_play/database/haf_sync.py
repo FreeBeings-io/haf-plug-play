@@ -1,8 +1,9 @@
 import os
 import psycopg2
+import time
 
 APPLICATION_CONTEXT = "plug_play"
-BATCH_PROCESS_SIZE = 100000
+BATCH_PROCESS_SIZE = 1000000
 
 config = {
     'db_username': 'postgres',
@@ -97,11 +98,11 @@ class DbSetup:
                 CREATE TABLE IF NOT EXISTS public.plug_play_ops(
                     id integer PRIMARY KEY,
                     block_num integer NOT NULL,
-                    transaction_id char(40) NOT NULL,
+                    transaction_id char(40),
                     req_auths json,
                     req_posting_auths json,
                     op_id varchar(128) NOT NULL,
-                    op_json varchar(10192) NOT NULL
+                    op_json varchar NOT NULL
                 )
                 INHERITS( hive.{APPLICATION_CONTEXT} );
             """, None
@@ -152,33 +153,57 @@ class DbSetup:
             """, None
         )
         db.commit()
-        # create update ops functions
+        # create update ops function
         db.execute(
             f"""
                 CREATE OR REPLACE FUNCTION public.update_plug_play_ops( _first_block INT, _last_block INT )
                 RETURNS void
                 LANGUAGE plpgsql
                 VOLATILE AS $function$
+                    DECLARE
+                        temprow RECORD;
+                        _id INTEGER;
+                        _block_num INTEGER;
+                        _required_auths JSON;
+                        _required_posting_auths JSON;
+                        _op_id VARCHAR;
+                        _op_json VARCHAR;
+                        _hash VARCHAR;
+                        _transaction_id VARCHAR(40);
                     BEGIN
-                        INSERT INTO public.plug_play_ops as ppops(
-                            id, block_num, transaction_id, req_auths, req_posting_auths, op_id, op_json)
-                        SELECT
-                            ppov.id,
-                            ppov.block_num,
-                            encode(pptv.trx_hash::bytea,'escape'),
-                            (ppov.body::json -> 'value' -> 'required_auths')::json,
-                            (ppov.body::json -> 'value' -> 'required_posting_auths')::json,
-                            ppov.body::json->'value'->>'id',
-                            ppov.body::json->'value'->>'json'
-                        FROM hive.{APPLICATION_CONTEXT}_operations_view ppov
-                        JOIN hive.{APPLICATION_CONTEXT}_transactions_view pptv
-                            ON ppov.block_num = pptv.block_num
-                            AND ppov.trx_in_block = pptv.trx_in_block
-                        WHERE ppov.block_num >= _first_block
-                            AND ppov.block_num <= _last_block
-                            AND ppov.op_type_id = 18;
-                    UPDATE public.global_props
-                        SET head_hive_rowid = (SELECT MAX(hive_rowid) FROM public.plug_play_ops);
+                        FOR temprow IN
+                                SELECT
+                                    ppov.id,
+                                    ppov.block_num,
+                                    ppov.trx_in_block,
+                                    (ppov.body::json -> 'value' -> 'required_auths')::json AS required_auths,
+                                    (ppov.body::json -> 'value' -> 'required_posting_auths')::json AS required_posting_auths,
+                                    ppov.body::json->'value'->>'id' AS op_id,
+                                    ppov.body::json->'value'->>'json' AS op_json
+                                FROM hive.plug_play_operations_view ppov
+                                WHERE ppov.block_num >= _first_block
+                                    AND ppov.block_num <= _last_block
+                                    AND ppov.op_type_id = 18
+                            LOOP
+                                _id := temprow.id;
+                                _block_num := temprow.block_num;
+                                _required_auths := temprow.required_auths;
+                                _required_posting_auths := temprow.required_posting_auths;
+                                _op_id := temprow.op_id;
+                                _op_json := temprow.op_json;
+                                _hash := (
+                                    SELECT pptv.trx_hash FROM hive.plug_play_transactions_view pptv
+                                    WHERE pptv.block_num = temprow.block_num
+                                    AND pptv.trx_in_block = temprow.trx_in_block);
+                                _transaction_id := encode(_hash::bytea, 'escape');
+                                INSERT INTO public.plug_play_ops as ppops(
+                                    id, block_num, transaction_id, req_auths,
+                                    req_posting_auths, op_id, op_json)
+                                VALUES
+                                    (_id, _block_num, _transaction_id, _required_auths,
+                                    _required_posting_auths, _op_id, _op_json);
+
+                            END LOOP;
                     END;
                     $function$
             """, None
@@ -188,53 +213,69 @@ class DbSetup:
 
 db = DbSession()
 
-def split(first, last, size):
-    count = 0
-    result = []
-    for i in range(first, last+1):
-        if i == last:
-            result.append((_first, i))
-        if count == 0:
-            _first = i
-        elif count == size:
-            _last = i
-            result.append((_first,_last))
-            count = 0
-            continue
-        count += 1
-    return result
+class HafSync:
 
-def main_loop():
-    while True:
-        # get blocks range
-        blocks_range = db.select(f"SELECT * FROM hive.app_next_block('{APPLICATION_CONTEXT}');")[0]
-        print(f"Blocks range: {blocks_range}")
-        if not blocks_range:
-            continue
-        (first_block, last_block) = blocks_range
-        if not first_block:
-            continue
+    sync_enabled = False
 
-        if (last_block - first_block) > 100:
-            steps = split(first_block, last_block, BATCH_PROCESS_SIZE)
-            for s in steps:
-                db.select(f"SELECT hive.app_context_detach( '{APPLICATION_CONTEXT}' );")
-                print("context detached")
-                print(f"processing {s[0]} to {s[1]}")
-                db.select(f"SELECT public.update_plug_play_ops( {s[0]}, {s[1]} );")
-                print("batch sync done")
-                db.select(f"SELECT hive.app_context_attach( '{APPLICATION_CONTEXT}', {s[1]} );")
-                print("context attached again")
-                db.commit()
+    @classmethod
+    def _split(cls, first, last, size):
+        count = 0
+        result = []
+        for i in range(first, last+1):
+            if i == last:
+                result.append((_first, i))
+            if count == 0:
+                _first = i
+            elif count == size:
+                _last = i
+                result.append((_first,_last))
+                count = 0
                 continue
+            count += 1
+        return result
+    
+    @classmethod
+    def init(cls):
+        DbSetup.check_db()
+        DbSetup.prepare_app_data()
+        DbSetup.prepare_global_data()
+    
+    @classmethod
+    def toggle_sync(cls, enabled=True):
+        cls.sync_enabled = enabled
 
-        print(db.select(f"SELECT public.update_plug_play_ops( {first_block}, {last_block} );"))
-        db.commit()
+    @classmethod
+    def main_loop(cls):
+        while True:
+            if cls.sync_enabled is True:
+                # get blocks range
+                blocks_range = db.select(f"SELECT * FROM hive.app_next_block('{APPLICATION_CONTEXT}');")[0]
+                print(f"Blocks range: {blocks_range}")
+                if not blocks_range:
+                    continue
+                (first_block, last_block) = blocks_range
+                if not first_block:
+                    continue
+
+                if (last_block - first_block) > 100:
+                    steps = cls._split(first_block, last_block, BATCH_PROCESS_SIZE)
+                    for s in steps:
+                        db.select(f"SELECT hive.app_context_detach( '{APPLICATION_CONTEXT}' );")
+                        print("context detached")
+                        print(f"processing {s[0]} to {s[1]}")
+                        db.select(f"SELECT public.update_plug_play_ops( {s[0]}, {s[1]} );")
+                        print("batch sync done")
+                        db.select(f"SELECT hive.app_context_attach( '{APPLICATION_CONTEXT}', {s[1]} );")
+                        print("context attached again")
+                        db.commit()
+                        continue
+
+                print(db.select(f"SELECT public.update_plug_play_ops( {first_block}, {last_block} );"))
+                db.commit()
+            time.sleep(0.5)
 
 
-DbSetup.check_db()
-DbSetup.prepare_app_data()
-DbSetup.prepare_global_data()
 
 if __name__ == "__main__":
-    main_loop()
+    HafSync.init()
+    HafSync.main_loop()
