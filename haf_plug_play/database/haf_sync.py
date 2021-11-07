@@ -278,4 +278,5 @@ class HafSync:
 
 if __name__ == "__main__":
     HafSync.init()
+    HafSync.toggle_sync()
     HafSync.main_loop()
