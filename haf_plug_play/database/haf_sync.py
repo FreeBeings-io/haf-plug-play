@@ -141,7 +141,9 @@ class DbSetup:
         db.execute(
             f"""
                 CREATE TABLE IF NOT EXISTS public.global_props(
-                    head_hive_rowid integer
+                    head_hive_rowid integer,
+                    head_block_num integer,
+                    head_block_time timestamp
                 );
             """, None
         )
