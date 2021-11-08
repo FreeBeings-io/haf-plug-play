@@ -185,7 +185,7 @@ class DbSetup:
                                     (ppov.body::json -> 'value' -> 'required_auths')::json AS required_auths,
                                     (ppov.body::json -> 'value' -> 'required_posting_auths')::json AS required_posting_auths,
                                     ppov.body::json->'value'->>'id' AS op_id,
-                                    ppov.body::json->'value'->>'json' AS op_json,
+                                    ppov.body::json->'value'->>'json' AS op_json
                                 FROM hive.plug_play_operations_view ppov
                                 WHERE ppov.block_num >= _first_block
                                     AND ppov.block_num <= _last_block
@@ -210,7 +210,7 @@ class DbSetup:
                                 VALUES
                                     (_id, _block_num, _transaction_id, _required_auths,
                                     _required_posting_auths, _op_id, _op_json);
-                                UPDATE global_props SET (head_hive_rowid, head_block_num, head_block_time) = (_head_hive_rowid, _block_num, _block_timestamp)
+                                UPDATE global_props SET (head_hive_rowid, head_block_num, head_block_time) = (_head_hive_rowid, _block_num, _block_timestamp);
 
                             END LOOP;
                     END;
