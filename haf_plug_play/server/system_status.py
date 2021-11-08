@@ -1,17 +1,17 @@
+from haf_plug_play.database.handlers import PlugPlayDb
+
 class SystemStatus:
     sync_status = None
-    
+    db = None
+
     @classmethod
-    def set_sync_status(cls, latest_block, latest_time, behind):
-        cls.sync_status = {
-            'latest_block': latest_block,
-            'latest_block_time': latest_time,
-            'behind': behind
-        }
-    
+    def init(cls, config):
+        cls.db = PlugPlayDb(config)
+
     @classmethod
     def get_sync_status(cls):
-        return dict(cls.sync_status) if cls.sync_status is not None else None
+        status = cls.db.get_sync_status()
+        return status
     
     @classmethod
     def get_latest_block(cls):
