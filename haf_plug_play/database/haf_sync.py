@@ -210,7 +210,7 @@ class DbSetup:
                                 VALUES
                                     (_id, _block_num, _transaction_id, _required_auths,
                                     _required_posting_auths, _op_id, _op_json);
-                                UPDATE global_props SET (head_hive_rowid, head_block_num, head_block_time) = (_head_hive_rowid, _block_num, _)
+                                UPDATE global_props SET (head_hive_rowid, head_block_num, head_block_time) = (_head_hive_rowid, _block_num, _block_timestamp)
 
                             END LOOP;
                     END;
