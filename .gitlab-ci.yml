@@ -18,7 +18,7 @@ deploy:
     - pip3 install .
     - cd haf_plug_play
     - pkill -f run_plug_play.py || true
-    - nohup python3 -u run_plug_play.py >> plug_play.log 2>&1&
+    #- nohup python3 -u run_plug_play.py >> plug_play.log 2>&1&
   only:
     - dev
   tags:
