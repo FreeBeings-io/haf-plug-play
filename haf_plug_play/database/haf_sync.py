@@ -2,6 +2,8 @@ import os
 import psycopg2
 import time
 
+from haf_plug_play.utils.tools import range_split
+
 APPLICATION_CONTEXT = "plug_play"
 BATCH_PROCESS_SIZE = 1000000
 
@@ -224,23 +226,6 @@ db = DbSession()
 class HafSync:
 
     sync_enabled = False
-
-    @classmethod
-    def _split(cls, first, last, size):
-        count = 0
-        result = []
-        for i in range(first, last+1):
-            if i == last:
-                result.append((_first, i))
-            if count == 0:
-                _first = i
-            elif count == size:
-                _last = i
-                result.append((_first,_last))
-                count = 0
-                continue
-            count += 1
-        return result
     
     @classmethod
     def init(cls):
@@ -266,7 +251,7 @@ class HafSync:
                     continue
 
                 if (last_block - first_block) > 100:
-                    steps = cls._split(first_block, last_block, BATCH_PROCESS_SIZE)
+                    steps = range_split(first_block, last_block, BATCH_PROCESS_SIZE)
                     for s in steps:
                         db.select(f"SELECT hive.app_context_detach( '{APPLICATION_CONTEXT}' );")
                         print("context detached")
