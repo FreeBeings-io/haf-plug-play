@@ -32,3 +32,6 @@ class PlugSync:
                 db.select(f"SELECT public.hpp_follow_update( {app_hive_rowid+1}, {head_hive_rowid} );")
                 db.commit()
             time.sleep(0.5)
+
+if __name__ == "__main__":
+    PlugSync.sync_follow()
