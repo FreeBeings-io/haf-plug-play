@@ -13,8 +13,8 @@ async def ping():
     return Success("pong")
 
 @method(name="plug_play_api.get_sync_status")
-async def get_sync_status():
-    return Success(normalize_types(SystemStatus.get_sync_status()))
+async def get_sync_status(plugs=[]):
+    return Success(normalize_types(SystemStatus.get_sync_status(plugs)))
 
 @method(name="plug_play_api.get_ops_by_block")
 async def get_ops_by_block(block_num):
