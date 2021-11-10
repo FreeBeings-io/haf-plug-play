@@ -6,7 +6,7 @@ CREATE OR REPLACE FUNCTION public.hpp_follow_update( _begin INT, _end INT )
             temprow RECORD;
             head_hive_rowid int;
         BEGIN
-            SELECT MAX(latest_hive_rowid) INTO head_hive_rowid FROM public.app_sync WHERE app_name = 'global';
+            SELECT MAX(latest_hive_rowid) INTO head_hive_rowid FROM public.plug_sync WHERE plug_name = 'follow';
             RAISE NOTICE '%', head_hive_rowid;
             IF head_hive_rowid IS NULL THEN
                 head_hive_rowid := 0;
@@ -53,7 +53,9 @@ CREATE OR REPLACE FUNCTION public.hpp_follow_update( _begin INT, _end INT )
                     temprow.following, temprow.what
                 );
                 UPDATE public.app_sync SET latest_hive_rowid = temprow.hive_rowid WHERE app_name='global';
-                PERFORM hpp_follow_update_state(temprow.follower, temprow.following, temprow.what);
+                IF temprow.follower IS NOT NULL AND temprow.following IS NOT NULL THEN
+                    PERFORM hpp_follow_update_state(temprow.follower, temprow.following, temprow.what);
+                END IF;
                 UPDATE public.app_sync SET state_hive_rowid = temprow.hive_rowid WHERE app_name='global';
             END LOOP;
         END;
@@ -83,9 +85,9 @@ CREATE OR REPLACE FUNCTION public.hpp_follow_update_state( _follower VARCHAR, _f
                             to_add := array_append(to_add, x);
                         END IF;
                     END LOOP;
-                    UPDATE public.hpp_follow_state SET what = temprow.what || to_add;
+                    UPDATE public.hpp_follow_state SET what = temprow.what || to_add WHERE account = _follower AND following = _following;
                 ELSE
-                    UPDATE public.hpp_follow_state SET what = '{}';
+                    UPDATE public.hpp_follow_state SET what = '{}' WHERE account = _follower AND following = _following;
                 END IF;
             END IF;
         END;
