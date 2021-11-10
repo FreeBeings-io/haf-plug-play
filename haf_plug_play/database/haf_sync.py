@@ -118,7 +118,7 @@ class DbSetup:
         db.execute(
             f"""
                 CREATE INDEX IF  NOT EXISTS custom_json_ops_ix_op_id
-                ON public.plug_play_ops (op_id);
+                ON public.plug_play_ops (op_id, hive_rowid);
             """, None
         )
         db.execute(
@@ -133,8 +133,8 @@ class DbSetup:
         )
         db.execute(
             f"""
-                CREATE TABLE IF NOT EXISTS public.app_sync(
-                    app_name varchar(32) NOT NULL REFERENCES apps (app_name),
+                CREATE TABLE IF NOT EXISTS public.plug_sync(
+                    plug_name varchar(16) NOT NULL,
                     latest_hive_rowid integer,
                     state_hive_rowid integer
                 );
