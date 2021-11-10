@@ -12,7 +12,7 @@ BATCH_PROCESS_SIZE = 100000
 class PlugInitSetup:
 
     @classmethod
-    def setup_follow():
+    def setup_follow(cls):
         pass # TODO
 
 class PlugSync:

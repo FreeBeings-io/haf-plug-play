@@ -118,7 +118,7 @@ class DbSetup:
         db.execute(
             f"""
                 CREATE INDEX IF  NOT EXISTS custom_json_ops_ix_op_id
-                ON public.plug_play_ops (op_id, hive_rowid);
+                ON public.plug_play_ops (op_id);
             """, None
         )
         db.execute(
