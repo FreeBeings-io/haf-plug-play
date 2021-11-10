@@ -10,8 +10,7 @@ from haf_plug_play.database.plug_sync import PlugInitSetup, PlugSync
 config = Config.config
 
 def run():
-    print("---   Hive Plug & Play (HAF)started   ---")
-    SystemStatus.init(config)
+    print("---   Hive Plug & Play (HAF) started   ---")
     # start haf sync
     HafSync.init()
     HafSync.toggle_sync()
