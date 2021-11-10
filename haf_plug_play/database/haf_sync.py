@@ -2,6 +2,7 @@ import os
 import psycopg2
 import time
 
+from haf_plug_play.server.system_status import SystemStatus
 from haf_plug_play.utils.tools import range_split
 
 APPLICATION_CONTEXT = "plug_play"
@@ -256,13 +257,14 @@ class HafSync:
                         db.select(f"SELECT hive.app_context_detach( '{APPLICATION_CONTEXT}' );")
                         print("context detached")
                         print(f"processing {s[0]} to {s[1]}")
+                        SystemStatus.update_sync_status(sys_status=f"Massive sync in progress: {s[0]} to {s[1]}")
                         db.select(f"SELECT public.update_plug_play_ops( {s[0]}, {s[1]} );")
                         print("batch sync done")
                         db.select(f"SELECT hive.app_context_attach( '{APPLICATION_CONTEXT}', {s[1]} );")
                         print("context attached again")
                         db.commit()
                         continue
-
+                SystemStatus.update_sync_status(sys_status=f"Synchronizing: {first_block} to {last_block}")
                 print(db.select(f"SELECT public.update_plug_play_ops( {first_block}, {last_block} );"))
                 db.commit()
             time.sleep(0.5)

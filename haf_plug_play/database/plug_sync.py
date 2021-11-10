@@ -2,7 +2,9 @@ from threading import Thread
 import time
 
 from haf_plug_play.database.haf_sync import DbSession
+from haf_plug_play.server.system_status import SystemStatus
 from haf_plug_play.utils.tools import range_split
+from haf_plug_play.plugs.follow.follow import WDIR_FOLLOW
 
 db = DbSession()
 
@@ -12,8 +14,13 @@ BATCH_PROCESS_SIZE = 100000
 class PlugInitSetup:
 
     @classmethod
+    def init(cls):
+        cls.setup_follow()
+
+    @classmethod
     def setup_follow(cls):
-        pass # TODO
+        functions = open(f'{WDIR_FOLLOW}/functions.sql', 'r').read()
+        tables = open(f'{WDIR_FOLLOW}/tables.sql', 'r').read()
 
 class PlugSync:
 
@@ -40,6 +47,7 @@ class PlugSync:
                 for s in steps:
                     progress = round((s[1]/head_hive_rowid) * 100, 2)
                     cls.plug_sync_states['follow'] = f'synchronizing ({progress} %'
+                    SystemStatus.update_sync_status(plug_status=cls.plug_sync_states)
                     print(f"FOLLOW:: processing {s[0]} to {s[1]}     {progress}%")
                     db.select(f"SELECT public.hpp_follow_update( {s[0]}, {s[1]} );")
                     db.commit()
@@ -49,6 +57,7 @@ class PlugSync:
                 db.select(f"SELECT public.hpp_follow_update( {app_hive_rowid+1}, {head_hive_rowid} );")
                 db.commit()
             cls.plug_sync_states['follow'] = 'synchronized'
+            SystemStatus.update_sync_status(plug_status=cls.plug_sync_states)
             time.sleep(0.5)
     
     @classmethod
@@ -56,4 +65,5 @@ class PlugSync:
         Thread(target=cls.sync_follow).start()
 
 if __name__ == "__main__":
+    PlugInitSetup.setup_follow()
     PlugSync.sync_follow()
