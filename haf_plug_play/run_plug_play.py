@@ -17,6 +17,7 @@ def run():
     Thread(target=HafSync.main_loop).start()
     # start plug sync
     PlugInitSetup.init()
+    PlugSync.toggle_sync()
     PlugSync.start_sync()
     run_server(config)
 

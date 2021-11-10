@@ -3,6 +3,7 @@ import time
 from haf_plug_play.config import Config
 from haf_plug_play.database.access import WriteDb
 from haf_plug_play.database.core import DbSetup
+from haf_plug_play.database.plug_sync import PlugSync
 from haf_plug_play.server.system_status import SystemStatus
 from haf_plug_play.utils.tools import range_split
 
@@ -191,6 +192,7 @@ class HafSync:
                 if (last_block - first_block) > 100:
                     steps = range_split(first_block, last_block, BATCH_PROCESS_SIZE)
                     for s in steps:
+                        PlugSync.toggle_sync(False)
                         db.select(f"SELECT hive.app_context_detach( '{APPLICATION_CONTEXT}' );")
                         print("context detached")
                         print(f"processing {s[0]} to {s[1]}")
@@ -200,6 +202,7 @@ class HafSync:
                         db.select(f"SELECT hive.app_context_attach( '{APPLICATION_CONTEXT}', {s[1]} );")
                         print("context attached again")
                         db.commit()
+                        PlugSync.toggle_sync()
                         continue
                 SystemStatus.update_sync_status(sync_status=f"Synchronizing: {first_block} to {last_block}")
                 print(db.select(f"SELECT public.update_plug_play_ops( {first_block}, {last_block} );"))
