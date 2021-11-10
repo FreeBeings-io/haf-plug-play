@@ -30,3 +30,19 @@ def get_cleaned_dict(og_values, keys, keep=False):
         if (k in keys) == keep:
             result[k] = og_values[k]
     return result
+
+def range_split(first, last, size):
+    count = 0
+    result = []
+    for i in range(first, last+1):
+        if i == last:
+            result.append((_first, i))
+        if count == 0:
+            _first = i
+        elif count == size:
+            _last = i
+            result.append((_first,_last))
+            count = 0
+            continue
+        count += 1
+    return result

@@ -141,6 +141,14 @@ class PlugPlayDb:
     def _save(self):
         self.db.commit()
 
+    # STATUS
+
+    def get_status(self):
+        cols = ['head_hive_rowid', 'head_block_num', 'head_block_time']
+        _res = self.db.select("SELECT * FROM global_props;")
+        res = self._populate_by_schema(_res[0], cols)
+        return res
+
     # OPS
 
     def get_ops_by_block(self, block_num):

@@ -39,7 +39,7 @@ apt-get install -y \
     libboost-test-dev \
     libboost-thread-dev
 
-apt install python3 python3-pip postgresql libpq-dev apt install postgresql-server-dev-all
+apt-get install python3 python3-pip postgresql libpq-dev libpqxx-dev postgresql-server-dev-all
 ```
 
 ### Setup PostgreSQL
@@ -60,6 +60,12 @@ After that, create the `haf` database:
 psql -U postgres
 CREATE DATABASE haf;
 ```
+### Connect to the database and create the extension
+
+'''
+\c haf
+CREATE EXTENSION hive_fork_manager;
+'''
 
 ### Give PostgreSQL permissions
 
@@ -96,7 +102,7 @@ make extension.hive_fork_manager
 make install
 ```
 
-### Add sql_serializer to params to hived config
+### Add sql_serializer params to hived config
 
 ```
 nano data/config.ini
@@ -122,7 +128,7 @@ cd haf_plug_play/database
 python3 haf_sync.py
 ```
 
-### Donwload block log for replay
+### Download block log for replay
 
 ```
 cd build_haf_sql_serializer/programs/hived/data
