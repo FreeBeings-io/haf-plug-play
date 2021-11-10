@@ -6,7 +6,7 @@ CREATE OR REPLACE FUNCTION public.hpp_reblog_update( _begin INT, _end INT )
             temprow RECORD;
             head_hive_rowid int;
         BEGIN
-            SELECT MAX(latest_hive_rowid) INTO head_hive_rowid FROM public.app_sync WHERE app_name = 'global';
+            SELECT MAX(latest_hive_rowid) INTO head_hive_rowid FROM public.plug_sync WHERE plug_name = 'reblog';
                 RAISE NOTICE '%', head_hive_rowid;
                 IF head_hive_rowid IS NULL THEN
                     head_hive_rowid := 0;
@@ -52,9 +52,9 @@ CREATE OR REPLACE FUNCTION public.hpp_reblog_update( _begin INT, _end INT )
                     temprow.req_auths, temprow.req_posting_auths, temprow.account,
                     temprow.author, temprow.permlink
                 );
-                UPDATE public.app_sync SET latest_hive_rowid = temprow.hive_rowid WHERE app_name='global';
+                UPDATE public.plug_sync SET latest_hive_rowid = temprow.hive_rowid WHERE plug_name='reblog';
                 PERFORM hpp_reblog_update_state(temprow.account, temprow.author, temprow.permlink);
-                UPDATE public.app_sync SET state_hive_rowid = temprow.hive_rowid WHERE app_name='global';
+                UPDATE public.plug_sync SET state_hive_rowid = temprow.hive_rowid WHERE plug_name='reblog';
             END LOOP;
         END;
         $function$;

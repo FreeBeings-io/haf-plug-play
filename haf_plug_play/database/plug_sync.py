@@ -30,7 +30,7 @@ class PlugSync:
         cls.plug_sync_states['follow'] = 'loaded'
         while True:
             head_hive_rowid = db.select("SELECT head_hive_rowid FROM global_props;")[0]
-            app_hive_rowid = db.select("SELECT latest_hive_rowid FROM app_sync WHERE app_name = 'global';")[0]
+            app_hive_rowid = db.select("SELECT latest_hive_rowid FROM plug_sync WHERE plug_name = 'follow';")[0]
             if (head_hive_rowid - app_hive_rowid) > 1000:
                 steps = range_split((app_hive_rowid + 1), head_hive_rowid, BATCH_PROCESS_SIZE)
                 for s in steps:

@@ -52,11 +52,11 @@ CREATE OR REPLACE FUNCTION public.hpp_follow_update( _begin INT, _end INT )
                     temprow.req_auths, temprow.req_posting_auths, temprow.follower,
                     temprow.following, temprow.what
                 );
-                UPDATE public.app_sync SET latest_hive_rowid = temprow.hive_rowid WHERE app_name='global';
+                UPDATE public.plug_sync SET latest_hive_rowid = temprow.hive_rowid WHERE plug_name='follow';
                 IF temprow.follower IS NOT NULL AND temprow.following IS NOT NULL THEN
                     PERFORM hpp_follow_update_state(temprow.follower, temprow.following, temprow.what);
                 END IF;
-                UPDATE public.app_sync SET state_hive_rowid = temprow.hive_rowid WHERE app_name='global';
+                UPDATE public.plug_sync SET state_hive_rowid = temprow.hive_rowid WHERE plug_name='follow';
             END LOOP;
         END;
         $function$;
