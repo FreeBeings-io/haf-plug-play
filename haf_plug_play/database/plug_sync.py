@@ -19,8 +19,11 @@ class PlugInitSetup:
 
     @classmethod
     def setup_follow(cls):
-        functions = open(f'{WDIR_FOLLOW}/functions.sql', 'r').read()
         tables = open(f'{WDIR_FOLLOW}/tables.sql', 'r').read()
+        functions = open(f'{WDIR_FOLLOW}/functions.sql', 'r').read()
+        db.execute(tables, None)
+        db.execute(functions, None)
+        db.commit()
 
 class PlugSync:
 
