@@ -30,7 +30,14 @@ class PlugSync:
         cls.plug_sync_states['follow'] = 'loaded'
         while True:
             head_hive_rowid = db.select("SELECT head_hive_rowid FROM global_props;")[0]
-            app_hive_rowid = db.select("SELECT latest_hive_rowid FROM plug_sync WHERE plug_name = 'follow';")[0]
+            while True:
+                _app_hive_rowid = db.select("SELECT latest_hive_rowid FROM plug_sync WHERE plug_name = 'follow';")
+                if not _app_hive_rowid:
+                    db.execute("INSERT INTO plug_sync (plug_name,latest_hive_rowid,state_hive_rowid) VALUES ('follow',0,0);", None)
+                    db.commit()
+                else:
+                    break
+                app_hive_rowid = _app_hive_rowid[0]
             if (head_hive_rowid - app_hive_rowid) > 1000:
                 steps = range_split((app_hive_rowid + 1), head_hive_rowid, BATCH_PROCESS_SIZE)
                 for s in steps:
