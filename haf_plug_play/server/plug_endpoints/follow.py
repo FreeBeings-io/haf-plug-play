@@ -2,12 +2,12 @@
 import json
 from jsonrpcserver import method, Result, Success, Error
 
-from haf_plug_play.database.access import DbAccess
+from haf_plug_play.database.access import ReadDb
 from haf_plug_play.plugs.follow.follow import SearchQuery, StateQuery
 from haf_plug_play.server.system_status import SystemStatus
 from haf_plug_play.server.normalize import populate_by_schema
 
-db = DbAccess.db
+db = ReadDb.db
 
 @method(name="plug_play_api.follow.get_follow_ops")
 async def get_follow_ops(follower=None, followed=None,  block_range=None) -> Result:
