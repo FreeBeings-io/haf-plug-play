@@ -1,20 +1,19 @@
 """API endpoints."""
-from os import name
 from jsonrpcserver import method, Result, Success, Error
 
-from haf_plug_play.database.access import DbAccess
+from haf_plug_play.database.access import ReadDb
 from haf_plug_play.server.system_status import SystemStatus
 from haf_plug_play.server.normalize import normalize_types
 
-db = DbAccess.db
+db = ReadDb.db
 
 @method(name="plug_play_api.ping")
 async def ping():
     return Success("pong")
 
 @method(name="plug_play_api.get_sync_status")
-async def get_sync_status(plugs=[]):
-    return Success(normalize_types(SystemStatus.get_sync_status(plugs)))
+async def get_sync_status():
+    return Success(normalize_types(SystemStatus.get_sync_status()))
 
 @method(name="plug_play_api.get_ops_by_block")
 async def get_ops_by_block(block_num):

@@ -1,77 +1,18 @@
-import os
-import psycopg2
 import time
 
+from haf_plug_play.config import Config
+from haf_plug_play.database.access import WriteDb
+from haf_plug_play.database.core import DbSetup
 from haf_plug_play.server.system_status import SystemStatus
 from haf_plug_play.utils.tools import range_split
 
 APPLICATION_CONTEXT = "plug_play"
 BATCH_PROCESS_SIZE = 1000000
 
-config = {
-    'db_username': 'postgres',
-    'db_password': 'pass.word',
-    'server_host': '127.0.0.0',
-    'server_port': '8080',
-    'ssl_cert': '',
-    'ssl_key': ''
-}
+db = WriteDb().db
+config = Config.config
 
-class DbSession:
-    def __init__(self):
-        # TODO: retrieve from env_variables
-        self.conn = psycopg2.connect(f"dbname=haf user={config['db_username']} password={config['db_password']}")
-        self.conn.autocommit = False
-        self.cur = self.conn.cursor()
-
-    def select(self, sql):
-        self.cur.execute(sql)
-        res = self.cur.fetchall()
-        if len(res) == 0:
-            return None
-        else:
-            return res
-
-    def execute_immediate(self, sql,  data):
-        self.cur.execute(sql, data)
-        self.conn.commit()
-
-    def get_query(self,sql, data):
-        return self.cur.mogrify(sql,data)
-
-    def execute(self, sql, data):
-        try:
-            if data:
-                self.cur.execute(sql, data)
-            else:
-                self.cur.execute(sql)
-
-        except Exception as e:
-            print(e)
-            print(f"SQL:  {sql}")
-            print(f"DATA:   {data}")
-            self.conn.rollback()
-            raise Exception ('DB error occurred')
-
-    def commit(self):
-        self.conn.commit()
-
-
-class DbSetup:
-
-    @classmethod
-    def check_db(cls):
-        # check if it exists
-        try:
-            # TODO: retrieve authentication from config 
-            cls.conn = psycopg2.connect(f"dbname=haf user={config['db_username']} password={config['db_password']}")
-        except psycopg2.OperationalError as e:
-            if "haf" in e.args[0] and "does not exist" in e.args[0]:
-                print("No database found. Please create a 'haf' database in PostgreSQL.")
-                os._exit(1)
-            else:
-                print(e)
-                os._exit(1)
+class HafSyncSetup:
     
     @classmethod
     def prepare_global_data(cls):
@@ -87,7 +28,6 @@ class DbSetup:
     @classmethod
     def prepare_app_data(cls):
         # prepare app data
-        db = DbSession()
         exists = db.select(
             f"SELECT hive.app_context_exists( '{APPLICATION_CONTEXT}' );"
         )[0][0]
@@ -220,9 +160,6 @@ class DbSetup:
             """, None
         )
         db.commit()
-        cls.conn.close()
-
-db = DbSession()
 
 class HafSync:
 
@@ -230,9 +167,9 @@ class HafSync:
     
     @classmethod
     def init(cls):
-        DbSetup.check_db()
-        DbSetup.prepare_app_data()
-        DbSetup.prepare_global_data()
+        DbSetup.check_db(config)
+        HafSyncSetup.prepare_app_data()
+        HafSyncSetup.prepare_global_data()
     
     @classmethod
     def toggle_sync(cls, enabled=True):
@@ -257,14 +194,14 @@ class HafSync:
                         db.select(f"SELECT hive.app_context_detach( '{APPLICATION_CONTEXT}' );")
                         print("context detached")
                         print(f"processing {s[0]} to {s[1]}")
-                        SystemStatus.update_sync_status(sys_status=f"Massive sync in progress: {s[0]} to {s[1]}")
+                        SystemStatus.update_sync_status(sync_status=f"Massive sync in progress: {s[0]} to {s[1]}")
                         db.select(f"SELECT public.update_plug_play_ops( {s[0]}, {s[1]} );")
                         print("batch sync done")
                         db.select(f"SELECT hive.app_context_attach( '{APPLICATION_CONTEXT}', {s[1]} );")
                         print("context attached again")
                         db.commit()
                         continue
-                SystemStatus.update_sync_status(sys_status=f"Synchronizing: {first_block} to {last_block}")
+                SystemStatus.update_sync_status(sync_status=f"Synchronizing: {first_block} to {last_block}")
                 print(db.select(f"SELECT public.update_plug_play_ops( {first_block}, {last_block} );"))
                 db.commit()
             time.sleep(0.5)
