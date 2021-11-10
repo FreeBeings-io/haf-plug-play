@@ -1,6 +1,6 @@
 from haf_plug_play.server.system_status import SystemStatus
 
-class SearchOps:
+class SearchQuery:
 
     @classmethod
     def follow(cls, follower_account=None, followed_account=None, block_range=None):
