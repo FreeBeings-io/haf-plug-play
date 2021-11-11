@@ -5,7 +5,7 @@ from haf_plug_play.database.access import ReadDb
 from haf_plug_play.server.system_status import SystemStatus
 from haf_plug_play.server.normalize import normalize_types
 
-db = ReadDb.db
+db = ReadDb().db
 
 @method(name="plug_play_api.ping")
 async def ping():

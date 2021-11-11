@@ -2,7 +2,6 @@ import ssl
 from datetime import datetime
 from aiohttp import web
 from jsonrpcserver import method, async_dispatch
-from haf_plug_play.database.handlers import PlugPlayDb
 from haf_plug_play.server import api_endpoints
 from haf_plug_play.server.system_status import SystemStatus
 from haf_plug_play.server.normalize import normalize_types
@@ -11,7 +10,6 @@ from haf_plug_play.server.plug_endpoints import community, follow
 
 def run_server(config):
     app = web.Application()
-    app['db'] = PlugPlayDb(config)
 
     async def status_report(request):
         report = {
