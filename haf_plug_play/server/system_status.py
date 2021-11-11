@@ -1,10 +1,11 @@
 from haf_plug_play.database.access import ReadDb
+from haf_plug_play.server.normalize import normalize_types
 
 db = ReadDb.db
 
 class SystemStatus:
     sync_status = {}
-    
+
     @classmethod
     def update_sync_status(cls, sync_status=None, plug_status=None):
         if sync_status:
@@ -14,7 +15,6 @@ class SystemStatus:
 
     @classmethod
     def get_sync_status(cls):
-        glob_props = db.get_global_props()
+        glob_props = normalize_types(db.get_global_props())
         cls.sync_status['system'] = glob_props
         return cls.sync_status
-
