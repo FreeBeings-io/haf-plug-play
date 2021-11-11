@@ -202,8 +202,7 @@ class HafSync:
                         db.select(f"SELECT hive.app_context_attach( '{APPLICATION_CONTEXT}', {s[1]} );")
                         print("context attached again")
                         db.commit()
-                        PlugSync.toggle_sync()
-                        continue
+                    continue
                 PlugSync.toggle_sync()
                 SystemStatus.update_sync_status(sync_status=f"Synchronizing: {first_block} to {last_block}")
                 print(db.select(f"SELECT public.update_plug_play_ops( {first_block}, {last_block} );"))
