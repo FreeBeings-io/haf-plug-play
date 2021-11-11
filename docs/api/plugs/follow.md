@@ -2,7 +2,7 @@
 
 Search endpoints for the Follow protocol
 
-**Dev Server:** https://beta.plug-play.imwatsi.com/
+**Dev Server:** https://plug-play-beta.imwatsi.com
 
 ---
 

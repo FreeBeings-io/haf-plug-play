@@ -2,7 +2,7 @@
 
 *Documentation for the API endpoints available on Hive Plug & Play*
 
-*The development server: https://beta.plug-play.imwatsi.com/*
+*The development server: https://plug-play-beta.imwatsi.com*
 
 ---
 
