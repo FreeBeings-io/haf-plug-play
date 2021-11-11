@@ -5,7 +5,9 @@ from haf_plug_play.config import Config
 config = Config.config
 
 class ReadDb:
-    db = PlugPlayDb(config)
+    def __init__(self) -> None:
+        self.db = PlugPlayDb(config)
 
 class WriteDb:
-    db = DbSession(config)
+    def __init__(self) -> None:
+        self.db = DbSession(config)
