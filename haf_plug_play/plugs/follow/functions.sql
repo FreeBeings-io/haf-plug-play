@@ -32,6 +32,7 @@ CREATE OR REPLACE FUNCTION public.hpp_follow_update( _begin INT, _end INT )
 
             FOR temprow IN
                 SELECT
+                    ppops.hive_rowid AS hive_rowid,
                     ppops.id AS ppop_id,
                     ppops.block_num AS block_num,
                     transaction_id AS transaction_id,
