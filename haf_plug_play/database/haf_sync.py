@@ -187,6 +187,7 @@ class HafSync:
                     continue
                 (first_block, last_block) = blocks_range
                 if not first_block:
+                    PlugSync.toggle_sync()
                     continue
 
                 if (last_block - first_block) > 100:

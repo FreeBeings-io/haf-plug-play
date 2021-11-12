@@ -20,6 +20,6 @@ async def get_ops_by_block(block_num):
     """Returns a list of ops within the specified block number."""
     status = SystemStatus.get_sync_status()
     if not status: return [] # TODO: error handling/reporting
-    latest = status['latest_block']
+    latest = SystemStatus.get_latest_block()
     if block_num > latest: return []
     return Success(db.get_ops_by_block(block_num))
