@@ -32,7 +32,7 @@ CREATE OR REPLACE FUNCTION public.hpp_follow_update( _begin INT, _end INT )
 
             FOR temprow IN
                 SELECT
-                    ppops.hive_rowid AS hive_rowid,
+                    ppops.id AS ppop_id,
                     ppops.block_num AS block_num,
                     transaction_id AS transaction_id,
                     ARRAY(SELECT json_array_elements_text(req_auths::json))  AS req_auths,
@@ -48,11 +48,11 @@ CREATE OR REPLACE FUNCTION public.hpp_follow_update( _begin INT, _end INT )
                 INSERT INTO public.hpp_follow as hppf(
                     ppop_id, block_num, transaction_id, req_auths, req_posting_auths, account, following, what)
                 VALUES (
-                    temprow.hive_rowid, temprow.block_num, temprow.transaction_id,
+                    temprow.ppop_id, temprow.block_num, temprow.transaction_id,
                     temprow.req_auths, temprow.req_posting_auths, temprow.follower,
                     temprow.following, temprow.what
                 );
-                UPDATE public.plug_sync SET latest_hive_rowid = temprow.hive_rowid WHERE plug_name='follow';
+                UPDATE public.plug_sync SET latest_hive_rowid = temprow.hive_rowid AND latest_hive_head_block = temprow.block_num WHERE plug_name='follow';
                 IF temprow.follower IS NOT NULL AND temprow.following IS NOT NULL THEN
                     PERFORM hpp_follow_update_state(temprow.follower, temprow.following, temprow.what);
                 END IF;
