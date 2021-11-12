@@ -19,20 +19,19 @@ class SearchQuery:
             SELECT *  
             FROM (
                 SELECT
-                    req_posting_auths,
-                    op_json::json
-                FROM plug_play_ops
+                    req_posting_auths, account, following, what
+                FROM hpp_follow
                     WHERE block_num BETWEEN {block_range[0]} and {block_range[1]}
         """
             #WHERE op_id = '"follow"'
         #AND (op_json::json -> 0)::text = '"follow"'
         if follower_account:
             query += f"""
-            AND (op_json::json -> 1 -> 'follower'):: text = '"{follower_account}"'
+            AND account = '"{follower_account}"'
             """
         if followed_account:
             query += f"""
-            AND (op_json::json -> 1 -> 'following'):: text = '"{followed_account}"'
+            AND following = '"{followed_account}"'
             """
         query += ")AS follow_ops;"
 

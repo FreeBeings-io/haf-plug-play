@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS public.hpp_follow(
-    ppop_id integer NOT NULL UNIQUE,
+    ppop_id integer NOT NULL UNIQUE REFERENCES public.plug_play_ops(id),
     block_num integer NOT NULL,
     transaction_id char(40) NOT NULL,
     req_auths text array,
