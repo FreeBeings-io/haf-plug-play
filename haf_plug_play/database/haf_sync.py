@@ -182,12 +182,12 @@ class HafSync:
             if cls.sync_enabled is True:
                 # get blocks range
                 blocks_range = db.select(f"SELECT * FROM hive.app_next_block('{APPLICATION_CONTEXT}');")[0]
-                print(f"Blocks range: {blocks_range}")
+                #print(f"Blocks range: {blocks_range}")
+                PlugSync.toggle_sync()
                 if not blocks_range:
                     continue
                 (first_block, last_block) = blocks_range
                 if not first_block:
-                    PlugSync.toggle_sync()
                     continue
 
                 if (last_block - first_block) > 100:
@@ -204,7 +204,6 @@ class HafSync:
                         print("context attached again")
                         db.commit()
                     continue
-                PlugSync.toggle_sync()
                 SystemStatus.update_sync_status(sync_status=f"Synchronizing: {first_block} to {last_block}")
                 print(db.select(f"SELECT public.update_plug_play_ops( {first_block}, {last_block} );"))
                 db.commit()
