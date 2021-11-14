@@ -10,7 +10,7 @@ from haf_plug_play.plugs.reblog.reblog import WDIR_REBLOG
 
 db = WriteDb().db
 
-BATCH_PROCESS_SIZE = 100000
+BATCH_PROCESS_SIZE = 10000
 
 
 class PlugInitSetup:
