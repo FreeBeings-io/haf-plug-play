@@ -21,15 +21,8 @@ async def get_follow_ops(follower=None, followed=None,  block_range=None) -> Res
     if sql:
         res = db.db.select(sql) or []
         for entry in res:
-            _json = json.loads(entry[1])
-            _entry = [
-                entry[0],
-                _json['follower'],
-                _json['following'],
-                _json['what']
-            ]
             result.append(populate_by_schema(
-                _entry, ['acc_auths', 'follower', 'following', 'what']
+                entry, ['transaction_id', 'acc_auths', 'follower', 'following', 'what']
             ))
 
     return Success(result)
@@ -48,7 +41,7 @@ async def get_reblog_ops(reblog_account=None, author=None, permlink=None, block_
         res = db.db.select(sql) or []
         for entry in res:
             result.append(populate_by_schema(
-                entry, ['acc_auths', 'account', 'author', 'permlink']
+                entry, ['transaction_id', 'acc_auths', 'account', 'author', 'permlink']
             ))
     return Success(result)
 

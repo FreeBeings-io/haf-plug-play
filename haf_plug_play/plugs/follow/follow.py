@@ -8,33 +8,21 @@ class SearchQuery:
 
     @classmethod
     def follow(cls, follower_account=None, followed_account=None, block_range=None):
-        """
-            "follow" | {"follower":"idwritershive","following":"olgavita","what":["blog"]}
-        """
         if block_range is None:
             latest = SystemStatus.get_latest_block()
             if not latest: return None # TODO: notify??
             block_range = [latest - 28800, latest]
         query = f"""
-            SELECT *  
-            FROM (
-                SELECT
-                    req_posting_auths, account, following, what
-                FROM hpp_follow
+                    SELECT transaction_id, req_posting_auths, account, following, what
+                    FROM hpp_follow
                     WHERE block_num BETWEEN {block_range[0]} AND {block_range[1]}
         """
         if follower_account:
-            query += f"""
-            AND account = '{follower_account}'
-            """
+            query += f"AND account = '{follower_account}'"
         if followed_account:
-            query += f"""
-            AND following = '{followed_account}'
-            """
-        query += ")AS follow_ops;"
+            query += f"AND following = '{followed_account}';"
 
         return query
-
 
 
 class StateQuery:
