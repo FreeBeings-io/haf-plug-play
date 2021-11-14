@@ -52,7 +52,7 @@ CREATE OR REPLACE FUNCTION public.hpp_reblog_update( _begin INT, _end INT )
                     temprow.req_auths, temprow.req_posting_auths, temprow.account,
                     temprow.author, temprow.permlink
                 );
-                UPDATE public.plug_sync SET latest_hive_rowid = temprow.hive_rowid WHERE plug_name='reblog';
+                UPDATE public.plug_sync SET latest_hive_rowid = temprow.hive_rowid, latest_hive_head_block = temprow.block_num WHERE plug_name='reblog';
                 PERFORM hpp_reblog_update_state(temprow.account, temprow.author, temprow.permlink);
                 UPDATE public.plug_sync SET state_hive_rowid = temprow.hive_rowid WHERE plug_name='reblog';
             END LOOP;

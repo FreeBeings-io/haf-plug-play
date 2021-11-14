@@ -21,23 +21,21 @@ class SearchQuery:
                 SELECT
                     req_posting_auths, account, following, what
                 FROM hpp_follow
-                    WHERE block_num BETWEEN {block_range[0]} and {block_range[1]}
+                    WHERE block_num BETWEEN {block_range[0]} AND {block_range[1]}
         """
-            #WHERE op_id = '"follow"'
-        #AND (op_json::json -> 0)::text = '"follow"'
         if follower_account:
             query += f"""
-            AND account = '"{follower_account}"'
+            AND account = '{follower_account}'
             """
         if followed_account:
             query += f"""
-            AND following = '"{followed_account}"'
+            AND following = '{followed_account}'
             """
         query += ")AS follow_ops;"
 
         return query
 
-    
+
 
 class StateQuery:
 
@@ -46,6 +44,7 @@ class StateQuery:
         query = f"""
             SELECT account, what
                 FROM hpp_follow_state
-                WHERE following = '{account}';
+                WHERE following = '{account}'
+                AND what != '{{}}';
         """
         return query

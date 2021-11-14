@@ -18,6 +18,3 @@ CREATE TABLE IF NOT EXISTS public.hpp_follow_state(
     what text array,
     CONSTRAINT hpp_follow_state_pkey_unique PRIMARY KEY (account,following)
 );
-
-CREATE INDEX IF NOT EXISTS hpp_follow_state_ix_account_following
-    ON hpp_follow_state (account, following);

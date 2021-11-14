@@ -68,11 +68,11 @@ class PlugSync:
                         progress = round((s[1]/head_hive_rowid) * 100, 2)
                         cls.plug_sync_states['reblog'] = f'synchronizing ({progress} %'
                         SystemStatus.update_sync_status(plug_status=cls.plug_sync_states)
-                        print(f"FOLLOW:: processing {s[0]} to {s[1]}     {progress}%")
+                        print(f"REBLOG:: processing {s[0]} to {s[1]}     {progress}%")
                         db.select(f"SELECT public.hpp_reblog_update( {s[0]}, {s[1]} );")
                         db.commit()
                 elif (head_hive_rowid - app_hive_rowid) > 0:
-                    print(f"FOLLOW:: processing {app_hive_rowid+1} to {head_hive_rowid}")
+                    print(f"REBLOG:: processing {app_hive_rowid+1} to {head_hive_rowid}")
                     cls.plug_sync_states['reblog'] = f'synchronizing ({progress} %'
                     db.select(f"SELECT public.hpp_reblog_update( {app_hive_rowid+1}, {head_hive_rowid} );")
                     db.commit()
@@ -90,6 +90,11 @@ class PlugSync:
             if cls.plug_sync_enabled is True:
                 head_hive_rowid = db.select("SELECT head_hive_rowid FROM global_props;")[0][0]
                 _app_hive_rowid = db.select("SELECT latest_hive_rowid FROM plug_sync WHERE plug_name = 'follow';")
+                if _app_hive_rowid is None:
+                    db.execute(
+                        """INSERT INTO plug_sync (plug_name,latest_hive_rowid,state_hive_rowid,latest_hive_head_block)
+                            VALUES ('follow',0,0,0);""", None)
+                    db.commit()
                 if not _app_hive_rowid:
                     app_hive_rowid = 0
                 else:
@@ -98,7 +103,7 @@ class PlugSync:
                     steps = range_split((app_hive_rowid + 1), head_hive_rowid, BATCH_PROCESS_SIZE)
                     for s in steps:
                         progress = round((s[1]/head_hive_rowid) * 100, 2)
-                        cls.plug_sync_states['follow'] = f'synchronizing ({progress} %'
+                        cls.plug_sync_states['follow'] = f'synchronizing {progress} %'
                         SystemStatus.update_sync_status(plug_status=cls.plug_sync_states)
                         print(f"FOLLOW:: processing {s[0]} to {s[1]}     {progress}%")
                         db.select(f"SELECT public.hpp_follow_update( {s[0]}, {s[1]} );")
