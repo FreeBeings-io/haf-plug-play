@@ -15,7 +15,7 @@ deploy:
     - cp -r * $DEPLOY_DIR
     - cd $DEPLOY_DIR
     - pwd
-    - pip3 install .
+    - pip3 install -e .
     - cd haf_plug_play
     - pkill -f run_plug_play.py || true
     #- nohup python3 -u run_plug_play.py >> plug_play.log 2>&1&

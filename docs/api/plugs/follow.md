@@ -2,7 +2,7 @@
 
 Search endpoints for the Follow protocol
 
-**Dev Server:** https://beta.plug-play.imwatsi.com/
+**Dev Server:** https://plug-play-beta.imwatsi.com
 
 ---
 
@@ -23,8 +23,7 @@ Example payload:
     "jsonrpc": "2.0",
     "method": "plug_play_api.follow.get_follow_ops",
     "params": {
-        "follower": "tommyl33",
-        "followed": "taskmaster4450"
+            "block_range": [1,2500000]
         },
     "id": 1
 }
@@ -34,22 +33,48 @@ Example response:
 
 ```
 {
-    "jsonrpc": "2.0",
-    "result": [
-        {
-            "acc_auths": ['tommyl33'],
-            "following": "taskmaster4450",
-            "follower": "tommyl33"
-        },
-        ...
-    ],
-    "id": 1
+  "jsonrpc": "2.0",
+  "result": [
+    {
+      "transaction_id": "544c84cf09333b77ebffc76c8ab3180041bf6739",
+      "acc_auths": [
+        "steemit"
+      ],
+      "follower": "steemit",
+      "following": "steem",
+      "what": [
+        "posts"
+      ]
+    },
+    {
+      "transaction_id": "bc81ed5d7d689d1aed10796e04d9bcb304ad2c07",
+      "acc_auths": [
+        "red"
+      ],
+      "follower": "red",
+      "following": "piedpiper",
+      "what": [
+        "posts"
+      ]
+    },
+    {
+      "transaction_id": "9e442eca18cef91bdbd75af1b409da790ecd8d2b",
+      "acc_auths": [
+        "red"
+      ],
+      "follower": "red",
+      "following": "piedpiper",
+      "what": [
+        "posts"
+      ]
+    },
+    ...
 }
 ```
 
 ---
 
-### get_reblog_ops
+### get_reblog_ops (WIP)
 
 *Returns a list of global reblog ops within the specified block (or last 24 hours if not specified)*
 
@@ -126,39 +151,29 @@ Example response:
   "jsonrpc": "2.0",
   "result": [
     {
-      "account": "thedashguy",
+      "account": "hr1",
       "what": [
-        "posts",
+        "blog"
+      ]
+    },
+    {
+      "account": "steemit200",
+      "what": [
+        "blog"
+      ]
+    },
+    {
+      "account": "ash",
+      "what": [
         "blog"
       ]
     },
     {
       "account": "infovore",
       "what": [
-        "posts",
-        "blog"
+        "posts"
       ]
     },
-    {
-      "account": "samtoland",
-      "what": [
-        "posts",
-        "blog"
-      ]
-    },
-    {
-      "account": "sonsy",
-      "what": [
-        "posts",
-        "blog"
-      ]
-    },
-    {
-      "account": "abit",
-      "what": [
-        "posts",
-        "blog"
-      ]
-    },...
+    ...
 }
 ```

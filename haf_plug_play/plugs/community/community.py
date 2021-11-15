@@ -1,4 +1,8 @@
+import os
+
 from haf_plug_play.server.system_status import SystemStatus
+
+WDIR_COMMUNITY = os.path.dirname(__file__)
 
 class SearchOps:
 

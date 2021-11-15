@@ -1,6 +1,6 @@
 # Standard endpoints
 
-**Dev Server:** https://beta.plug-play.imwatsi.com/
+**Dev Server:** https://plug-play-beta.imwatsi.com
 
 ### ping
 
