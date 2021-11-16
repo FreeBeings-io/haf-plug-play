@@ -46,10 +46,13 @@ Example response:
 {
     "jsonrpc": "2.0",
     "result": {
-      "latest_block": 2999999,
-      "latest_block_time": "2016-07-07 21:24:54",
-      "behind": false
-    },
+          "sync": "Massive sync in progress: 1 to 1000001",
+          "system": {
+              "head_hive_rowid": 0,
+              "head_block_num": null,
+              "head_block_time": null
+          }
+      },
     "id": 1
 }
 ```

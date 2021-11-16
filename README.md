@@ -20,27 +20,31 @@ Documentation can be found here:
 ## Development
 
 
-
 ### Install dependencies
 
-```
-apt-get install -y \
-    libboost-chrono-dev \
-    libboost-context-dev \
-    libboost-coroutine-dev \
-    libboost-date-time-dev \
-    libboost-filesystem-dev \
-    libboost-iostreams-dev \
-    libboost-locale-dev \
-    libboost-program-options-dev \
-    libboost-serialization-dev \
-    libboost-signals-dev \
-    libboost-system-dev \
-    libboost-test-dev \
-    libboost-thread-dev
 
-apt-get install python3 python3-pip postgresql libpq-dev libpqxx-dev postgresql-server-dev-all
 ```
+sudo apt install python3 \
+    python3-pip \
+    postgresql \
+    libpq-dev \
+    libssl-dev \
+    libreadline-dev \
+    libpqxx-dev \
+    postgresql-server-dev-12 \
+    postgresql-server-dev-all
+```
+
+### Install HAF and hived
+
+- Clone the HAF repository: https://gitlab.syncad.com/hive/haf
+- `git submodule update --init --recursive`
+- Create a build directory: `mkdir build`
+- `cd build`
+- `cmake -DCMAKE_BUILD_TYPE=Release ..`
+- `make`
+- Create data dir for hived: `./hived -d data --dump-config`
+
 
 ### Setup PostgreSQL
 
@@ -73,34 +77,7 @@ CREATE EXTENSION hive_fork_manager;
 CREATE ROLE hived LOGIN PASSWORD 'hivedpass' INHERIT IN ROLE hived_group;
 CREATE ROLE application LOGIN PASSWORD 'applicationpass' INHERIT IN ROLE hive_applications_group;
 ```
-`
 
-### Build hived and configure the node
-
-```
-git clone https://gitlab.syncad.com/hive/hive.git
-pushd hive
-git checkout develop
-git submodule update --init --recursive
-popd
-mkdir build_haf_sql_serializer
-pushd build_haf_sql_serializer
-cmake -DCMAKE_BUILD_TYPE=Release ../hive
-make -j${nproc}
-pushd programs/hived
-./hived -d data --dump-config
-```
-
-### Install the fork_manager
-
-
-```
-git clone https://gitlab.syncad.com/hive/psql_tools.git
-cd psql_tools
-cmake .
-make extension.hive_fork_manager
-make install
-```
 
 ### Add sql_serializer params to hived config
 
@@ -113,6 +90,14 @@ plugin = sql_serializer
 psql-url = dbname=haf user=postgres password=your_password hostaddr=127.0.0.1 port=5432
 ```
 
+### Download block log for replay
+
+```
+cd haf/build/hive/programs/hived/data
+mkdir -p blockchain
+wget -O blockchain/block_log https://gtg.openhive.network/get/blockchain/block_log
+```
+
 ### Install HAF Plug & Play
 
 ```
@@ -121,26 +106,11 @@ cd haf-plug-play
 pip3 install -e .
 ```
 
-### Run the HAF Plug & Play setup script
-
-```
-cd haf_plug_play/database
-python3 haf_sync.py
-```
-
-### Download block log for replay
-
-```
-cd build_haf_sql_serializer/programs/hived/data
-mkdir -p blockchain
-wget -O blockchain/block_log https://gtg.openhive.network/get/blockchain/block_log
-```
-
 ### Run hived and sync to a specific block height
 
 ```
-cd build_haf_sql_serializer/programs/hived
-./hived -d data --replay-blockchain --stop-replay-at-block 5000000 --exit-after-replay
+cd haf/build/hive/programs/hived
+./hived -d data --replay-blockchain --stop-replay-at-block 59000000 --exit-after-replay
 ```
 
 ### Configure Hive Plug & Play (HAF)
@@ -163,3 +133,12 @@ cd build_haf_sql_serializer/programs/hived
   ```
 
   This config works well with an Nginx reverse-proxy server setup to route traffic to the HAF Plug & Play server.
+
+### Run HAF Plug & Play
+
+Run HAF Plug & Play: `haf_plug_play`
+
+### Check HAF Plug & Play sync status
+
+- Visiting https://plug-play-beta.imwatsi.com/ or
+- Making this call on the API - https://github.com/imwatsi/haf-plug-play/blob/master/docs/api/standard_endpoints.md#get_sync_status
