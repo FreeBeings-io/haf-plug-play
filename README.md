@@ -43,6 +43,7 @@ sudo apt install python3 \
 - `cd build`
 - `cmake -DCMAKE_BUILD_TYPE=Release ..`
 - `make`
+- `cd hive/programs/hived/`
 - Create data dir for hived: `./hived -d data --dump-config`
 
 
