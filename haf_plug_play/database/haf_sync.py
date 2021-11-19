@@ -36,6 +36,11 @@ class HafSyncSetup:
         if exists == False:
             db.select(f"SELECT hive.app_create_context( '{APPLICATION_CONTEXT}' );")
             db.commit()
+            print("Created context: plug_play")
+            exists = db.select(
+            f"SELECT hive.app_context_exists( '{APPLICATION_CONTEXT}' );"
+            )[0][0]
+            print(exists)
         # create table
         db.execute(
             f"""
