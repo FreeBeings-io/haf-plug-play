@@ -43,6 +43,7 @@ sudo apt install python3 \
 - `cd build`
 - `cmake -DCMAKE_BUILD_TYPE=Release ..`
 - `make`
+- `make install`
 - `cd hive/programs/hived/`
 - Create data dir for hived: `./hived -d data --dump-config`
 
@@ -111,7 +112,7 @@ pip3 install -e .
 
 ```
 cd haf/build/hive/programs/hived
-./hived -d data --replay-blockchain --stop-replay-at-block 59000000 --exit-after-replay
+./hived -d data --replay-blockchain --stop-replay-at-block 45000000 --exit-after-replay
 ```
 
 ### Configure Hive Plug & Play (HAF)
