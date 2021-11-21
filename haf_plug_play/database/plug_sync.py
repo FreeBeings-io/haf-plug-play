@@ -123,6 +123,7 @@ class PlugSync:
     @classmethod
     def start_sync(cls):
         Thread(target=cls.sync_follow).start()
+        Thread(target=cls.sync_reblog).start()
 
 if __name__ == "__main__":
     PlugSync.sync_follow()
