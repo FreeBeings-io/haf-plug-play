@@ -18,6 +18,7 @@ class PlugInitSetup:
     @classmethod
     def init(cls):
         cls.setup_follow()
+        cls.setup_reblog()
 
     @classmethod
     def setup_follow(cls):
@@ -124,5 +125,4 @@ class PlugSync:
         Thread(target=cls.sync_follow).start()
 
 if __name__ == "__main__":
-    PlugInitSetup.setup_follow()
     PlugSync.sync_follow()
