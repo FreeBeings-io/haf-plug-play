@@ -81,7 +81,8 @@ class PlugSync:
                     cls.plug_sync_states['reblog'] = f'synchronizing ({progress} %'
                     db.select(f"SELECT public.hpp_reblog_update( {app_hive_rowid+1}, {head_hive_rowid} );")
                     db.commit()
-                cls.plug_sync_states['reblog'] = 'synchronized'
+                if head_hive_rowid != 0:
+                    cls.plug_sync_states['reblog'] = 'synchronized'
                 SystemStatus.update_sync_status(plug_status=cls.plug_sync_states)
             else:
                 cls.plug_sync_states['reblog'] = 'paused'
@@ -122,7 +123,8 @@ class PlugSync:
                     cls.plug_sync_states['follow'] = f'synchronizing ({progress} %'
                     db.select(f"SELECT public.hpp_follow_update( {app_hive_rowid+1}, {head_hive_rowid} );")
                     db.commit()
-                cls.plug_sync_states['follow'] = 'synchronized'
+                if head_hive_rowid != 0:
+                    cls.plug_sync_states['follow'] = 'synchronized'
                 SystemStatus.update_sync_status(plug_status=cls.plug_sync_states)
             else:
                 cls.plug_sync_states['follow'] = 'paused'
