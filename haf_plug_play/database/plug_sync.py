@@ -126,4 +126,4 @@ class PlugSync:
         Thread(target=cls.sync_reblog).start()
 
 if __name__ == "__main__":
-    PlugSync.sync_follow()
+    PlugSync.start_sync()
