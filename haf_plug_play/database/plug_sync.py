@@ -57,7 +57,11 @@ class PlugSync:
         cls.plug_sync_states['reblog'] = 'loaded'
         while True:
             if cls.plug_sync_enabled is True:
-                head_hive_rowid = db.select("SELECT head_hive_rowid FROM global_props;")[0][0]
+                head_hive_rowid = db.select("SELECT head_hive_rowid FROM global_props;")
+                if head_hive_rowid:
+                    head_hive_rowid = head_hive_rowid[0][0]
+                else:
+                    head_hive_rowid = 0
                 _app_hive_rowid = db.select("SELECT latest_hive_rowid FROM plug_sync WHERE plug_name = 'reblog';")
                 if not _app_hive_rowid:
                     app_hive_rowid = 0
@@ -89,7 +93,11 @@ class PlugSync:
         cls.plug_sync_states['follow'] = 'loaded'
         while True:
             if cls.plug_sync_enabled is True:
-                head_hive_rowid = db.select("SELECT head_hive_rowid FROM global_props;")[0][0]
+                head_hive_rowid = db.select("SELECT head_hive_rowid FROM global_props;")
+                if head_hive_rowid:
+                    head_hive_rowid = head_hive_rowid[0][0]
+                else:
+                    head_hive_rowid = 0
                 _app_hive_rowid = db.select("SELECT latest_hive_rowid FROM plug_sync WHERE plug_name = 'follow';")
                 if _app_hive_rowid is None:
                     db.execute(
