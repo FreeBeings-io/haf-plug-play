@@ -9,10 +9,8 @@ CREATE TABLE IF NOT EXISTS public.hpp_reblog(
     permlink varchar(255)
 );
 
-CREATE INDEX hpp_reblog_ix_ppop_id
+CREATE INDEX IF NOT EXISTS hpp_reblog_ix_ppop_id
     ON hpp_reblog (ppop_id);
 
-CREATE INDEX hpp_reblog_ix_account
+CREATE INDEX IF NOT EXISTS hpp_reblog_ix_account
     ON hpp_reblog (account);
-
-ALTER TABLE public.hpp_reblog ADD CONSTRAINT "hpp_reblog_pkey_unique" PRIMARY KEY (account);
