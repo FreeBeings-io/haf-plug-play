@@ -1,10 +1,10 @@
-CREATE OR REPLACE FUNCTION public.hpp_follow_update( _begin INT, _end INT )
+CREATE OR REPLACE FUNCTION public.hpp_follow_update( _begin BIGINT, _end BIGINT )
     RETURNS void
     LANGUAGE plpgsql
     VOLATILE AS $function$
         DECLARE
             temprow RECORD;
-            head_hive_rowid int;
+            head_hive_rowid bigint;
         BEGIN
             SELECT MAX(latest_hive_rowid) INTO head_hive_rowid FROM public.plug_sync WHERE plug_name = 'follow';
             RAISE NOTICE '%', head_hive_rowid;
@@ -54,10 +54,6 @@ CREATE OR REPLACE FUNCTION public.hpp_follow_update( _begin INT, _end INT )
                     temprow.following, temprow.what
                 );
                 UPDATE public.plug_sync SET latest_hive_rowid = temprow.hive_rowid, latest_hive_head_block = temprow.block_num WHERE plug_name='follow';
-                IF temprow.follower IS NOT NULL AND temprow.following IS NOT NULL THEN
-                    PERFORM hpp_follow_update_state(temprow.follower, temprow.following, temprow.what);
-                END IF;
-                UPDATE public.plug_sync SET state_hive_rowid = temprow.hive_rowid WHERE plug_name='follow';
             END LOOP;
         END;
         $function$;

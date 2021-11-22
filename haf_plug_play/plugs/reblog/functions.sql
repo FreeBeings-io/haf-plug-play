@@ -1,10 +1,10 @@
-CREATE OR REPLACE FUNCTION public.hpp_reblog_update( _begin INT, _end INT )
+CREATE OR REPLACE FUNCTION public.hpp_reblog_update( _begin BIGINT, _end BIGINT )
     RETURNS void
     LANGUAGE plpgsql
     VOLATILE AS $function$
         DECLARE
             temprow RECORD;
-            head_hive_rowid int;
+            head_hive_rowid bigint;
         BEGIN
             SELECT MAX(latest_hive_rowid) INTO head_hive_rowid FROM public.plug_sync WHERE plug_name = 'reblog';
                 RAISE NOTICE '%', head_hive_rowid;

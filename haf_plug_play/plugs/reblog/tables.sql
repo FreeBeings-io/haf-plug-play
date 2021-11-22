@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS public.hpp_reblog(
-    ppop_id integer NOT NULL UNIQUE,
+    ppop_id bigint NOT NULL UNIQUE,
     block_num integer NOT NULL,
     transaction_id char(40) NOT NULL,
     req_auths text array,
