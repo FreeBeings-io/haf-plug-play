@@ -163,7 +163,7 @@ class HafSyncSetup:
                             END LOOP;
                             UPDATE global_props SET (head_hive_rowid, head_block_num, head_block_time) = (_head_hive_rowid, _block_num, _block_timestamp);
                     END;
-                    $function$
+                    $function$;
             """, None
         )
         db.commit()
