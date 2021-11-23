@@ -8,33 +8,34 @@ from haf_plug_play.utils.tools import range_split
 from haf_plug_play.plugs.follow.follow import WDIR_FOLLOW
 from haf_plug_play.plugs.reblog.reblog import WDIR_REBLOG
 
-db = WriteDb().db
-
 BATCH_PROCESS_SIZE = 100000
 
 
 class PlugInitSetup:
 
+    db = WriteDb().db
+
     @classmethod
     def init(cls):
         cls.setup_follow()
         cls.setup_reblog()
+        cls.db.conn.close()
 
     @classmethod
     def setup_follow(cls):
         tables = open(f'{WDIR_FOLLOW}/tables.sql', 'r').read()
         functions = open(f'{WDIR_FOLLOW}/functions.sql', 'r').read()
-        db.execute(tables, None)
-        db.execute(functions, None)
-        db.commit()
+        cls.db.execute(tables, None)
+        cls.db.execute(functions, None)
+        cls.db.commit()
 
     @classmethod
     def setup_reblog(cls):
         tables = open(f'{WDIR_REBLOG}/tables.sql', 'r').read()
         functions = open(f'{WDIR_REBLOG}/functions.sql', 'r').read()
-        db.execute(tables, None)
-        db.execute(functions, None)
-        db.commit()
+        cls.db.execute(tables, None)
+        cls.db.execute(functions, None)
+        cls.db.commit()
 
 class PlugSync:
 
@@ -54,6 +55,7 @@ class PlugSync:
     @classmethod
     def sync_reblog(cls):
         print('Starting plug sync: reblog')
+        db = WriteDb().db
         cls.plug_sync_states['reblog'] = 'loaded'
         while True:
             if cls.plug_sync_enabled is True:
@@ -96,6 +98,7 @@ class PlugSync:
     @classmethod
     def sync_follow(cls):
         print('Starting plug sync: follow')
+        db = WriteDb().db
         cls.plug_sync_states['follow'] = 'loaded'
         while True:
             if cls.plug_sync_enabled is True:
