@@ -10,7 +10,7 @@ from haf_plug_play.plugs.reblog.reblog import WDIR_REBLOG
 
 db = WriteDb().db
 
-BATCH_PROCESS_SIZE = 1000
+BATCH_PROCESS_SIZE = 100000
 
 
 class PlugInitSetup:
@@ -63,6 +63,11 @@ class PlugSync:
                 else:
                     head_hive_rowid = 0
                 _app_hive_rowid = db.select("SELECT latest_hive_rowid FROM plug_sync WHERE plug_name = 'reblog';")
+                if _app_hive_rowid is None:
+                    db.execute(
+                        """INSERT INTO plug_sync (plug_name,latest_hive_rowid,state_hive_rowid,latest_hive_head_block)
+                            VALUES ('reblog',0,0,0);""", None)
+                    db.commit()
                 if not _app_hive_rowid:
                     app_hive_rowid = 0
                 else:
