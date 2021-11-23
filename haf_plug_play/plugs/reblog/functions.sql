@@ -37,9 +37,9 @@ CREATE OR REPLACE FUNCTION public.hpp_reblog_update( _begin BIGINT, _end BIGINT 
                     transaction_id AS transaction_id,
                     ARRAY(SELECT json_array_elements_text(req_auths::json))  AS req_auths,
                     ARRAY(SELECT json_array_elements_text(req_posting_auths::json)) AS req_posting_auths,
-                    ARRAY(SELECT ppops.op_json::json) ->> 1::json ->> 'account' AS account,
-                    ARRAY(SELECT ppops.op_json::json) ->> 1::json ->> 'author' AS author,
-                    ARRAY(SELECT ppops.op_json::json) ->> 1::json ->> 'permlink' AS permlink
+                    (ppops.op_json::json ->> 1) ::json ->> 'account' AS account,
+                    (ppops.op_json::json ->> 1) ::json ->> 'author' AS author,
+                    (ppops.op_json::json ->> 1) ::json ->> 'permlink' AS permlink
                 FROM public.plug_play_ops ppops
                 WHERE ppops.hive_rowid >= _begin
                     AND ppops.hive_rowid <= _end
