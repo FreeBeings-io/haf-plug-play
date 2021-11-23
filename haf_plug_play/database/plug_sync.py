@@ -60,6 +60,7 @@ class PlugSync:
         while True:
             if cls.plug_sync_enabled is True:
                 head_hive_rowid = db.select("SELECT head_hive_rowid FROM global_props;")
+                assert head_hive_rowid is not None, "Null head_hive_rowid found"
                 if head_hive_rowid:
                     head_hive_rowid = head_hive_rowid[0][0]
                 else:
@@ -103,6 +104,7 @@ class PlugSync:
         while True:
             if cls.plug_sync_enabled is True:
                 head_hive_rowid = db.select("SELECT head_hive_rowid FROM global_props;")
+                assert head_hive_rowid is not None, "Null head_hive_rowid found"
                 if head_hive_rowid:
                     head_hive_rowid = head_hive_rowid[0][0]
                 else:
