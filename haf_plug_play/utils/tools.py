@@ -32,17 +32,14 @@ def get_cleaned_dict(og_values, keys, keep=False):
     return result
 
 def range_split(first, last, size):
-    count = 0
+    a = first
+    b = first
     result = []
-    for i in range(first, last+1):
-        if i == last:
-            result.append((_first, i))
-        if count == 0:
-            _first = i
-        elif count == size:
-            _last = i
-            result.append((_first,_last))
-            count = 0
-            continue
-        count += 1
-    return result
+    while True:
+        a += size
+        if a >= last:
+            result.append((b,last))
+            return result
+        elif a < last:
+            result.append((b,a))
+            b = a+1
