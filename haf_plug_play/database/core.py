@@ -10,7 +10,10 @@ class DbSession:
 
     def select(self, sql):
         self.cur.execute(sql)
-        res = self.cur.fetchall()
+        try:
+            res = self.cur.fetchall()
+        except:
+            return None
         if len(res) == 0:
             return None
         else:
