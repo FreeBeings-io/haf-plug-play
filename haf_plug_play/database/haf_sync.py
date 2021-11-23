@@ -191,9 +191,11 @@ class HafSync:
                 #print(f"Blocks range: {blocks_range}")
                 PlugSync.toggle_sync()
                 if not blocks_range:
+                    time.sleep(0.5)
                     continue
                 (first_block, last_block) = blocks_range
                 if not first_block:
+                    time.sleep(0.5)
                     continue
 
                 if (last_block - first_block) > 100:
