@@ -91,8 +91,8 @@ class HafSyncSetup:
         db.execute(
             f"""
                 CREATE TABLE IF NOT EXISTS public.global_props(
-                    head_hive_rowid bigint,
-                    head_block_num bigint,
+                    head_hive_rowid bigint DEFAULT 0,
+                    head_block_num bigint DEFAULT 0,
                     head_block_time timestamp
                 );
             """, None
@@ -100,7 +100,7 @@ class HafSyncSetup:
         db.execute(
             f"""
                 INSERT INTO public.global_props (head_hive_rowid, head_block_num)
-                VALUES (0,0)
+                SELECT '0'
                 WHERE NOT EXISTS (SELECT * FROM public.global_props);
             """, None
         )
