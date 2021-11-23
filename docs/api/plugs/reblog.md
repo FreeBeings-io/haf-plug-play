@@ -22,9 +22,9 @@ Example payload:
 ```
 {
     "jsonrpc": "2.0",
-    "method": "plug_play_api.follow.get_follow_ops",
+    "method": "plug_play_api.reblog.get_reblog_ops",
     "params": {
-            "block_range": [1,2500000]
+            "block_range": [1,15000000]
         },
     "id": 1
 }
@@ -37,39 +37,43 @@ Example response:
   "jsonrpc": "2.0",
   "result": [
     {
-      "transaction_id": "544c84cf09333b77ebffc76c8ab3180041bf6739",
+      "transaction_id": "b3569abd2900afdf6b55304d4fdc0a8034ac25ed",
       "acc_auths": [
-        "steemit"
+        "test-safari"
       ],
-      "follower": "steemit",
-      "following": "steem",
-      "what": [
-        "posts"
-      ]
+      "account": null,
+      "author": null,
+      "permlink": null
     },
     {
-      "transaction_id": "bc81ed5d7d689d1aed10796e04d9bcb304ad2c07",
+      "transaction_id": "ae9da66ea9df2bd41b70333b1aefabd325722b67",
       "acc_auths": [
-        "red"
+        "test-safari"
       ],
-      "follower": "red",
-      "following": "piedpiper",
-      "what": [
-        "posts"
-      ]
+      "account": null,
+      "author": null,
+      "permlink": null
     },
     {
-      "transaction_id": "9e442eca18cef91bdbd75af1b409da790ecd8d2b",
+      "transaction_id": "6907aed1625ca261f065c96c265d84f553a8912c",
       "acc_auths": [
-        "red"
+        "jamesc"
       ],
-      "follower": "red",
-      "following": "piedpiper",
-      "what": [
-        "posts"
-      ]
+      "account": "jamesc",
+      "author": "dantheman",
+      "permlink": "why-do-we-fight-to-change-the-world"
     },
-    ...
+    {
+      "transaction_id": "6e6e5c5632d35393acacdc40b7c6f1db4e3fe4a1",
+      "acc_auths": [
+        "nil1511"
+      ],
+      "account": "nil1511",
+      "author": "ned",
+      "permlink": "steemfest-update"
+    } ...
+  ],
+  "id": 1
 }
 ```
 
@@ -89,7 +93,7 @@ Example payload:
     "jsonrpc": "2.0",
     "method": "plug_play_api.reblog.get_account_reblogs",
     "params": {
-            "account": "netuoso"
+            "account": "lukestokes"
         },
     "id": 1
 }
@@ -97,4 +101,15 @@ Example payload:
 
 Example response:
 
+```
+{
+  "jsonrpc": "2.0",
+  "result": [
+    {
+      "author": "fioprotocol",
+      "permlink": "how-to-renew-your-fio-address-or-fio-domain"
+    }
+  ],
+  "id": 1
+}
 ```
