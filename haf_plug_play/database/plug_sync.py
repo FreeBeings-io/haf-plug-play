@@ -68,8 +68,8 @@ class PlugSync:
                 _app_hive_rowid = db.select("SELECT latest_hive_rowid FROM plug_sync WHERE plug_name = 'reblog';")
                 if _app_hive_rowid is None:
                     db.execute(
-                        """INSERT INTO plug_sync (plug_name,latest_hive_rowid,state_hive_rowid,latest_hive_head_block)
-                            VALUES ('reblog',0,0,0);""", None)
+                        """INSERT INTO plug_sync (plug_name,latest_hive_rowid,state_hive_rowid)
+                            VALUES ('reblog',0,0);""", None)
                     db.commit()
                 if not _app_hive_rowid:
                     app_hive_rowid = 0
@@ -83,6 +83,7 @@ class PlugSync:
                         SystemStatus.update_sync_status(plug_status=cls.plug_sync_states)
                         print(f"REBLOG:: processing {s[0]} to {s[1]}     {progress}%")
                         db.select(f"SELECT public.hpp_reblog_update( {s[0]}, {s[1]} );")
+                        db.execute(f"UPDATE public.plug_sync SET latest_hive_rowid = {s[1]}, state_hive_rowid = {s[1]} WHERE plug_name='reblog';", None)
                         db.commit()
                 elif (head_hive_rowid - app_hive_rowid) > 0:
                     print(f"REBLOG:: processing {app_hive_rowid+1} to {head_hive_rowid}")
@@ -112,8 +113,8 @@ class PlugSync:
                 _app_hive_rowid = db.select("SELECT latest_hive_rowid FROM plug_sync WHERE plug_name = 'follow';")
                 if _app_hive_rowid is None:
                     db.execute(
-                        """INSERT INTO plug_sync (plug_name,latest_hive_rowid,state_hive_rowid,latest_hive_head_block)
-                            VALUES ('follow',0,0,0);""", None)
+                        """INSERT INTO plug_sync (plug_name,latest_hive_rowid,state_hive_rowid)
+                            VALUES ('follow',0,0);""", None)
                     db.commit()
                 if not _app_hive_rowid:
                     app_hive_rowid = 0
@@ -132,6 +133,7 @@ class PlugSync:
                     print(f"FOLLOW:: processing {app_hive_rowid+1} to {head_hive_rowid}")
                     cls.plug_sync_states['follow'] = f'synchronizing ({progress} %'
                     db.select(f"SELECT public.hpp_follow_update( {app_hive_rowid+1}, {head_hive_rowid} );")
+                    db.execute(f"UPDATE public.plug_sync SET latest_hive_rowid = {s[1]}, state_hive_rowid = {s[1]} WHERE plug_name='follow';", None)
                     db.commit()
                 if head_hive_rowid != 0:
                     cls.plug_sync_states['follow'] = 'synchronized'
