@@ -46,15 +46,13 @@ CREATE OR REPLACE FUNCTION public.hpp_reblog_update( _begin BIGINT, _end BIGINT 
                     AND ppops.hive_rowid <= _end
                     AND ppops.op_id = 'reblog'
             LOOP
-                IF temprow.transaction_id IS NOT NULL THEN
-                    INSERT INTO public.hpp_reblog as hppr(
-                        ppop_id, block_num, transaction_id, req_auths, req_posting_auths, account, author, permlink)
-                    VALUES (
-                        temprow.hive_rowid, temprow.block_num, temprow.transaction_id,
-                        temprow.req_auths, temprow.req_posting_auths, temprow.account,
-                        temprow.author, temprow.permlink
-                    );
-                END IF;
+                INSERT INTO public.hpp_reblog as hppr(
+                    ppop_id, block_num, transaction_id, req_auths, req_posting_auths, account, author, permlink)
+                VALUES (
+                    temprow.hive_rowid, temprow.block_num, temprow.transaction_id,
+                    temprow.req_auths, temprow.req_posting_auths, temprow.account,
+                    temprow.author, temprow.permlink
+                );
             END LOOP;
         END;
         $function$;
