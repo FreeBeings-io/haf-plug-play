@@ -83,7 +83,6 @@ class HafSyncSetup:
                 CREATE TABLE IF NOT EXISTS public.plug_sync(
                     plug_name varchar(16) NOT NULL,
                     latest_hive_rowid bigint DEFAULT 0,
-                    latest_hive_head_block integer DEFAULT 0,
                     state_hive_rowid bigint DEFAULT 0
                 );
             """, None

@@ -55,8 +55,6 @@ CREATE OR REPLACE FUNCTION public.hpp_reblog_update( _begin BIGINT, _end BIGINT 
                         temprow.author, temprow.permlink
                     );
                 END IF;
-                UPDATE public.plug_sync SET latest_hive_rowid = temprow.hive_rowid, latest_hive_head_block = temprow.block_num WHERE plug_name='reblog';
-                UPDATE public.plug_sync SET state_hive_rowid = temprow.hive_rowid WHERE plug_name='reblog';
             END LOOP;
         END;
         $function$;
