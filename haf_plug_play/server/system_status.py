@@ -23,7 +23,7 @@ class SystemStatus:
     @classmethod
     def get_latest_block(cls):
         status = cls.get_sync_status()
-        if 'system' in status['system']:
-            if 'head_block_num' in status:
+        if 'system' in status:
+            if 'head_block_num' in status['system']:
                 return status['system']['head_block_num']
         return None
