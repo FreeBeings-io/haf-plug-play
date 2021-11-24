@@ -65,7 +65,7 @@ CREATE OR REPLACE FUNCTION public.hpp_follow_update( _begin BIGINT, _end BIGINT 
                     temprow.req_auths, temprow.req_posting_auths, follower,
                     following, what
                 );
-                IF temprow.follower IS NOT NULL AND temprow.following IS NOT NULL THEN
+                IF follower IS NOT NULL AND following IS NOT NULL THEN
                     PERFORM hpp_follow_update_state(follower, following, what);
                 END IF;
             END LOOP;
