@@ -4,6 +4,9 @@ CREATE OR REPLACE FUNCTION public.hpp_follow_update( _begin BIGINT, _end BIGINT 
     VOLATILE AS $function$
         DECLARE
             temprow RECORD;
+            follower varchar(16);
+            following varchar(16);
+            what varchar[];
             head_hive_rowid bigint;
         BEGIN
             SELECT MAX(latest_hive_rowid) INTO head_hive_rowid FROM public.plug_sync WHERE plug_name = 'follow';
@@ -38,23 +41,32 @@ CREATE OR REPLACE FUNCTION public.hpp_follow_update( _begin BIGINT, _end BIGINT 
                     transaction_id AS transaction_id,
                     ARRAY(SELECT json_array_elements_text(req_auths::json))  AS req_auths,
                     ARRAY(SELECT json_array_elements_text(req_posting_auths::json)) AS req_posting_auths,
-                    ppops.op_json::json ->>'follower' AS follower,
-                    ppops.op_json::json ->>'following' AS following,
-                    ARRAY(SELECT json_array_elements_text(ppops.op_json::json ->'what')) AS what
+                    ppops.op_json
                 FROM public.plug_play_ops ppops
                 WHERE ppops.hive_rowid >= _begin
                     AND ppops.hive_rowid <= _end
                     AND ppops.op_id = 'follow'
             LOOP
+                BEGIN
+                    follower := temprow.op_json::json ->>'follower';
+                    following := temprow.op_json::json ->>'following';
+                    what := ARRAY(SELECT json_array_elements_text(temprow.op_json::json ->'what'));
+                EXCEPTION WHEN OTHERS THEN
+                    RAISE NOTICE E'Got exception:
+                    SQLSTATE: % 
+                    SQLERRM: %', SQLSTATE, SQLERRM; 
+                    CONTINUE;
+                END;
+
                 INSERT INTO public.hpp_follow as hppf(
                     ppop_id, block_num, transaction_id, req_auths, req_posting_auths, account, following, what)
                 VALUES (
                     temprow.ppop_id, temprow.block_num, temprow.transaction_id,
-                    temprow.req_auths, temprow.req_posting_auths, temprow.follower,
-                    temprow.following, temprow.what
+                    temprow.req_auths, temprow.req_posting_auths, follower,
+                    following, what
                 );
                 IF temprow.follower IS NOT NULL AND temprow.following IS NOT NULL THEN
-                    PERFORM hpp_follow_update_state(temprow.follower, temprow.following, temprow.what);
+                    PERFORM hpp_follow_update_state(follower, following, what);
                 END IF;
             END LOOP;
         END;
