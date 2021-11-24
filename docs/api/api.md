@@ -1,12 +1,13 @@
 # API Documentation
 
-*Documentation for the API endpoints available on Hive Plug & Play*
+*Documentation for the API endpoints available on HAF Plug & Play*
 
-*The development server: https://plug-play-beta.imwatsi.com*
+***Production Server:** https://plug-play.imwatsi.com
+**Dev Server:** https://plug-play-beta.imwatsi.com
 
 ---
 
-**[Standard endpoints](docs/api/standard_endpoints.md)**
+**[Standard endpoints](standard_endpoints.md)**
 
 ---
 
