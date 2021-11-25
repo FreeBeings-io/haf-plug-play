@@ -36,11 +36,16 @@ class HafSyncSetup:
         if exists == False:
             db.select(f"SELECT hive.app_create_context( '{APPLICATION_CONTEXT}' );")
             db.commit()
+            print("Created context: plug_play")
+            exists = db.select(
+            f"SELECT hive.app_context_exists( '{APPLICATION_CONTEXT}' );"
+            )[0][0]
+            print(exists)
         # create table
         db.execute(
             f"""
                 CREATE TABLE IF NOT EXISTS public.plug_play_ops(
-                    id integer PRIMARY KEY,
+                    id bigint PRIMARY KEY,
                     block_num integer NOT NULL,
                     transaction_id char(40),
                     req_auths json,
@@ -77,17 +82,16 @@ class HafSyncSetup:
             f"""
                 CREATE TABLE IF NOT EXISTS public.plug_sync(
                     plug_name varchar(16) NOT NULL,
-                    latest_hive_rowid integer,
-                    latest_hive_head_block integer,
-                    state_hive_rowid integer
+                    latest_hive_rowid bigint DEFAULT 0,
+                    state_hive_rowid bigint DEFAULT 0
                 );
             """, None
         )
         db.execute(
             f"""
                 CREATE TABLE IF NOT EXISTS public.global_props(
-                    head_hive_rowid integer,
-                    head_block_num integer,
+                    head_hive_rowid bigint DEFAULT 0,
+                    head_block_num bigint DEFAULT 0,
                     head_block_time timestamp
                 );
             """, None
@@ -103,14 +107,14 @@ class HafSyncSetup:
         # create update ops function
         db.execute(
             f"""
-                CREATE OR REPLACE FUNCTION public.update_plug_play_ops( _first_block INT, _last_block INT )
+                CREATE OR REPLACE FUNCTION public.update_plug_play_ops( _first_block BIGINT, _last_block BIGINT )
                 RETURNS void
                 LANGUAGE plpgsql
                 VOLATILE AS $function$
                     DECLARE
                         temprow RECORD;
-                        _id INTEGER;
-                        _head_hive_rowid INTEGER;
+                        _id BIGINT;
+                        _head_hive_rowid BIGINT;
                         _block_num INTEGER;
                         _block_timestamp TIMESTAMP;
                         _required_auths JSON;
@@ -158,7 +162,7 @@ class HafSyncSetup:
                             END LOOP;
                             UPDATE global_props SET (head_hive_rowid, head_block_num, head_block_time) = (_head_hive_rowid, _block_num, _block_timestamp);
                     END;
-                    $function$
+                    $function$;
             """, None
         )
         db.commit()
@@ -186,9 +190,11 @@ class HafSync:
                 #print(f"Blocks range: {blocks_range}")
                 PlugSync.toggle_sync()
                 if not blocks_range:
+                    time.sleep(0.5)
                     continue
                 (first_block, last_block) = blocks_range
                 if not first_block:
+                    time.sleep(0.5)
                     continue
 
                 if (last_block - first_block) > 100:
@@ -198,7 +204,8 @@ class HafSync:
                         db.select(f"SELECT hive.app_context_detach( '{APPLICATION_CONTEXT}' );")
                         print("context detached")
                         print(f"processing {s[0]} to {s[1]}")
-                        SystemStatus.update_sync_status(sync_status=f"Massive sync in progress: {s[0]} to {s[1]}")
+                        progress = round(((s[0]/last_block) * 100),2)
+                        SystemStatus.update_sync_status(sync_status=f"Massive sync in progress: {s[0]} to {s[1]}    ({progress} %)")
                         db.select(f"SELECT public.update_plug_play_ops( {s[0]}, {s[1]} );")
                         print("batch sync done")
                         db.select(f"SELECT hive.app_context_attach( '{APPLICATION_CONTEXT}', {s[1]} );")

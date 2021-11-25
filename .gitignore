@@ -1,2 +1,4 @@
 tests/
 config.dat
+__pycache__/
+*.egg-info/

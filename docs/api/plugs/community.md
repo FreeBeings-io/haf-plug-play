@@ -1,7 +1,8 @@
-# Community Plug
+# Community Plug (Not available yet - WIP)
 
 Search endpoints for the Hivemind Communities protocol
 
+**Production Server:** https://plug-play.imwatsi.com
 **Dev Server:** https://plug-play-beta.imwatsi.com
 
 ### get_subscribe_ops

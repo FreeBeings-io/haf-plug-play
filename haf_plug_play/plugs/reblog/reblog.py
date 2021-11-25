@@ -30,4 +30,9 @@ class StateQuery:
 
     @classmethod
     def get_account_reblogs(cls, account):
-        pass
+        query = f"""
+            SELECT author, permlink
+                FROM hpp_reblog
+                WHERE account = '{account}';
+        """
+        return query

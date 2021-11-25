@@ -1,8 +1,6 @@
-# Hive Plug & Play (HAF) [ALPHA]
+# Hive Plug & Play (HAF) [BETA]
 
 **Customizable streaming and parsing microservice for custom_json ops on Hive.**
-
-*This project is under heavy development and is not stable enough to run in production.*
 
 ## HAF
 
@@ -43,6 +41,8 @@ sudo apt install python3 \
 - `cd build`
 - `cmake -DCMAKE_BUILD_TYPE=Release ..`
 - `make`
+- `make install`
+- `cd hive/programs/hived/`
 - Create data dir for hived: `./hived -d data --dump-config`
 
 
@@ -110,7 +110,7 @@ pip3 install -e .
 
 ```
 cd haf/build/hive/programs/hived
-./hived -d data --replay-blockchain --stop-replay-at-block 59000000 --exit-after-replay
+./hived -d data --replay-blockchain --stop-replay-at-block 45000000 --exit-after-replay
 ```
 
 ### Configure Hive Plug & Play (HAF)
@@ -140,5 +140,5 @@ Run HAF Plug & Play: `haf_plug_play`
 
 ### Check HAF Plug & Play sync status
 
-- Visiting https://plug-play-beta.imwatsi.com/ or
+- Visiting https://plug-play.imwatsi.com/ or
 - Making this call on the API - https://github.com/imwatsi/haf-plug-play/blob/master/docs/api/standard_endpoints.md#get_sync_status

@@ -1,10 +1,10 @@
-CREATE OR REPLACE FUNCTION public.hpp_reblog_update( _begin INT, _end INT )
+CREATE OR REPLACE FUNCTION public.hpp_reblog_update( _begin BIGINT, _end BIGINT )
     RETURNS void
     LANGUAGE plpgsql
     VOLATILE AS $function$
         DECLARE
             temprow RECORD;
-            head_hive_rowid int;
+            head_hive_rowid bigint;
         BEGIN
             SELECT MAX(latest_hive_rowid) INTO head_hive_rowid FROM public.plug_sync WHERE plug_name = 'reblog';
                 RAISE NOTICE '%', head_hive_rowid;
@@ -32,14 +32,15 @@ CREATE OR REPLACE FUNCTION public.hpp_reblog_update( _begin INT, _end INT )
 
                 FOR temprow IN
                 SELECT
+                    ppops.hive_rowid AS hive_rowid,
                     ppops.id AS ppop_id,
                     ppops.block_num AS block_num,
                     transaction_id AS transaction_id,
                     ARRAY(SELECT json_array_elements_text(req_auths::json))  AS req_auths,
                     ARRAY(SELECT json_array_elements_text(req_posting_auths::json)) AS req_posting_auths,
-                    ARRAY(SELECT ppops.op_json::json) ->> 1::json ->> 'account' AS account,
-                    ARRAY(SELECT ppops.op_json::json) ->> 1::json ->> 'author' AS author,
-                    ARRAY(SELECT ppops.op_json::json) ->> 1::json ->> 'permlink' AS permlink
+                    (ppops.op_json::json ->> 1) ::json ->> 'account' AS account,
+                    (ppops.op_json::json ->> 1) ::json ->> 'author' AS author,
+                    (ppops.op_json::json ->> 1) ::json ->> 'permlink' AS permlink
                 FROM public.plug_play_ops ppops
                 WHERE ppops.hive_rowid >= _begin
                     AND ppops.hive_rowid <= _end
@@ -52,9 +53,6 @@ CREATE OR REPLACE FUNCTION public.hpp_reblog_update( _begin INT, _end INT )
                     temprow.req_auths, temprow.req_posting_auths, temprow.account,
                     temprow.author, temprow.permlink
                 );
-                UPDATE public.plug_sync SET latest_hive_rowid = temprow.hive_rowid, latest_hive_head_block = temprow.block_num WHERE plug_name='reblog';
-                PERFORM hpp_reblog_update_state(temprow.account, temprow.author, temprow.permlink);
-                UPDATE public.plug_sync SET state_hive_rowid = temprow.hive_rowid WHERE plug_name='reblog';
             END LOOP;
         END;
         $function$;

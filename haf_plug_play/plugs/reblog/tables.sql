@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS public.hpp_reblog(
-    ppop_id integer NOT NULL UNIQUE,
+    ppop_id bigint NOT NULL UNIQUE,
     block_num integer NOT NULL,
-    transaction_id char(40) NOT NULL,
+    transaction_id char(40),
     req_auths text array,
     req_posting_auths text array,
     account varchar(16),
@@ -9,10 +9,8 @@ CREATE TABLE IF NOT EXISTS public.hpp_reblog(
     permlink varchar(255)
 );
 
-CREATE INDEX hpp_reblog_ix_ppop_id
+CREATE INDEX IF NOT EXISTS hpp_reblog_ix_ppop_id
     ON hpp_reblog (ppop_id);
 
-CREATE INDEX hpp_reblog_ix_account
+CREATE INDEX IF NOT EXISTS hpp_reblog_ix_account
     ON hpp_reblog (account);
-
-ALTER TABLE public.hpp_reblog ADD CONSTRAINT "hpp_reblog_pkey_unique" PRIMARY KEY (account);
