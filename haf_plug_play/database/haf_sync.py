@@ -213,7 +213,7 @@ class HafSync:
                         db.commit()
                     continue
                 SystemStatus.update_sync_status(sync_status=f"Synchronizing: {first_block} to {last_block}")
-                print(db.select(f"SELECT public.update_plug_play_ops( {first_block}, {last_block} );"))
+                db.select(f"SELECT public.update_plug_play_ops( {first_block}, {last_block} );")
                 db.commit()
             time.sleep(0.5)
 

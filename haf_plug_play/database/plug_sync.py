@@ -86,6 +86,7 @@ class PlugSync:
                         db.execute(f"UPDATE public.plug_sync SET latest_hive_rowid = {s[1]}, state_hive_rowid = {s[1]} WHERE plug_name='reblog';", None)
                         db.commit()
                 elif (head_hive_rowid - app_hive_rowid) > 0:
+                    progress = round(((app_hive_rowid+1)/head_hive_rowid) * 100, 2)
                     print(f"REBLOG:: processing {app_hive_rowid+1} to {head_hive_rowid}")
                     cls.plug_sync_states['reblog'] = f'synchronizing {progress} %'
                     db.select(f"SELECT public.hpp_reblog_update( {app_hive_rowid+1}, {head_hive_rowid} );")
