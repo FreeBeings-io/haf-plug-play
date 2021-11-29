@@ -46,12 +46,13 @@ class HafSyncSetup:
             f"""
                 CREATE TABLE IF NOT EXISTS public.plug_play_ops(
                     id bigint PRIMARY KEY,
-                    block_num integer NOT NULL,
-                    transaction_id char(40),
-                    req_auths json,
-                    req_posting_auths json,
-                    op_id varchar(128) NOT NULL,
-                    op_json varchar NOT NULL
+                    block_num INTEGER NOT NULL,
+                    timestamp TIMESTAMP,
+                    transaction_id CHAR(40),
+                    req_auths JSON,
+                    req_posting_auths JSON,
+                    op_id VARCHAR(128) NOT NULL,
+                    op_json VARCHAR NOT NULL
                 )
                 INHERITS( hive.{APPLICATION_CONTEXT} );
             """, None
@@ -154,10 +155,10 @@ class HafSyncSetup:
                                     AND pptv.trx_in_block = temprow.trx_in_block);
                                 _transaction_id := encode(_hash::bytea, 'escape');
                                 INSERT INTO public.plug_play_ops as ppops(
-                                    id, block_num, transaction_id, req_auths,
+                                    id, block_num, timestamp, transaction_id, req_auths,
                                     req_posting_auths, op_id, op_json)
                                 VALUES
-                                    (_id, _block_num, _transaction_id, _required_auths,
+                                    (_id, _block_num, _block_timestamp, _transaction_id, _required_auths,
                                     _required_posting_auths, _op_id, _op_json);
                             END LOOP;
                             UPDATE global_props SET (head_hive_rowid, head_block_num, head_block_time) = (_head_hive_rowid, _block_num, _block_timestamp);
@@ -214,6 +215,7 @@ class HafSync:
                     continue
                 SystemStatus.update_sync_status(sync_status=f"Synchronizing: {first_block} to {last_block}")
                 db.select(f"SELECT public.update_plug_play_ops( {first_block}, {last_block} );")
+                SystemStatus.update_sync_status(sync_status=f"Synchronized... on block {last_block}")
                 db.commit()
             time.sleep(0.5)
 

@@ -4,9 +4,11 @@ CREATE OR REPLACE FUNCTION public.hpp_follow_update( _begin BIGINT, _end BIGINT 
     VOLATILE AS $function$
         DECLARE
             temprow RECORD;
-            follower varchar(16);
-            following varchar(16);
-            what varchar[];
+            _json json;
+            _follower varchar(16);
+            _following varchar(16);
+            _what varchar[];
+            _type varchar;
             head_hive_rowid bigint;
         BEGIN
             SELECT MAX(latest_hive_rowid) INTO head_hive_rowid FROM public.plug_sync WHERE plug_name = 'follow';
@@ -48,13 +50,22 @@ CREATE OR REPLACE FUNCTION public.hpp_follow_update( _begin BIGINT, _end BIGINT 
                     AND ppops.op_id = 'follow'
             LOOP
                 BEGIN
-                    follower := temprow.op_json::json ->>'follower';
-                    following := temprow.op_json::json ->>'following';
-                    what := ARRAY(SELECT json_array_elements_text(temprow.op_json::json ->'what'));
+                    _type := json_typeof(temprow.op_json::json);
+                    IF _type = 'object' THEN
+                        _json := temprow.op_json::json;
+                    ELSIF _type = 'array' THEN
+                        _json := (temprow.op_json::json ->> 1)::json;
+                        RAISE NOTICE '%', _json;
+                    END IF;
+                    _follower := _json ->> 'follower';
+                    _following := _json ->> 'following';
+                    _what := ARRAY(SELECT json_array_elements_text(_json->'what'));
                 EXCEPTION WHEN OTHERS THEN
                     RAISE NOTICE E'Got exception:
                     SQLSTATE: % 
-                    SQLERRM: %', SQLSTATE, SQLERRM; 
+                    SQLERRM: %
+                    JSON: %
+                    BLOCK: %', SQLSTATE, SQLERRM, temprow.op_json, temprow.block_num; 
                     CONTINUE;
                 END;
 
@@ -62,11 +73,13 @@ CREATE OR REPLACE FUNCTION public.hpp_follow_update( _begin BIGINT, _end BIGINT 
                     ppop_id, block_num, transaction_id, req_auths, req_posting_auths, account, following, what)
                 VALUES (
                     temprow.ppop_id, temprow.block_num, temprow.transaction_id,
-                    temprow.req_auths, temprow.req_posting_auths, follower,
-                    following, what
+                    temprow.req_auths, temprow.req_posting_auths, _follower,
+                    _following, _what
                 );
-                IF follower IS NOT NULL AND following IS NOT NULL THEN
-                    PERFORM hpp_follow_update_state(follower, following, what);
+                IF _follower IS NOT NULL AND _following IS NOT NULL THEN
+                    PERFORM hpp_follow_update_state(_follower, _following, _what);
+                ELSE
+                    --RAISE NOTICE '%, %, %', follower, following, what;
                 END IF;
             END LOOP;
         END;
