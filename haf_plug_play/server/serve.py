@@ -5,7 +5,7 @@ from jsonrpcserver import method, async_dispatch
 from haf_plug_play.server import api_endpoints
 from haf_plug_play.server.system_status import SystemStatus
 from haf_plug_play.server.normalize import normalize_types
-from haf_plug_play.server.plug_endpoints import follow
+from haf_plug_play.server.plug_endpoints import follow, polls
 
 
 def run_server(config):
