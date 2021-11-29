@@ -7,7 +7,7 @@ from haf_plug_play.server.system_status import SystemStatus
 from haf_plug_play.utils.tools import range_split
 from haf_plug_play.plugs.follow.follow import WDIR_FOLLOW
 
-BATCH_PROCESS_SIZE = 100000
+BATCH_PROCESS_SIZE = 1000000
 
 
 class PlugInitSetup:
