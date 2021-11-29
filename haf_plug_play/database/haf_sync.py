@@ -45,7 +45,7 @@ class HafSyncSetup:
         db.execute(
             f"""
                 CREATE TABLE IF NOT EXISTS public.plug_play_ops(
-                    id bigint PRIMARY KEY,
+                    id BIGSERIAL PRIMARY KEY,
                     block_num INTEGER NOT NULL,
                     timestamp TIMESTAMP,
                     transaction_id CHAR(40),
