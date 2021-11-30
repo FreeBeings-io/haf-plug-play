@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS public.hpp_polls_ops(
 
 CREATE TABLE IF NOT EXISTS public.hpp_polls_content(
     pp_poll_id BIGINT NOT NULL UNIQUE REFERENCES public.hpp_polls_ops(pp_poll_id),
+    created TIMESTAMP,
     permlink VARCHAR(255),
     author VARCHAR(16),
     question VARCHAR(255),
@@ -20,6 +21,7 @@ CREATE TABLE IF NOT EXISTS public.hpp_polls_content(
 
 CREATE TABLE IF NOT EXISTS public.hpp_polls_votes(
     pp_poll_id BIGINT NOT NULL UNIQUE REFERENCES public.hpp_polls_ops(pp_poll_id),
+    created TIMESTAMP,
     account VARCHAR(16),
     answer SMALLINT
 );
