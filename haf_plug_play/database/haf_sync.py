@@ -22,7 +22,7 @@ class HafSyncSetup:
             db.execute(
                 """
                     INSERT INTO public.apps (app_name, op_ids, enabled)
-                    VALUES ('global','{"follow", "community"}',true);
+                    VALUES ('polls','{"polls"}',true);
                 """, None
             )
 
