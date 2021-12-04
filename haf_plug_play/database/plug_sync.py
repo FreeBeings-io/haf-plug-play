@@ -65,7 +65,7 @@ class PlugSync:
                     # get start hive_rowid from start block
                     start_block = 59594882
                     while True:
-                        _start_hive_rowid = db.select(f"SELECT min(hive_rowid) FROM plug_play_ops WHERE block_num = {start_block};")
+                        _start_hive_rowid = db.select(f"SELECT min(hive_rowid) FROM plug_play_ops WHERE block_num >= {start_block-100};")
                         if _start_hive_rowid:
                             app_hive_rowid = _start_hive_rowid[0][0]
                             break
