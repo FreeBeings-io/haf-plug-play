@@ -3,8 +3,9 @@ CREATE TABLE IF NOT EXISTS public.hpp_polls_ops(
     pp_poll_id BIGSERIAL UNIQUE,
     block_num INTEGER NOT NULL,
     transaction_id CHAR(40) NOT NULL,
+    op_header JSON,
     op_type VARCHAR(16),
-    op_payload VARCHAR
+    op_payload JSON
 );
 
 CREATE TABLE IF NOT EXISTS public.hpp_polls_content(
