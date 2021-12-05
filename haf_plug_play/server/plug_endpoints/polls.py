@@ -1,5 +1,4 @@
 """Plug endpoints for community ops."""
-from os import name
 from jsonrpcserver import method, Result, Success, Error, result
 from haf_plug_play.database.access import ReadDb
 from haf_plug_play.plugs.polls.polls import SearchQuery, StateQuery
