@@ -111,6 +111,7 @@ CREATE OR REPLACE FUNCTION public.hpp_polls_update_state( _posting_acc VARCHAR(1
                     END IF;
                 ELSIF _op_type = 'vote' THEN
                     -- vote on a poll
+                    _answer := _op_payload ->> 'answer';
                     SELECT * INTO temprow FROM hpp_polls_content WHERE author = _author and permlink = _permlink;
                     IF FOUND THEN
                         INSERT INTO public.hpp_polls_votes (pp_poll_id, account, answer)
