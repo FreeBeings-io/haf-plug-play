@@ -25,7 +25,7 @@ async def get_poll_ops(op_type=None, block_range=None) -> Result:
     return Success(result)
 
 @method(name="plug_play_api.polls.get_polls_active")
-async def get_polls_active(tag):
+async def get_polls_active(tag=None):
     """Returns a list of current active polls, filterable by tag."""
     assert isinstance(tag, str), "Poll tag must be a string"
     assert len(tag) <= 16, "Poll tags must be no more than 16 characters"
