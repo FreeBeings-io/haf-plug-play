@@ -17,7 +17,7 @@ class HafSyncSetup:
     
     @classmethod
     def prepare_global_data(cls):
-        app_entry = db.select(f"SELECT 1 FROM public.apps WHERE app_name='global';")
+        app_entry = db.select(f"SELECT 1 FROM public.apps WHERE app_name='polls';")
         if app_entry is None:
             db.execute(
                 """
