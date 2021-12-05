@@ -1,7 +1,7 @@
 # Polls Protocol Documentation
 
 ## Version 1
-
+The `polls` protocol uses the `custom_json` ID: `polls`.
 
 ### create
 
