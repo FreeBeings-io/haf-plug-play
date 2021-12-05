@@ -2,7 +2,11 @@
 
 ### IDs
 
-Applications or protocols use a single ID to broadcast their `custom_json` ops.
+Applications or protocols use their own IDs to broadcast their `custom_json` ops. For example:
+
+- `community`: global community protocol used by Hivemind
+- `polls`: global protocol for polls on Hive
+
 
 ### Op JSON Data Structure
 
