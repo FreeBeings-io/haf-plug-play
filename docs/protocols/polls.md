@@ -31,7 +31,7 @@ Example op:
     [1, "polls-app/0.01"],
     "create",
     {
-        "permlink": "this-is-a-test",
+        "permlink": "what-do-you-think",
         "question": "What do you think Hive's price will be next year?",
         "answers": ["$1.00", "$2.00", "$5.00", "$10.00"],
         "expires": "2021-12-04 13:54:06",
@@ -52,7 +52,8 @@ Op structure:
     "vote",
     {
         "author": <string> (16),
-        "permlink": <string> (255)
+        "permlink": <string> (255),
+        "answer": integer
     }
 ]
 ```
@@ -64,8 +65,9 @@ Example op:
     [1, "polls/0.01"],
     "vote",
     {
-        "author": "",
-        "permlink": ""
+        "author": "imwatsi",
+        "permlink": "what-do-you-think",
+        "answer": 3
     }
 ]
 ```
