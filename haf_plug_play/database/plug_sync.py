@@ -1,6 +1,5 @@
-from os import truncate
-from threading import Thread
 import time
+from threading import Thread
 
 from haf_plug_play.database.access import WriteDb
 from haf_plug_play.server.system_status import SystemStatus
@@ -8,7 +7,7 @@ from haf_plug_play.utils.tools import range_split
 from haf_plug_play.plugs.polls.polls import WDIR_POLLS
 
 BATCH_PROCESS_SIZE = 200000
-
+START_BLOCK_POLLS = 59594882
 
 class PlugInitSetup:
 
@@ -63,7 +62,7 @@ class PlugSync:
                     db.commit()
                 if not _app_hive_rowid:
                     # get start hive_rowid from start block
-                    start_block = 59594882
+                    start_block = START_BLOCK_POLLS
                     while True:
                         _start_hive_rowid = db.select(f"SELECT min(id) FROM hive.plug_play_operations_view WHERE block_num = {start_block};")
                         if _start_hive_rowid:
