@@ -4,13 +4,6 @@
 
 Applications or protocols use a single ID to broadcast their `custom_json` ops.
 
-For example:
-
-- `community`: Hivemind communities protocol
-- `notify`: blockchain-wide notification protocol
-- `follow`: blockchain-wide follower protocol
-- `3speak`: 3Speak application
-
 ### Op JSON Data Structure
 
 ```
@@ -29,6 +22,8 @@ Ops are broadcast using an array as the main container in the `json` field.
 
 - The second element contains the internal name of the operation. [string (64)]
 
-- The third element contains the actual data that the application/protocol uses, in one of two formats:
+- The third element contains the actual data/payload that the application/protocol uses, in one of these formats:
     - a JSON object (dictionary), or
     - an array/list
+    - string
+    - integer
