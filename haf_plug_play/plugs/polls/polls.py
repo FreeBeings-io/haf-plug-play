@@ -29,7 +29,7 @@ class StateQuery:
     def get_polls_active(cls, tag=None):
         query = f"""
             SELECT author, permlink, question
-                answers, expires, tags
+                answers, expires, tag
             FROM hpp_polls_content
             WHERE timestamp >= NOW() AT TIME ZONE 'utc'
         """
@@ -41,26 +41,24 @@ class StateQuery:
     def get_poll(cls, author, permlink):
         query = f"""
             SELECT author, permlink, question
-                answers, expires, tags,
-                (SELECT COUNT(*) FROM hpp_polls_votes WHERE author = '{author}' AND permlink = '{permlink}') AS votes_count
+                answers, expires, tag
             FROM hpp_polls_content
             WHERE author = '{author}' AND permlink = '{permlink}';
         """
         return query
 
     @classmethod
-    def get_poll_votes(cls, author, permlink):
+    def get_poll_votes_summary(cls, author, permlink):
         query = f"""
-            SELECT account, (
-                SELECT answers[t_votes.answer]
-                FROM hpp_polls_content
-                WHERE author = '{author}' AND permlink = '{permlink}')
-            FROM hpp_polls_votes t_votes
-            WHERE pp_poll_id = (
-                SELECT pp_poll_id
-                FROM hpp_polls_content
-                WHERE author = '{author}' AND permlink = '{permlink}');
+            SELECT t_content.answers[t_votes.answer] AS answer, COUNT(DISTINCT t_votes.account)
+            FROM hpp_polls_content t_content 
+            JOIN hpp_polls_votes t_votes ON t_content.pp_poll_id = t_votes.pp_poll_id
+            WHERE t_content.author = '{author}' AND t_content.permlink = '{permlink}' GROUP BY t_content.answer;
         """
+        return query
+
+    @classmethod
+    def get_poll_votes(cls, author, permlink):
         query = f"""
             SELECT t_votes.account, t_content.answers[t_votes.answer] AS answer
             FROM hpp_polls_content t_content 

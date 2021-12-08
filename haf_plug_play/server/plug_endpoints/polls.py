@@ -1,10 +1,47 @@
 """Plug endpoints for community ops."""
+import re
 from jsonrpcserver import method, Result, Success, Error, result
 from haf_plug_play.database.access import ReadDb
 from haf_plug_play.plugs.polls.polls import SearchQuery, StateQuery
 from haf_plug_play.server.normalize import populate_by_schema
 
 db = ReadDb().db
+
+def does_poll_exist(author,permlink):
+    sql = f"""
+        SELECT 1 FROM public.hpp_polls_content
+        WHERE author = '{author}' AND permlink = '{permlink}';
+    """
+    exists = bool(db.db.select(sql))
+    return exists
+
+@method(name="plug_play_api.polls.get_poll_permlink")
+async def get_poll_permlink(author, question):
+    """Returns a valid and unique permlink to use with a new poll."""
+    assert isinstance(author, str), "Poll author must be a string"
+    assert len(author) <= 16, "Poll author must be no more than 16 characters"
+    assert isinstance(question, str), "Poll question must be a string"
+    assert len(question) <= 255, "Poll question must be no more than 255 characters"
+    _body = question
+    _body = _body.replace("&", " and ")
+    _body = _body.replace("  ", " ")
+    tries = 0
+    while True:
+        _clean_title = _body.split(' ')
+        clean_title = ""
+        total_len = 0
+        for w in _clean_title:
+            total_len += len(w)
+            if total_len > 32: break
+            clean_title += f"{w}-"
+        plink = re.sub(r'[^a-z-]+', '', clean_title[:-1].lower())
+        if tries > 0: plink = f"{plink}-{str(tries)}"
+        exists = does_poll_exist(author, plink)
+        if not exists:
+            break
+        else:
+            tries += 1
+    return plink
 
 @method(name="plug_play_api.polls.get_polls_ops")
 async def get_poll_ops(op_type=None, block_range=None) -> Result:
@@ -35,6 +72,31 @@ async def get_polls_active(tag=None):
         result.append(populate_by_schema(
             entry, ['author', 'permlink', 'question', 'answers', 'expires', 'tags']
         ))
+    return Success(result)
+
+@method(name="plug_play_api.polls.get_poll")
+async def get_poll(author,permlink, summary=True):
+    """Returns a poll and vote details."""
+    assert isinstance(author, str), "Poll author must be a string"
+    assert len(author) <= 16, "Poll author must be no more than 16 characters"
+    assert isinstance(permlink, str), "Poll permlink must be a string"
+    assert len(permlink) <= 255, "Poll permlink must be no more than 255 characters"
+    sql = StateQuery.get_poll(author,permlink)
+    _votes = []
+    res = db.db.select(sql) or None
+    result = populate_by_schema(res[0], ['author', 'permlink', 'question'
+                'answers', 'expires', 'tag'])
+    if summary:
+        sql = StateQuery.get_poll_votes_summary(author,permlink)
+        res = db.db.select(sql) or None
+        for entry in res:
+            _votes.append(populate_by_schema(entry, ['answer', 'count']))
+    else:
+        sql = StateQuery.get_poll_votes(author,permlink)
+        res = db.db.select(sql) or None
+        for entry in res:
+            _votes.append(populate_by_schema(entry, ['account', 'answer']))
+    result['votes'] = _votes
     return Success(result)
 
 @method(name="plug_play_api.polls.get_poll_votes")
