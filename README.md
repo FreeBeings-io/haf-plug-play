@@ -66,10 +66,10 @@ CREATE DATABASE haf;
 ```
 ### Connect to the database and create the extension
 
-'''
+```
 \c haf
 CREATE EXTENSION hive_fork_manager;
-'''
+```
 
 ### Give PostgreSQL permissions
 
