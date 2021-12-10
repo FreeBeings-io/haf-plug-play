@@ -141,6 +141,7 @@ class HafSyncSetup:
                                 WHERE ppov.block_num >= _first_block
                                     AND ppov.block_num <= _last_block
                                     AND ppov.op_type_id = 18
+                                ORDER BY ppov.block_num, ppov.id
                             LOOP
                                 _id := temprow.id;
                                 _block_num := temprow.block_num;
