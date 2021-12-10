@@ -8,6 +8,7 @@ from haf_plug_play.server.system_status import SystemStatus
 from haf_plug_play.utils.tools import range_split
 
 APPLICATION_CONTEXT = "plug_play"
+GLOBAL_START_BLOCK = 59913162
 BATCH_PROCESS_SIZE = 100000
 
 db = WriteDb().db
@@ -188,6 +189,10 @@ class HafSync:
             if cls.sync_enabled is True:
                 # get blocks range
                 blocks_range = db.select(f"SELECT * FROM hive.app_next_block('{APPLICATION_CONTEXT}');")[0]
+                if blocks_range[0] < GLOBAL_START_BLOCK:
+                    db.select(f"SELECT hive.app_context_detach( '{APPLICATION_CONTEXT}' );")
+                    db.select(f"SELECT hive.app_context_attach( '{APPLICATION_CONTEXT}', {(GLOBAL_START_BLOCK-1)} );")
+                    blocks_range = db.select(f"SELECT * FROM hive.app_next_block('{APPLICATION_CONTEXT}');")[0]
                 #print(f"Blocks range: {blocks_range}")
                 PlugSync.toggle_sync()
                 if not blocks_range:
