@@ -127,43 +127,43 @@ class HafSyncSetup:
                         _transaction_id VARCHAR(40);
                     BEGIN
                         FOR temprow IN
-                                SELECT
-                                    ppov.id,
-                                    ppov.id AS head_hive_rowid,
-                                    ppov.block_num,
-                                    ppov.timestamp,
-                                    ppov.trx_in_block,
-                                    (ppov.body::json -> 'value' -> 'required_auths')::json AS required_auths,
-                                    (ppov.body::json -> 'value' -> 'required_posting_auths')::json AS required_posting_auths,
-                                    ppov.body::json->'value'->>'id' AS op_id,
-                                    ppov.body::json->'value'->>'json' AS op_json
-                                FROM hive.plug_play_operations_view ppov
-                                WHERE ppov.block_num >= _first_block
-                                    AND ppov.block_num <= _last_block
-                                    AND ppov.op_type_id = 18
-                                ORDER BY ppov.block_num, ppov.id
-                            LOOP
-                                _id := temprow.id;
-                                _block_num := temprow.block_num;
-                                _head_hive_rowid = temprow.head_hive_rowid;
-                                _block_timestamp = temprow.timestamp;
-                                _required_auths := temprow.required_auths;
-                                _required_posting_auths := temprow.required_posting_auths;
-                                _op_id := temprow.op_id;
-                                _op_json := temprow.op_json;
-                                _hash := (
-                                    SELECT pptv.trx_hash FROM hive.plug_play_transactions_view pptv
-                                    WHERE pptv.block_num = temprow.block_num
-                                    AND pptv.trx_in_block = temprow.trx_in_block);
-                                _transaction_id := encode(_hash::bytea, 'escape');
-                                INSERT INTO public.plug_play_ops as ppops(
-                                    id, block_num, timestamp, transaction_id, req_auths,
-                                    req_posting_auths, op_id, op_json)
-                                VALUES
-                                    (_id, _block_num, _block_timestamp, _transaction_id, _required_auths,
-                                    _required_posting_auths, _op_id, _op_json);
-                            END LOOP;
-                            UPDATE global_props SET (head_hive_rowid, head_block_num, head_block_time) = (_head_hive_rowid, _block_num, _block_timestamp);
+                            SELECT
+                                ppov.id,
+                                ppov.id AS head_hive_rowid,
+                                ppov.block_num,
+                                ppov.timestamp,
+                                ppov.trx_in_block,
+                                (ppov.body::json -> 'value' -> 'required_auths')::json AS required_auths,
+                                (ppov.body::json -> 'value' -> 'required_posting_auths')::json AS required_posting_auths,
+                                ppov.body::json->'value'->>'id' AS op_id,
+                                ppov.body::json->'value'->>'json' AS op_json
+                            FROM hive.plug_play_operations_view ppov
+                            WHERE ppov.block_num >= _first_block
+                                AND ppov.block_num <= _last_block
+                                AND ppov.op_type_id = 18
+                            ORDER BY ppov.block_num, ppov.id
+                        LOOP
+                            _id := temprow.id;
+                            _block_num := temprow.block_num;
+                            _head_hive_rowid = temprow.head_hive_rowid;
+                            _block_timestamp = temprow.timestamp;
+                            _required_auths := temprow.required_auths;
+                            _required_posting_auths := temprow.required_posting_auths;
+                            _op_id := temprow.op_id;
+                            _op_json := temprow.op_json;
+                            _hash := (
+                                SELECT pptv.trx_hash FROM hive.plug_play_transactions_view pptv
+                                WHERE pptv.block_num = temprow.block_num
+                                AND pptv.trx_in_block = temprow.trx_in_block);
+                            _transaction_id := encode(_hash::bytea, 'escape');
+                            INSERT INTO public.plug_play_ops as ppops(
+                                id, block_num, timestamp, transaction_id, req_auths,
+                                req_posting_auths, op_id, op_json)
+                            VALUES
+                                (_id, _block_num, _block_timestamp, _transaction_id, _required_auths,
+                                _required_posting_auths, _op_id, _op_json);
+                        END LOOP;
+                        UPDATE global_props SET (head_hive_rowid, head_block_num, head_block_time) = (_head_hive_rowid, _block_num, _block_timestamp);
                     END;
                     $function$;
             """, None
