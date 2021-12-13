@@ -195,15 +195,19 @@ class HafSync:
                 if not blocks_range:
                     time.sleep(0.5)
                     continue
-                (first_block, last_block) = blocks_range
                 if not first_block:
                     time.sleep(0.5)
                     continue
                 if blocks_range[0] < GLOBAL_START_BLOCK:
+                    print(f"Starting from global_start_block: {GLOBAL_START_BLOCK}")
                     db.select(f"SELECT hive.app_context_detach( '{APPLICATION_CONTEXT}' );")
+                    print("context detached")
                     db.select(f"SELECT hive.app_context_attach( '{APPLICATION_CONTEXT}', {(GLOBAL_START_BLOCK-1)} );")
+                    print("context attached again")
                     blocks_range = db.select(f"SELECT * FROM hive.app_next_block('{APPLICATION_CONTEXT}');")[0]
+                    print(f"blocks range: {blocks_range}")
 
+                (first_block, last_block) = blocks_range
                 if (last_block - first_block) > 100:
                     PlugSync.toggle_sync(False)
                     steps = range_split(first_block, last_block, BATCH_PROCESS_SIZE)
