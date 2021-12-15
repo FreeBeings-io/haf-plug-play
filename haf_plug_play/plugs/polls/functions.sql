@@ -16,10 +16,6 @@ CREATE OR REPLACE FUNCTION public.hpp_polls_update( _begin BIGINT, _end BIGINT )
             IF head_hive_rowid IS NULL THEN
                 head_hive_rowid := 0;
                 RAISE NOTICE 'head_hive_rowid is NULL';
-                IF NOT _begin = 1 THEN
-                    RAISE NOTICE 'New sync needs to start at row 1';
-                    RETURN;
-                END IF;
             ELSIF _end < head_hive_rowid THEN
                 RAISE NOTICE 'head: %  head + 1:  %  end:  %', head_hive_rowid, head_hive_rowid + 1, _end;
                 RETURN;
