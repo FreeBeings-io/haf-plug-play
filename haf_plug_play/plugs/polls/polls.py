@@ -31,7 +31,7 @@ class StateQuery:
             SELECT author, permlink, question
                 answers, expires, tag
             FROM hpp_polls_content
-            WHERE timestamp >= NOW() AT TIME ZONE 'utc'
+            WHERE created >= NOW() AT TIME ZONE 'utc'
         """
         if tag:
             query += f" AND tag = '{tag}';"
@@ -50,10 +50,10 @@ class StateQuery:
     @classmethod
     def get_poll_votes_summary(cls, author, permlink):
         query = f"""
-            SELECT t_content.answers[t_votes.answer] AS answer, COUNT(DISTINCT t_votes.account)
+            SELECT t_content.answers[t_votes.answer] AS parsed_answer, COUNT(DISTINCT t_votes.account)
             FROM hpp_polls_content t_content 
-            JOIN hpp_polls_votes t_votes ON t_content.pp_poll_id = t_votes.pp_poll_id
-            WHERE t_content.author = '{author}' AND t_content.permlink = '{permlink}' GROUP BY t_content.answer;
+            JOIN hpp_polls_votes t_votes ON t_content.author = t_votes.author AND t_content.permlink = t_votes.permlink
+            WHERE t_content.author = '{author}' AND t_content.permlink = '{permlink}' GROUP BY parsed_answer;
         """
         return query
 
@@ -62,7 +62,7 @@ class StateQuery:
         query = f"""
             SELECT t_votes.account, t_content.answers[t_votes.answer] AS answer
             FROM hpp_polls_content t_content 
-            JOIN hpp_polls_votes t_votes ON t_content.pp_poll_id = t_votes.pp_poll_id
+            JOIN hpp_polls_votes t_votes ON t_content.author = t_votes.author AND t_content.permlink = t_votes.permlink
             WHERE t_content.author = '{author}' AND t_content.permlink = '{permlink}';
         """
         return query
