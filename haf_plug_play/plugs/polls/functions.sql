@@ -34,16 +34,16 @@ CREATE OR REPLACE FUNCTION public.hpp_polls_update( _begin BIGINT, _end BIGINT )
             -- Sync update
             FOR temprow IN
                 SELECT
-                    ppops.hive_rowid AS hive_rowid,
                     ppops.id AS ppop_id,
-                    ppops.block_num AS block_num,
-                    transaction_id AS transaction_id,
+                    ppops.block_num,
+                    ppops.timestamp,
+                    ppops.transaction_id,
                     ARRAY(SELECT json_array_elements_text(req_auths::json))  AS req_auths,
                     ARRAY(SELECT json_array_elements_text(req_posting_auths::json)) AS req_posting_auths,
                     ppops.op_json
                 FROM public.plug_play_ops ppops
-                WHERE ppops.hive_rowid >= _begin
-                    AND ppops.hive_rowid <= _end
+                WHERE ppops.id >= _begin
+                    AND ppops.id <= _end
                     AND ppops.op_id = 'polls'
             LOOP
                 BEGIN
@@ -61,24 +61,25 @@ CREATE OR REPLACE FUNCTION public.hpp_polls_update( _begin BIGINT, _end BIGINT )
                 END;
 
                 INSERT INTO public.hpp_polls_ops as hppf(
-                    ppop_id, block_num, transaction_id, req_auths, req_posting_auths, op_header, op_type, op_payload)
+                    ppop_id, block_num, created, transaction_id, req_auths, req_posting_auths, op_header, op_type, op_payload)
                 VALUES (
-                    temprow.ppop_id, temprow.block_num, temprow.transaction_id,
+                    temprow.ppop_id, temprow.block_num, temprow.timestamp, temprow.transaction_id,
                     temprow.req_auths, temprow.req_posting_auths, _header, _op_type,
                     _op_payload
                 );
                 -- Update state tables
-                PERFORM hpp_polls_update_state(req_posting_auths[1], req_auths[1], _header, _op_type, _op_payload);
+                PERFORM hpp_polls_update_state(temprow.ppop_id, temprow.timestamp, temprow.req_posting_auths[1], temprow.req_auths[1], _header, _op_type, _op_payload);
             END LOOP;
         END;
         $function$;
 
-CREATE OR REPLACE FUNCTION public.hpp_polls_update_state( _posting_acc VARCHAR(16), _active_acc VARCHAR(16), _header JSON, _op_type VARCHAR, _op_payload JSON )
+CREATE OR REPLACE FUNCTION public.hpp_polls_update_state( _ppop_id BIGINT, _created TIMESTAMP, _posting_acc VARCHAR(16), _active_acc VARCHAR(16), _header JSON, _op_type VARCHAR, _op_payload JSON)
     RETURNS void
     LANGUAGE plpgsql
     VOLATILE AS $function$
         DECLARE
             temprow RECORD;
+            _pp_poll_opid BIGINT;
             _author VARCHAR(16);
             _permlink VARCHAR(255);
             _question VARCHAR(255);
@@ -88,36 +89,42 @@ CREATE OR REPLACE FUNCTION public.hpp_polls_update_state( _posting_acc VARCHAR(1
             _expires TIMESTAMP;
             _op_version SMALLINT;
             _app_name VARCHAR(100);
+            -- 
         BEGIN
-            _op_version := _header[0];
-            _app_name := _header[1];
+            _op_version := _header ->> 0;
+            _app_name := _header ->> 1;
+            SELECT pp_poll_opid INTO _pp_poll_opid FROM public.hpp_polls_ops WHERE ppop_id = _ppop_id;
+
+            RAISE NOTICE 'op_version: % \n app_name: %', _op_version, _app_name;
 
             IF _op_version = 1 THEN
                 IF _op_type = 'create' THEN
                     -- new poll
                     _permlink := _op_payload ->> 'permlink';
                     _question := _op_payload ->> 'question';
-                    SELECT * INTO temprow FROM hpp_polls_content WHERE author = _posting_acc and permlink = _permlink;
+                    _answers := ARRAY(SELECT json_array_elements_text((_op_payload ->> 'answers')::json));
+                    _expires := _op_payload ->> 'expires';
+                    _tag := _op_payload ->> 'tag';
+                    SELECT * INTO temprow FROM public.hpp_polls_content WHERE author = _posting_acc and permlink = _permlink;
                     IF NOT FOUND THEN
-                        INSERT INTO public.hpp_polls_content (author, permlink, question, answers, expires, tag)
+                        INSERT INTO public.hpp_polls_content (pp_poll_opid, author, permlink, question, answers, expires, tag)
                         VALUES (
-                            _posting_acc, _permlink, _question,
+                            _pp_poll_opid, _posting_acc, _permlink, _question,
                             _answers, _expires, _tag
                         );
                     END IF;
                 ELSIF _op_type = 'vote' THEN
                     -- vote on a poll
                     _answer := _op_payload ->> 'answer';
-                    SELECT * INTO temprow FROM hpp_polls_content WHERE author = _author and permlink = _permlink;
-                    IF FOUND THEN
-                        INSERT INTO public.hpp_polls_votes (pp_poll_id, account, answer)
-                        VALUES (temprow.pp_poll_id, _posting_acc, _answer);
-                    END IF;
+                    _author := _op_payload ->> 'author';
+                    _permlink := _op_payload ->> 'permlink';
+                    INSERT INTO public.hpp_polls_votes (pp_poll_opid, permlink, author, created, account, answer)
+                    VALUES (_pp_poll_opid, _permlink, _author, _created, _posting_acc, _answer);
                 END IF;
             END IF;
-            EXCEPTION WHEN OTHERS THEN
-                    RAISE NOTICE E'Got exception:
-                    SQLSTATE: % 
-                    SQLERRM: %', SQLSTATE, SQLERRM;
+        EXCEPTION WHEN OTHERS THEN
+                RAISE NOTICE E'Got exception:
+                SQLSTATE: % 
+                SQLERRM: %', SQLSTATE, SQLERRM;
         END;
         $function$;
