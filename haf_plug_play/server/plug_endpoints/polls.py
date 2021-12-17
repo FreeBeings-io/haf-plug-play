@@ -41,7 +41,7 @@ async def get_poll_permlink(author, question):
             break
         else:
             tries += 1
-    return plink
+    return Success(plink)
 
 @method(name="plug_play_api.polls.get_polls_ops")
 async def get_poll_ops(op_type=None, block_range=None) -> Result:
