@@ -22,7 +22,11 @@ Documentation can be found here:
 
 
 ```
-sudo apt install python3 \
+# HAF and Plug & Play
+
+sudo apt install \
+    python3 \
+    python3-dev \
     python3-pip \
     postgresql \
     libpq-dev \
@@ -31,11 +35,51 @@ sudo apt install python3 \
     libpqxx-dev \
     postgresql-server-dev-12 \
     postgresql-server-dev-all
+
+# hived packages
+
+sudo apt-get install \
+    autoconf \
+    automake \
+    cmake \
+    g++ \
+    git \
+    zlib1g-dev \
+    libbz2-dev \
+    libsnappy-dev \
+    libssl-dev \
+    libtool \
+    make \
+    pkg-config \
+    doxygen \
+    libncurses5-dev \
+    libreadline-dev \
+    perl \
+    python3 \
+    python3-jinja2
+
+# Boost packages (hived)
+
+sudo apt-get install \
+    libboost-chrono-dev \
+    libboost-context-dev \
+    libboost-coroutine-dev \
+    libboost-date-time-dev \
+    libboost-filesystem-dev \
+    libboost-iostreams-dev \
+    libboost-locale-dev \
+    libboost-program-options-dev \
+    libboost-serialization-dev \
+    libboost-system-dev \
+    libboost-test-dev \
+    libboost-thread-dev
+
 ```
 
 ### Install HAF and hived
 
 - Clone the HAF repository: https://gitlab.syncad.com/hive/haf
+- `cd haf`
 - `git submodule update --init --recursive`
 - Create a build directory: `mkdir build`
 - `cd build`
