@@ -6,7 +6,7 @@ def populate_by_schema(data, fields):
     result = {}
     for i in range(len(fields)):
         result[fields[i]] = data[i]
-    return result
+    return normalize_types(result)
 
 def normalize_types(data):
     if isinstance(data, dict):
