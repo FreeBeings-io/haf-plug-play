@@ -84,7 +84,7 @@ class PlugSync:
                 elif (head_hive_rowid - app_hive_rowid) > 0:
                     print(f"POLLS:: processing {app_hive_rowid+1} to {head_hive_rowid}")
                     progress = round((app_hive_rowid/head_hive_rowid) * 100, 2)
-                    cls.plug_sync_states['polls'] = f'synchronizing ({progress} %'
+                    cls.plug_sync_states['polls'] = f'synchronizing {progress} %'
                     db.select(f"SELECT public.hpp_polls_update( {app_hive_rowid+1}, {head_hive_rowid} );")
                     db.execute(f"UPDATE public.plug_sync SET latest_hive_rowid = {head_hive_rowid}, state_hive_rowid = {head_hive_rowid} WHERE plug_name='polls';", None)
                     db.commit()
