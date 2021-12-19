@@ -51,7 +51,7 @@ class PlugSync:
                 head_hive_rowid = db.select("SELECT head_hive_rowid FROM global_props;")
                 assert head_hive_rowid is not None, "Null head_hive_rowid found"
                 if head_hive_rowid:
-                    head_hive_rowid = head_hive_rowid[0][0]
+                    head_hive_rowid = head_hive_rowid[0][0] or 0
                 else:
                     head_hive_rowid = 0
                 _app_hive_rowid = db.select("SELECT latest_hive_rowid FROM plug_sync WHERE plug_name = 'polls';")
