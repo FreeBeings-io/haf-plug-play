@@ -31,7 +31,7 @@ class StateQuery:
             SELECT author, permlink, question
                 answers, expires, tag
             FROM hpp_polls_content
-            WHERE created >= NOW() AT TIME ZONE 'utc'
+            WHERE expires >= NOW() AT TIME ZONE 'utc'
         """
         if tag:
             query += f" AND tag = '{tag}';"
