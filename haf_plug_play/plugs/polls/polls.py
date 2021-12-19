@@ -28,7 +28,7 @@ class StateQuery:
     @classmethod
     def get_polls_active(cls, tag=None):
         query = f"""
-            SELECT author, permlink, question
+            SELECT author, permlink, question,
                 answers, expires, tag
             FROM hpp_polls_content
             WHERE expires >= NOW() AT TIME ZONE 'utc'
