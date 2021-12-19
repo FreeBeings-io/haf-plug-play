@@ -3,6 +3,7 @@
 Endpoints for the polls protocol
 
 **Production Server:** https://plug-play.imwatsi.com
+
 **Dev Server:** https://plug-play-beta.imwatsi.com
 
 ---
@@ -33,7 +34,11 @@ Endpoints for the polls protocol
 **Example response:**
 
 ```
-{}
+{
+    "jsonrpc": "2.0",
+    "result": "what-do-you-think-hives-price-will-be",
+    "id": 1
+}
 ```
 
 ### get_polls_ops
@@ -52,16 +57,52 @@ Endpoints for the polls protocol
     "jsonrpc": "2.0",
     "method": "plug_play_api.polls.get_polls_ops",
     "params": {
-            "block_range": [1,2500000]
+            "block_range": [1,60129000]
         },
     "id": 1
 }
 ```
 
-**Example response (WIP):**
+**Example response:**
 
 ```
-{}
+{
+    "jsonrpc": "2.0",
+    "result": [
+        {
+            "transaction_id": "87254b594dc80db2b8cbe6faefb380685836ce9b",
+            "req_posting_auths": [
+                "imwatsi.test"
+            ],
+            "op_type": "create",
+            "op_payload": {
+                "permlink": "what-do-you-think",
+                "question": "What do you think Hive's price will be next year?",
+                "answers": [
+                    "$1.00",
+                    "$2.00",
+                    "$5.00",
+                    "$10.00"
+                ],
+                "expires": "2021-12-04 13:54:06",
+                "tag": "hive-133333"
+            }
+        },
+        {
+            "transaction_id": "085284295ff34dd903ddacc1f5215eab935c80df",
+            "req_posting_auths": [
+                "imwatsi.test"
+            ],
+            "op_type": "vote",
+            "op_payload": {
+                "author": "imwatsi.test",
+                "permlink": "what-do-you-think",
+                "answer": 3
+            }
+        }
+    ],
+    "id": 1
+}
 ```
 
 ## get_polls_active
@@ -88,7 +129,24 @@ Endpoints for the polls protocol
 **Example response (WIP):**
 
 ```
-{}
+{
+    "jsonrpc": "2.0",
+    "result": [
+        {
+            "author": "imwatsi.test",
+            "permlink": "how-many-users-do-you-think-will-be",
+            "question": "How many users do you think will be active on Hive next year.",
+            "answers": [
+                "10000",
+                "200000",
+                "3000000"
+            ],
+            "expires": "2021-12-31T13:54:06",
+            "tags": "hive-133333"
+        }
+    ],
+    "id": 1
+}
 ```
 
 ## get_poll_votes
@@ -107,8 +165,8 @@ Endpoints for the polls protocol
     "jsonrpc": "2.0",
     "method": "plug_play_api.polls.get_poll_votes",
     "params": {
-            "author": "imwatsi",
-            "permlink": "my-first-poll"
+            "author": "imwatsi.test",
+            "permlink": "what-do-you-think"
         },
     "id": 1
 }
@@ -117,5 +175,5 @@ Endpoints for the polls protocol
 **Example response:**
 
 ```
-{}
+
 ```
