@@ -175,5 +175,14 @@ Endpoints for the polls protocol
 **Example response:**
 
 ```
-
+{
+    "jsonrpc": "2.0",
+    "result": [
+        {
+            "account": "imwatsi.test",
+            "answer": "$5.00"
+        }
+    ],
+    "id": 1
+}
 ```
