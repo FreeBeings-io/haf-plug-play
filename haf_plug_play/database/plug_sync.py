@@ -88,6 +88,8 @@ class PlugSync:
                     db.select(f"SELECT public.hpp_polls_update( {app_hive_rowid+1}, {head_hive_rowid} );")
                     db.execute(f"UPDATE public.plug_sync SET latest_hive_rowid = {head_hive_rowid}, state_hive_rowid = {head_hive_rowid} WHERE plug_name='polls';", None)
                     db.commit()
+                elif (head_hive_rowid - app_hive_rowid) < 0:
+                    continue
                 else:
                     cls.plug_sync_states['polls'] = 'synchronized'
                 SystemStatus.update_sync_status(plug_status=cls.plug_sync_states)
