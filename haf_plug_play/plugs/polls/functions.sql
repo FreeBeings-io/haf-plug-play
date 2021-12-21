@@ -85,7 +85,7 @@ CREATE OR REPLACE FUNCTION public.hpp_polls_update_state( _ppop_id BIGINT, _crea
             _question VARCHAR(255);
             _answer SMALLINT;
             _answers VARCHAR(128)[];
-            _tag VARCHAR(16);
+            _tag VARCHAR(500);
             _expires TIMESTAMP;
             _op_version SMALLINT;
             _app_name VARCHAR(100);

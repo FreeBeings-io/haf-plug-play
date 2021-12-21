@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS public.hpp_polls_content(
     question VARCHAR(255),
     answers VARCHAR(128)[],
     expires TIMESTAMP,
-    tag VARCHAR(16)
+    tag VARCHAR(500)
 );
 
 CREATE TABLE IF NOT EXISTS public.hpp_polls_votes(
