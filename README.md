@@ -112,7 +112,7 @@ CREATE DATABASE haf;
 
 ```
 \c haf
-CREATE EXTENSION hive_fork_manager;
+CREATE EXTENSION hive_fork_manager CASCADE;
 ```
 
 ### Give PostgreSQL permissions
