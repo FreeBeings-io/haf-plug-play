@@ -41,6 +41,10 @@ Endpoints for the polls protocol
 }
 ```
 
+**Example curl:**
+
+`curl -s --data '{"jsonrpc": "2.0", "method": "plug_play_api.polls.get_poll_permlink", "params": {"author": "imwatsi","question": "What do you think Hive price will be next year?"}, "id": 1}' https://plug-play.imwatsi.com`
+
 ### get_polls_ops
 
 *Returns a list of polls ops within the specified block range (or last 24 hours if not specified)*
@@ -105,6 +109,11 @@ Endpoints for the polls protocol
 }
 ```
 
+**Example curl:**
+
+`curl -s --data '{"jsonrpc": "2.0", "method": "plug_play_api.polls.get_polls_ops", "params": {"block_range": [1,60129000]}, "id": 1}' https://plug-play.imwatsi.com`
+
+
 ## get_polls_active
 
 *Returns a list of active polls, within a specific tag if specified*
@@ -149,6 +158,11 @@ Endpoints for the polls protocol
 }
 ```
 
+**Example curl:**
+
+`curl -s --data '{"jsonrpc": "2.0", "method": "plug_play_api.polls.get_polls_active", "params": {"tag": "hive-133333"}, "id": 1}' https://plug-play.imwatsi.com`
+
+
 ## get_poll_votes
 
 *Returns votes for a specified poll*
@@ -186,3 +200,7 @@ Endpoints for the polls protocol
     "id": 1
 }
 ```
+
+**Example curl:**
+
+`curl -s --data '{"jsonrpc": "2.0", "method": "plug_play_api.polls.get_poll_votes", "params": {"author": "imwatsi.test", "permlink": "what-do-you-think"}, "id": 1}' https://plug-play.imwatsi.com`
