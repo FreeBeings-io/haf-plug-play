@@ -7,7 +7,7 @@
 
 *Ping endpoint*
 
-Example payload:
+**Example payload:**
 
 ```
 {
@@ -17,7 +17,7 @@ Example payload:
 }
 ```
 
-Example response:
+**Example response:**
 
 ```
 {
@@ -27,7 +27,7 @@ Example response:
 }
 ```
 
-Example curl:
+**Example curl:**
 
 `curl -s --data '{"jsonrpc": "2.0", "method": "plug_play_api.ping", "id": 1}' https://plug-play.imwatsi.com`
 
@@ -35,7 +35,7 @@ Example curl:
 
 *Retrieves the node's sync status*
 
-Example payload:
+**Example payload:**
 
 ```
 {
@@ -45,7 +45,7 @@ Example payload:
 }
 ```
 
-Example response:
+**Example response:**
 
 ```
 {
@@ -68,7 +68,7 @@ Example response:
 
 *Retrieves all custom_json ops within a specified block number*
 
-Example payload:
+**Example payload:**
 
 ```
 {
@@ -80,7 +80,7 @@ Example payload:
 ```
 
 
-Example repsonse:
+**Example repsonse:**
 
 ```
 {
@@ -100,6 +100,6 @@ Example repsonse:
 }
 ```
 
-Example curl:
+**Example curl:**
 
 `curl -s --data '{"jsonrpc": "2.0", "method": "plug_play_api.get_ops_by_block", "params": {"block_num": 2232411}, "id": 1}' https://plug-play.imwatsi.com`
