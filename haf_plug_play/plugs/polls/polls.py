@@ -71,3 +71,17 @@ class StateQuery:
             WHERE t_content.author = '{author}' AND t_content.permlink = '{permlink}';
         """
         return query
+    
+    @classmethod
+    def get_polls_user(cls, author, active=False, tag=None):
+        query = f"""
+            SELECT permlink, question,
+                answers, expires, tag
+            FROM hpp_polls_content
+            WHERE author = '{author}'
+        """
+        if active is True:
+            query += "WHERE expires >= NOW() AT TIME ZONE 'utc'"
+        if tag:
+            query += f" AND tag = '{tag}';"
+        return query
