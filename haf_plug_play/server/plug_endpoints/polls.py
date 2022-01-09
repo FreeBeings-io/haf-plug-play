@@ -114,3 +114,20 @@ async def get_poll_votes(author, permlink):
             entry, ['account', 'answer']
         ))
     return Success(result)
+
+@method(name="plug_play_api.polls.get_polls_user")
+async def get_polls_user(author, active=False, tag=None):
+    """Returns polls created by the specified user."""
+    assert isinstance(author, str), "Poll author must be a string"
+    assert len(author) <= 16, "Hive accounts must be no more than 16 characters"
+    assert isinstance(active, bool), "Active parameter must be boolean"
+    assert isinstance(tag, str), "Poll tag must be a string"
+    assert len(tag) <= 16, "Poll tags must be no more than 16 characters"
+    sql = StateQuery.get_polls_user(author,active,tag)
+    result = []
+    res = db.db.select(sql) or []
+    for entry in res:
+        result.append(populate_by_schema(
+            entry, ['permlink', 'question', 'answers', 'expires', 'tags']
+        ))
+    return Success(result)
