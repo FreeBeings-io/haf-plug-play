@@ -107,10 +107,10 @@ CREATE OR REPLACE FUNCTION public.hpp_polls_update_state( _ppop_id BIGINT, _crea
                     _tag := _op_payload ->> 'tag';
                     SELECT * INTO temprow FROM public.hpp_polls_content WHERE author = _posting_acc and permlink = _permlink;
                     IF NOT FOUND THEN
-                        INSERT INTO public.hpp_polls_content (pp_poll_opid, author, permlink, question, answers, expires, tag)
+                        INSERT INTO public.hpp_polls_content (pp_poll_opid, author, permlink, question, answers, expires, tag, created)
                         VALUES (
                             _pp_poll_opid, _posting_acc, _permlink, _question,
-                            _answers, _expires, _tag
+                            _answers, _expires, _tag, _created
                         );
                     END IF;
                 ELSIF _op_type = 'vote' THEN
