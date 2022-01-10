@@ -41,6 +41,10 @@ Endpoints for the polls protocol
 }
 ```
 
+**Example curl:**
+
+`curl -s --data '{"jsonrpc": "2.0", "method": "plug_play_api.polls.get_poll_permlink", "params": {"author": "imwatsi","question": "What do you think Hive price will be next year?"}, "id": 1}' https://plug-play.imwatsi.com`
+
 ### get_polls_ops
 
 *Returns a list of polls ops within the specified block range (or last 24 hours if not specified)*
@@ -105,6 +109,11 @@ Endpoints for the polls protocol
 }
 ```
 
+**Example curl:**
+
+`curl -s --data '{"jsonrpc": "2.0", "method": "plug_play_api.polls.get_polls_ops", "params": {"block_range": [1,60129000]}, "id": 1}' https://plug-play.imwatsi.com`
+
+
 ## get_polls_active
 
 *Returns a list of active polls, within a specific tag if specified*
@@ -149,6 +158,11 @@ Endpoints for the polls protocol
 }
 ```
 
+**Example curl:**
+
+`curl -s --data '{"jsonrpc": "2.0", "method": "plug_play_api.polls.get_polls_active", "params": {"tag": "hive-133333"}, "id": 1}' https://plug-play.imwatsi.com`
+
+
 ## get_poll_votes
 
 *Returns votes for a specified poll*
@@ -186,3 +200,68 @@ Endpoints for the polls protocol
     "id": 1
 }
 ```
+
+**Example curl:**
+
+`curl -s --data '{"jsonrpc": "2.0", "method": "plug_play_api.polls.get_poll_votes", "params": {"author": "imwatsi.test", "permlink": "what-do-you-think"}, "id": 1}' https://plug-play.imwatsi.com`
+
+
+## get_polls_user
+
+*Returns a list of polls created by the specified user, optionally filterable by active and tag*
+
+**Params:**
+
+- `active`: <boolean> (optional)
+- `tag`: <string (16)> (optional)
+
+**Example payload:**
+
+```
+{
+    "jsonrpc": "2.0",
+    "method": "plug_play_api.polls.get_polls_user",
+    "params": {
+            "author": "imwatsi.test"
+        },
+    "id": 1
+}
+```
+
+**Example response:**
+
+```
+{
+    "jsonrpc": "2.0",
+    "result": [
+        {
+            "permlink": "what-do-you-think",
+            "question": "What do you think Hive's price will be next year?",
+            "answers": [
+                "$1.00",
+                "$2.00",
+                "$5.00",
+                "$10.00"
+            ],
+            "expires": "2021-12-04T13:54:06",
+            "tag": "hive-133333",
+            "created": "2021-12-01T12:00:00"
+        },
+        {
+            "permlink": "how-many-users-do-you-think-will-be",
+            "question": "How many users do you think will be active on Hive next year.",
+            "answers": [
+                "10000",
+                "200000",
+                "3000000"
+            ],
+            "expires": "2021-12-31T13:54:06",
+            "tag": "hive-133333",
+            "created": "2021-12-21T14:00:00"
+        }
+}
+```
+
+**Example curl:**
+
+`curl -s --data '{"jsonrpc": "2.0", "method": "plug_play_api.polls.get_polls_user", "params": {"author": "imwatsi.test"}, "id": 1}' https://plug-play.imwatsi.com`

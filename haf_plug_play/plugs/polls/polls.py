@@ -29,7 +29,7 @@ class StateQuery:
     def get_polls_active(cls, tag=None):
         query = f"""
             SELECT author, permlink, question,
-                answers, expires, tag
+                answers, expires, tag, created
             FROM hpp_polls_content
             WHERE expires >= NOW() AT TIME ZONE 'utc'
         """
@@ -41,7 +41,7 @@ class StateQuery:
     def get_poll(cls, author, permlink):
         query = f"""
             SELECT author, permlink, question
-                answers, expires, tag
+                answers, expires, tag, created
             FROM hpp_polls_content
             WHERE author = '{author}' AND permlink = '{permlink}';
         """
@@ -52,8 +52,13 @@ class StateQuery:
         query = f"""
             SELECT t_content.answers[t_votes.answer] AS parsed_answer, COUNT(DISTINCT t_votes.account)
             FROM hpp_polls_content t_content 
-            JOIN hpp_polls_votes t_votes ON t_content.author = t_votes.author AND t_content.permlink = t_votes.permlink
-            WHERE t_content.author = '{author}' AND t_content.permlink = '{permlink}' GROUP BY parsed_answer;
+            JOIN hpp_polls_votes t_votes ON t_content.author = t_votes.author
+                AND t_content.permlink = t_votes.permlink
+            WHERE t_content.author = '{author}'
+                AND t_content.permlink = '{permlink}'
+                AND t_votes.created <= COALESCE(
+                    t_content.expires, t_content.created - INTERVAL '7 DAYS')
+            GROUP BY parsed_answer;
         """
         return query
 
@@ -65,4 +70,19 @@ class StateQuery:
             JOIN hpp_polls_votes t_votes ON t_content.author = t_votes.author AND t_content.permlink = t_votes.permlink
             WHERE t_content.author = '{author}' AND t_content.permlink = '{permlink}';
         """
+        return query
+    
+    @classmethod
+    def get_polls_user(cls, author, active=False, tag=None):
+        query = f"""
+            SELECT permlink, question,
+                answers, expires, tag, created
+            FROM hpp_polls_content
+            WHERE author = '{author}'
+        """
+        if active is True:
+            query += " AND expires >= NOW() AT TIME ZONE 'utc'"
+        if tag:
+            query += f" AND tag = '{tag}'"
+        query += " ORDER BY created DESC;"
         return query
