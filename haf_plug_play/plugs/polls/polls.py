@@ -29,7 +29,7 @@ class StateQuery:
     def get_polls_active(cls, tag=None):
         query = f"""
             SELECT author, permlink, question,
-                answers, expires, tag
+                answers, expires, tag, created
             FROM hpp_polls_content
             WHERE expires >= NOW() AT TIME ZONE 'utc'
         """
@@ -41,7 +41,7 @@ class StateQuery:
     def get_poll(cls, author, permlink):
         query = f"""
             SELECT author, permlink, question
-                answers, expires, tag
+                answers, expires, tag, created
             FROM hpp_polls_content
             WHERE author = '{author}' AND permlink = '{permlink}';
         """
@@ -76,12 +76,13 @@ class StateQuery:
     def get_polls_user(cls, author, active=False, tag=None):
         query = f"""
             SELECT permlink, question,
-                answers, expires, tag
+                answers, expires, tag, created
             FROM hpp_polls_content
             WHERE author = '{author}'
         """
         if active is True:
-            query += "WHERE expires >= NOW() AT TIME ZONE 'utc'"
+            query += " AND expires >= NOW() AT TIME ZONE 'utc'"
         if tag:
-            query += f" AND tag = '{tag}';"
+            query += f" AND tag = '{tag}'"
+        query += " ORDER BY created DESC;"
         return query
