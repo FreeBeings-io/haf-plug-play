@@ -70,7 +70,7 @@ async def get_polls_active(tag=None):
     res = db.db.select(sql) or []
     for entry in res:
         result.append(populate_by_schema(
-            entry, ['author', 'permlink', 'question', 'answers', 'expires', 'tags']
+            entry, ['author', 'permlink', 'question', 'answers', 'expires', 'tag', 'created']
         ))
     return Success(result)
 
@@ -85,7 +85,7 @@ async def get_poll(author,permlink, summary=True):
     _votes = []
     res = db.db.select(sql) or None
     result = populate_by_schema(res[0], ['author', 'permlink', 'question'
-                'answers', 'expires', 'tag'])
+                'answers', 'expires', 'tag', 'created'])
     if summary:
         sql = StateQuery.get_poll_votes_summary(author,permlink)
         res = db.db.select(sql) or None
@@ -121,13 +121,14 @@ async def get_polls_user(author, active=False, tag=None):
     assert isinstance(author, str), "Poll author must be a string"
     assert len(author) <= 16, "Hive accounts must be no more than 16 characters"
     assert isinstance(active, bool), "Active parameter must be boolean"
-    assert isinstance(tag, str), "Poll tag must be a string"
-    assert len(tag) <= 16, "Poll tags must be no more than 16 characters"
+    if tag:
+        assert isinstance(tag, str), "Poll tag must be a string"
+        assert len(tag) <= 16, "Poll tags must be no more than 16 characters"
     sql = StateQuery.get_polls_user(author,active,tag)
     result = []
     res = db.db.select(sql) or []
     for entry in res:
         result.append(populate_by_schema(
-            entry, ['permlink', 'question', 'answers', 'expires', 'tags']
+            entry, ['permlink', 'question', 'answers', 'expires', 'tag', 'created']
         ))
     return Success(result)
