@@ -74,7 +74,7 @@ class HafSyncSetup:
             f"""
                 CREATE TABLE IF NOT EXISTS public.apps(
                     app_name varchar(32) PRIMARY KEY,
-                    op_ids varchar(16)[],
+                    op_ids varchar(31)[],
                     last_updated timestamp DEFAULT NOW(),
                     enabled boolean
                 );
@@ -84,6 +84,7 @@ class HafSyncSetup:
             f"""
                 CREATE TABLE IF NOT EXISTS public.plug_sync(
                     plug_name varchar(16) NOT NULL,
+                    latest_block_num bigint,
                     latest_hive_rowid bigint DEFAULT 0,
                     state_hive_rowid bigint DEFAULT 0
                 );
