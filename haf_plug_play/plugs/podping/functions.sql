@@ -19,25 +19,25 @@ CREATE OR REPLACE FUNCTION public.hpp_podping_update( _begin BIGINT, _end BIGINT
 
         BEGIN
             -- Preparations
-            SELECT MAX(latest_hive_block_num) INTO head_hive_block_num FROM public.plug_sync WHERE plug_name = 'podping';
-            RAISE NOTICE '%', head_hive_block_num;
-            IF head_hive_block_num IS NULL THEN
-                head_hive_block_num := 0;
+            SELECT MAX(latest_hive_rowid) INTO head_hive_rowid FROM public.plug_sync WHERE plug_name = 'podping';
+            RAISE NOTICE '%', head_hive_rowid;
+            IF head_hive_rowid IS NULL THEN
+                head_hive_rowid := 0;
                 RAISE NOTICE 'head_hive_block_num is NULL';
-            ELSIF _end < head_hive_block_num THEN
-                RAISE NOTICE 'head: %  head + 1:  %  end:  %', head_hive_block_num, head_hive_block_num + 1, _end;
+            ELSIF _end < head_hive_rowid THEN
+                RAISE NOTICE 'head: %  head + 1:  %  end:  %', head_hive_rowid, head_hive_rowid + 1, _end;
                 RETURN;
             END IF;
-            RAISE NOTICE '%   %', _begin, head_hive_block_num;
-            IF _begin < (head_hive_block_num + 1) THEN
-                IF _end >= (head_hive_block_num + 1) THEN
-                    _begin := (head_hive_block_num + 1);
+            RAISE NOTICE '%   %', _begin, head_hive_rowid;
+            IF _begin < (head_hive_rowid + 1) THEN
+                IF _end >= (head_hive_rowid + 1) THEN
+                    _begin := (head_hive_rowid + 1);
                 ELSE
                     RAISE NOTICE 'Cannot begin sync on ID less than head + 1';
                     RETURN;
                 END IF;
             END IF;
-            RAISE NOTICE 'head: %  begin:  %  end:  %', head_hive_block_num, _begin, _end;
+            RAISE NOTICE 'head: %  begin:  %  end:  %', head_hive_rowid, _begin, _end;
 
             -- Sync update
             FOR temprow IN
@@ -52,8 +52,8 @@ CREATE OR REPLACE FUNCTION public.hpp_podping_update( _begin BIGINT, _end BIGINT
                     ppops.op_id,
                     ppops.op_json
                 FROM public.plug_play_ops ppops
-                WHERE ppops.block_num >= _begin
-                    AND ppops.block_num <= _end
+                WHERE ppops.hive_rowid >= _begin
+                    AND ppops.hive_rowid <= _end
                     AND ppops.op_id = 'podping'
                 ORDER BY ppops.block_num, ppops.id
             LOOP
