@@ -4,11 +4,11 @@ CREATE OR REPLACE FUNCTION public.hpp_podping_update( _begin BIGINT, _end BIGINT
     VOLATILE AS $function$
         DECLARE
             temprow RECORD;
-            head_hive_block_num BIGINT;
+            head_hive_rowid BIGINT;
             -- 
             _id BIGINT;
             _block_num BIGINT;
-            _head_hive_rowid BIGINT;
+            _hive_rowid BIGINT;
             _block_timestamp TIMESTAMP;
             _required_auths VARCHAR(16)[];
             _required_posting_auths VARCHAR(16)[];
@@ -59,7 +59,7 @@ CREATE OR REPLACE FUNCTION public.hpp_podping_update( _begin BIGINT, _end BIGINT
             LOOP
                 _id := temprow.id;
                 _block_num := temprow.block_num;
-                _head_hive_rowid := temprow.hive_rowid;
+                _hive_rowid := temprow.hive_rowid;
                 _block_timestamp := temprow.timestamp;
                 _required_auths := ARRAY (SELECT json_array_elements_text(temprow.req_auths));
                 _required_posting_auths := ARRAY (SELECT json_array_elements_text(temprow.req_posting_auths));
