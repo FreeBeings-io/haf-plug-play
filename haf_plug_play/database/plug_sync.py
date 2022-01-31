@@ -5,6 +5,7 @@ from haf_plug_play.database.access import WriteDb
 from haf_plug_play.server.system_status import SystemStatus
 from haf_plug_play.utils.tools import range_split
 from haf_plug_play.plugs.polls.polls import WDIR_POLLS
+from haf_plug_play.plugs.podping.podping import WDIR_PODPING
 
 BATCH_PROCESS_SIZE = 200000
 START_BLOCK_POLLS = 59594882
@@ -16,7 +17,7 @@ class PlugInitSetup:
 
     @classmethod
     def init(cls):
-        for p in [WDIR_POLLS]:
+        for p in [WDIR_POLLS, WDIR_PODPING]:
             cls.setup_plug(p)
         cls.db.conn.close()
 
