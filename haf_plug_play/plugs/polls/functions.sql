@@ -5,6 +5,8 @@ CREATE OR REPLACE FUNCTION public.hpp_polls_update( _begin BIGINT, _end BIGINT )
         DECLARE
             temprow RECORD;
             head_hive_rowid BIGINT;
+            _block_num BIGINT;
+            _hive_rowid BIGINT;
             _header JSON;
             _op_type VARCHAR(16);
             _op_payload JSON;
@@ -35,6 +37,7 @@ CREATE OR REPLACE FUNCTION public.hpp_polls_update( _begin BIGINT, _end BIGINT )
             FOR temprow IN
                 SELECT
                     ppops.id AS ppop_id,
+                    ppops.hive_rowid,
                     ppops.block_num,
                     ppops.timestamp,
                     ppops.transaction_id,
@@ -47,6 +50,8 @@ CREATE OR REPLACE FUNCTION public.hpp_polls_update( _begin BIGINT, _end BIGINT )
                     AND ppops.op_id = 'polls'
             LOOP
                 BEGIN
+                    _block_num := temprow.block_num;
+                    _hive_rowid := temprow.hive_rowid;
                     _json := temprow.op_json::json;
                     _header := (_json ->> 0)::json;
                     _op_type := _json ->> 1;
@@ -70,6 +75,7 @@ CREATE OR REPLACE FUNCTION public.hpp_polls_update( _begin BIGINT, _end BIGINT )
                 -- Update state tables
                 PERFORM hpp_polls_update_state(temprow.ppop_id, temprow.timestamp, temprow.req_posting_auths[1], temprow.req_auths[1], _header, _op_type, _op_payload);
             END LOOP;
+            UPDATE public.plug_sync SET latest_block_num = _block_num, latest_hive_rowid = _hive_rowid, state_hive_rowid = _hive_rowid WHERE plug_name='polls';
         END;
         $function$;
 
