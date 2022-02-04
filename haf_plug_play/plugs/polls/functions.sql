@@ -75,7 +75,7 @@ CREATE OR REPLACE FUNCTION public.hpp_polls_update( _begin BIGINT, _end BIGINT )
                 -- Update state tables
                 PERFORM hpp_polls_update_state(temprow.id, temprow.timestamp, temprow.req_posting_auths[1], temprow.req_auths[1], _header, _op_type, _op_payload);
             END LOOP;
-            UPDATE public.plug_sync SET latest_block_num = _block_num, latest_hive_opid = _hive_rowid, state_hive_opid = _hive_rowid WHERE plug_name='polls';
+            UPDATE public.plug_sync SET latest_block_num = _block_num, latest_hive_opid = _hive_opid, state_hive_opid = _hive_opid WHERE plug_name='polls';
         END;
         $function$;
 
