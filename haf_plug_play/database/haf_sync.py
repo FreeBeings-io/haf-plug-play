@@ -46,7 +46,7 @@ class HafSyncSetup:
         db.execute(
             f"""
                 CREATE TABLE IF NOT EXISTS public.plug_play_ops(
-                    hive_opid BIGINNT PRIMARY KEY NOT NULL,
+                    hive_opid BIGINT PRIMARY KEY NOT NULL,
                     block_num INTEGER NOT NULL,
                     timestamp TIMESTAMP,
                     transaction_id CHAR(40),
