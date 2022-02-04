@@ -51,16 +51,16 @@ class PlugSync:
         cls.plug_sync_states['polls'] = 'loaded'
         while True:
             if cls.plug_sync_enabled is True:
-                head_hive_rowid = db.select("SELECT head_hive_rowid FROM global_props;")
-                assert head_hive_rowid is not None, "Null head_hive_rowid found"
+                head_hive_rowid = db.select("SELECT head_hive_opid FROM global_props;")
+                assert head_hive_rowid is not None, "Null head_hive_opid found"
                 if head_hive_rowid:
                     head_hive_rowid = head_hive_rowid[0][0] or 0
                 else:
                     head_hive_rowid = 0
-                _app_hive_rowid = db.select("SELECT latest_hive_rowid FROM plug_sync WHERE plug_name = 'polls';")
+                _app_hive_rowid = db.select("SELECT latest_hive_opid FROM plug_sync WHERE plug_name = 'polls';")
                 if _app_hive_rowid is None:
                     db.execute(
-                        """INSERT INTO plug_sync (plug_name,latest_hive_rowid,state_hive_rowid)
+                        """INSERT INTO plug_sync (plug_name,latest_hive_opid,state_hive_opid)
                             VALUES ('polls',0,0);""", None)
                     db.commit()
                 if not _app_hive_rowid:
@@ -107,21 +107,21 @@ class PlugSync:
         cls.plug_sync_states['podping'] = 'loaded'
         while True:
             if cls.plug_sync_enabled is True:
-                head_hive_rowid = db.select("SELECT head_hive_rowid FROM global_props;")
-                assert head_hive_rowid is not None, "Null head_hive_rowid found"
+                head_hive_rowid = db.select("SELECT head_hive_opid FROM global_props;")
+                assert head_hive_rowid is not None, "Null head_hive_opid found"
                 if head_hive_rowid:
                     head_hive_rowid = head_hive_rowid[0][0] or 0
                 else:
                     head_hive_rowid = 0
-                _app_hive_rowid = db.select("SELECT latest_hive_rowid FROM plug_sync WHERE plug_name = 'podping';")
+                _app_hive_rowid = db.select("SELECT latest_hive_opid FROM plug_sync WHERE plug_name = 'podping';")
                 if _app_hive_rowid is None:
                     db.execute(
-                        """INSERT INTO plug_sync (plug_name,latest_hive_rowid,state_hive_rowid)
+                        """INSERT INTO plug_sync (plug_name,latest_hive_opid,state_hive_opid)
                             VALUES ('podping',0,0);""", None)
                     db.commit()
                 if not _app_hive_rowid:
                     # get start hive_rowid from start block
-                    print("PODPING:: Finding app_hive_rowid using start_block")
+                    print("PODPING:: Finding app_hive_opid using start_block")
                     start_block = START_BLOCK_PODPING
                     while True:
                         _start_hive_rowid = db.select(f"SELECT min(id) FROM hive.plug_play_operations_view WHERE block_num = {start_block};")
