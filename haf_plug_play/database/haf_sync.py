@@ -100,7 +100,7 @@ class HafSyncSetup:
         db.execute(
             f"""
                 CREATE TABLE IF NOT EXISTS public.global_props(
-                    head_hive_rowid bigint DEFAULT 0,
+                    head_hive_opid bigint DEFAULT 0,
                     head_block_num bigint DEFAULT 0,
                     head_block_time timestamp
                 );
@@ -168,7 +168,7 @@ class HafSyncSetup:
                                 (_hive_opid, _block_num, _block_timestamp, _transaction_id, _required_auths,
                                 _required_posting_auths, _op_id, _op_json);
                         END LOOP;
-                        UPDATE global_props SET (head_hive_rowid, head_block_num, head_block_time) = (_head_hive_rowid, _block_num, _block_timestamp);
+                        UPDATE global_props SET (head_hive_opid, head_block_num, head_block_time) = (_hive_opid, _block_num, _block_timestamp);
                     END;
                     $function$;
             """, None
