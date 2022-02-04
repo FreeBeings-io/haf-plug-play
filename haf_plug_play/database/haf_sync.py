@@ -151,7 +151,6 @@ class HafSyncSetup:
                         LOOP
                             _hive_opid := temprow.hive_opid;
                             _block_num := temprow.block_num;
-                            _head_hive_rowid = temprow.head_hive_rowid;
                             _block_timestamp = temprow.timestamp;
                             _required_auths := temprow.required_auths;
                             _required_posting_auths := temprow.required_posting_auths;
