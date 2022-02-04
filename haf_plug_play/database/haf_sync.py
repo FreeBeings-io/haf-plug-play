@@ -108,7 +108,7 @@ class HafSyncSetup:
         )
         db.execute(
             f"""
-                INSERT INTO public.global_props (head_hive_rowid)
+                INSERT INTO public.global_props (head_hive_opid)
                 SELECT '0'
                 WHERE NOT EXISTS (SELECT * FROM public.global_props);
             """, None
