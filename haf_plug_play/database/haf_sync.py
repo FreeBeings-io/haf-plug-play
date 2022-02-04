@@ -46,7 +46,7 @@ class HafSyncSetup:
         db.execute(
             f"""
                 CREATE TABLE IF NOT EXISTS public.plug_play_ops(
-                    id BIGSERIAL PRIMARY KEY,
+                    hive_opid BIGINNT PRIMARY KEY NOT NULL,
                     block_num INTEGER NOT NULL,
                     timestamp TIMESTAMP,
                     transaction_id CHAR(40),
@@ -116,8 +116,7 @@ class HafSyncSetup:
                 VOLATILE AS $function$
                     DECLARE
                         temprow RECORD;
-                        _id BIGINT;
-                        _head_hive_rowid BIGINT;
+                        _hive_opid BIGINT;
                         _block_num INTEGER;
                         _block_timestamp TIMESTAMP;
                         _required_auths JSON;
@@ -129,8 +128,7 @@ class HafSyncSetup:
                     BEGIN
                         FOR temprow IN
                             SELECT
-                                ppov.id,
-                                ppov.id AS head_hive_rowid,
+                                ppov.id AS hive_opid,
                                 ppov.block_num,
                                 ppov.timestamp,
                                 ppov.trx_in_block,
@@ -144,7 +142,7 @@ class HafSyncSetup:
                                 AND ppov.op_type_id = 18
                             ORDER BY ppov.block_num, ppov.id
                         LOOP
-                            _id := temprow.id;
+                            _hive_opid := temprow.hive_opid;
                             _block_num := temprow.block_num;
                             _head_hive_rowid = temprow.head_hive_rowid;
                             _block_timestamp = temprow.timestamp;
@@ -158,10 +156,10 @@ class HafSyncSetup:
                                 AND pptv.trx_in_block = temprow.trx_in_block);
                             _transaction_id := encode(_hash::bytea, 'escape');
                             INSERT INTO public.plug_play_ops as ppops(
-                                id, block_num, timestamp, transaction_id, req_auths,
+                                hive_opid, block_num, timestamp, transaction_id, req_auths,
                                 req_posting_auths, op_id, op_json)
                             VALUES
-                                (_id, _block_num, _block_timestamp, _transaction_id, _required_auths,
+                                (_hive_opid, _block_num, _block_timestamp, _transaction_id, _required_auths,
                                 _required_posting_auths, _op_id, _op_json);
                         END LOOP;
                         UPDATE global_props SET (head_hive_rowid, head_block_num, head_block_time) = (_head_hive_rowid, _block_num, _block_timestamp);

@@ -67,7 +67,7 @@ class PlugSync:
                     # get start hive_rowid from start block
                     start_block = START_BLOCK_POLLS
                     while True:
-                        _start_hive_rowid = db.select(f"SELECT min(hive_rowid) FROM hive.plug_play_operations_view WHERE block_num = {start_block};")
+                        _start_hive_rowid = db.select(f"SELECT min(id) FROM hive.plug_play_operations_view WHERE block_num = {start_block};")
                         if _start_hive_rowid:
                             app_hive_rowid = _start_hive_rowid[0][0]
                             break
@@ -124,7 +124,7 @@ class PlugSync:
                     print("PODPING:: Finding app_hive_rowid using start_block")
                     start_block = START_BLOCK_PODPING
                     while True:
-                        _start_hive_rowid = db.select(f"SELECT min(hive_rowid) FROM hive.plug_play_operations_view WHERE block_num = {start_block};")
+                        _start_hive_rowid = db.select(f"SELECT min(id) FROM hive.plug_play_operations_view WHERE block_num = {start_block};")
                         if _start_hive_rowid:
                             app_hive_rowid = _start_hive_rowid[0][0]
                             print(f"PODPING:: Found {app_hive_rowid}")
