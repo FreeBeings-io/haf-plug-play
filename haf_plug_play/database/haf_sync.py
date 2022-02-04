@@ -46,7 +46,8 @@ class HafSyncSetup:
         db.execute(
             f"""
                 CREATE TABLE IF NOT EXISTS public.plug_play_ops(
-                    hive_opid BIGINT PRIMARY KEY NOT NULL,
+                    id BIGSERIAL PRIMARY KEY,
+                    hive_opid BIGINT NOT NULL,
                     block_num INTEGER NOT NULL,
                     timestamp TIMESTAMP,
                     transaction_id CHAR(40),
@@ -56,6 +57,12 @@ class HafSyncSetup:
                     op_json VARCHAR NOT NULL
                 )
                 INHERITS( hive.{APPLICATION_CONTEXT} );
+            """, None
+        )
+        db.execute(
+            f"""
+                CREATE INDEX IF NOT EXISTS custom_json_ops_ix_hive_opid
+                ON public.plug_play_ops (hive_opid);
             """, None
         )
         db.execute(

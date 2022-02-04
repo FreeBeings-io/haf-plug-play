@@ -6,7 +6,7 @@ CREATE OR REPLACE FUNCTION public.hpp_polls_update( _begin BIGINT, _end BIGINT )
             temprow RECORD;
             head_hive_rowid BIGINT;
             _block_num BIGINT;
-            _hive_rowid BIGINT;
+            _hive_opid BIGINT;
             _header JSON;
             _op_type VARCHAR(16);
             _op_payload JSON;
@@ -36,8 +36,8 @@ CREATE OR REPLACE FUNCTION public.hpp_polls_update( _begin BIGINT, _end BIGINT )
             -- Sync update
             FOR temprow IN
                 SELECT
-                    ppops.id AS ppop_id,
-                    ppops.hive_rowid,
+                    ppops.id,
+                    ppops.hive_opid,
                     ppops.block_num,
                     ppops.timestamp,
                     ppops.transaction_id,
@@ -51,7 +51,7 @@ CREATE OR REPLACE FUNCTION public.hpp_polls_update( _begin BIGINT, _end BIGINT )
             LOOP
                 BEGIN
                     _block_num := temprow.block_num;
-                    _hive_rowid := temprow.hive_rowid;
+                    _hive_opid := temprow.hive_opid;
                     _json := temprow.op_json::json;
                     _header := (_json ->> 0)::json;
                     _op_type := _json ->> 1;
@@ -68,12 +68,12 @@ CREATE OR REPLACE FUNCTION public.hpp_polls_update( _begin BIGINT, _end BIGINT )
                 INSERT INTO public.hpp_polls_ops as hppf(
                     ppop_id, block_num, created, transaction_id, req_auths, req_posting_auths, op_header, op_type, op_payload)
                 VALUES (
-                    temprow.ppop_id, temprow.block_num, temprow.timestamp, temprow.transaction_id,
+                    temprow.id, temprow.block_num, temprow.timestamp, temprow.transaction_id,
                     temprow.req_auths, temprow.req_posting_auths, _header, _op_type,
                     _op_payload
                 );
                 -- Update state tables
-                PERFORM hpp_polls_update_state(temprow.ppop_id, temprow.timestamp, temprow.req_posting_auths[1], temprow.req_auths[1], _header, _op_type, _op_payload);
+                PERFORM hpp_polls_update_state(temprow.id, temprow.timestamp, temprow.req_posting_auths[1], temprow.req_auths[1], _header, _op_type, _op_payload);
             END LOOP;
             UPDATE public.plug_sync SET latest_block_num = _block_num, latest_hive_rowid = _hive_rowid, state_hive_rowid = _hive_rowid WHERE plug_name='polls';
         END;

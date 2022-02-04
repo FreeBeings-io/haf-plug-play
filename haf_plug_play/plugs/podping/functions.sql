@@ -7,8 +7,8 @@ CREATE OR REPLACE FUNCTION public.hpp_podping_update( _begin BIGINT, _end BIGINT
             head_hive_rowid BIGINT;
             -- 
             _id BIGINT;
+            _hive_opid BIGINT;
             _block_num BIGINT;
-            _hive_rowid BIGINT;
             _block_timestamp TIMESTAMP;
             _required_auths VARCHAR(16)[];
             _required_posting_auths VARCHAR(16)[];
@@ -43,7 +43,7 @@ CREATE OR REPLACE FUNCTION public.hpp_podping_update( _begin BIGINT, _end BIGINT
             FOR temprow IN
                 SELECT
                     ppops.id,
-                    ppops.hive_rowid,
+                    ppops.hive_opid,
                     ppops.block_num,
                     ppops.transaction_id,
                     ppops.timestamp,
@@ -52,14 +52,14 @@ CREATE OR REPLACE FUNCTION public.hpp_podping_update( _begin BIGINT, _end BIGINT
                     ppops.op_id,
                     ppops.op_json
                 FROM public.plug_play_ops ppops
-                WHERE ppops.hive_rowid >= _begin
-                    AND ppops.hive_rowid <= _end
+                WHERE ppops.hive_opid >= _begin
+                    AND ppops.hive_opid <= _end
                     AND ppops.op_id = 'podping'
                 ORDER BY ppops.block_num, ppops.id
             LOOP
                 _id := temprow.id;
+                _hive_opid := temprow.hive_opid;
                 _block_num := temprow.block_num;
-                _hive_rowid := temprow.hive_rowid;
                 _block_timestamp := temprow.timestamp;
                 _required_auths := ARRAY (SELECT json_array_elements_text(temprow.req_auths));
                 _required_posting_auths := ARRAY (SELECT json_array_elements_text(temprow.req_posting_auths));
@@ -69,17 +69,17 @@ CREATE OR REPLACE FUNCTION public.hpp_podping_update( _begin BIGINT, _end BIGINT
                 -- Make new entry
                 WITH _ins AS (
                     INSERT INTO public.hpp_podping_ops(
-                        block_num, created, transaction_id, req_auths,
+                        ppop_id, block_num, created, transaction_id, req_auths,
                         req_posting_auths, op_id, op_payload)
                     VALUES
-                        (_block_num, _block_timestamp, _transaction_id, _required_auths,
+                        (_id, _block_num, _block_timestamp, _transaction_id, _required_auths,
                         _required_posting_auths, _op_id, _op_payload)
                     RETURNING pp_podping_opid
                 )
                 SELECT pp_podping_opid INTO _new_id FROM _ins;
                 PERFORM hpp_podping_process_op(_new_id, _block_num, _block_timestamp, _required_posting_auths[1], _op_id, _op_payload);
             END LOOP;
-            UPDATE public.plug_sync SET latest_block_num = _block_num, latest_hive_rowid = _hive_rowid, state_hive_rowid = _hive_rowid WHERE plug_name='podping';
+            UPDATE public.plug_sync SET latest_block_num = _block_num, latest_hive_rowid = hive_opid, state_hive_rowid = hive_opid WHERE plug_name='podping';
         END;
         $function$;
 
