@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS public.hpp_podping_ops(
     pp_podping_opid BIGSERIAL PRIMARY KEY,
-    ppop_id BIGINT NOT NULL REFERENCES public.plug_play_ops(id)
+    ppop_id BIGINT NOT NULL REFERENCES public.plug_play_ops(id),
     req_auths VARCHAR(16)[],
     req_posting_auths VARCHAR(16)[],
     op_id VARCHAR(31),
