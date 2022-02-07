@@ -9,7 +9,7 @@ from haf_plug_play.utils.tools import range_split
 
 APPLICATION_CONTEXT = "plug_play"
 GLOBAL_START_BLOCK = 1
-BATCH_PROCESS_SIZE = 100000
+BATCH_PROCESS_SIZE = 1000000
 
 db = WriteDb().db
 config = Config.config
@@ -215,6 +215,7 @@ class HafSync:
 
                 (first_block, last_block) = blocks_range
                 if (last_block - first_block) > 100:
+                    print("massive sync in progress")
                     PlugSync.toggle_sync(False)
                     steps = range_split(first_block, last_block, BATCH_PROCESS_SIZE)
                     for s in steps:
