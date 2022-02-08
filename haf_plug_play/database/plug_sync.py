@@ -65,12 +65,14 @@ class PlugSync:
                     db.commit()
                 if not _app_hive_rowid:
                     # get start hive_rowid from start block
+                    print("POLLS:: Finding app_hive_opid using start_block")
                     start_block = START_BLOCK_POLLS
                     while True:
                         _start_hive_rowid = db.select(f"SELECT min(id) FROM hive.plug_play_operations_view WHERE block_num = {start_block};")
                         if _start_hive_rowid:
                             print(_start_hive_rowid)
                             app_hive_rowid = _start_hive_rowid[0][0]
+                            print(f"POLLS:: Found {app_hive_rowid}")
                             break
                         start_block -= 1
                 else:
