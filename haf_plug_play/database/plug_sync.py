@@ -49,6 +49,7 @@ class PlugSync:
         print('Starting plug sync: polls')
         db = WriteDb().db
         cls.plug_sync_states['polls'] = 'loaded'
+
         while True:
             if cls.plug_sync_enabled is True:
                 head_hive_rowid = db.select("SELECT head_hive_opid FROM global_props;")
@@ -63,7 +64,7 @@ class PlugSync:
                         """INSERT INTO plug_sync (plug_name, latest_block_num, latest_hive_opid, state_hive_opid)
                             VALUES ('polls',0,0,0);""", None)
                     db.commit()
-                if not _app_hive_rowid[0][0]:
+                if not _app_hive_rowid:
                     # get start hive_rowid from start block
                     print("POLLS:: Finding app_hive_opid using start_block")
                     start_block = START_BLOCK_POLLS
@@ -96,6 +97,7 @@ class PlugSync:
                     #db.execute(f"UPDATE public.plug_sync SET latest_hive_opid = {head_hive_rowid}, state_hive_opid = {head_hive_rowid} WHERE plug_name='polls';", None)
                     db.commit()
                 elif (head_hive_rowid - app_hive_rowid) < 0:
+                    print("No new data, skipping")
                     continue
                 else:
                     cls.plug_sync_states['polls'] = 'synchronized'
