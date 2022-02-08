@@ -1,5 +1,6 @@
 import os
 from threading import Thread
+import time
 
 from haf_plug_play.config import Config
 from haf_plug_play.server.serve import run_server
@@ -14,6 +15,7 @@ def run():
     HafSync.init()
     HafSync.toggle_sync()
     Thread(target=HafSync.main_loop).start()
+    time.sleep(10)
     # start plug sync
     PlugInitSetup.init()
     PlugSync.start_sync()
