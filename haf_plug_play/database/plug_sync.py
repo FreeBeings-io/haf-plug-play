@@ -60,8 +60,8 @@ class PlugSync:
                 _app_hive_rowid = db.select("SELECT latest_hive_opid FROM plug_sync WHERE plug_name = 'polls';")
                 if _app_hive_rowid is None:
                     db.execute(
-                        """INSERT INTO plug_sync (plug_name,latest_hive_opid,state_hive_opid)
-                            VALUES ('polls',0,0);""", None)
+                        """INSERT INTO plug_sync (plug_name, latest_block_num, latest_hive_opid, state_hive_opid)
+                            VALUES ('polls',0,0,0);""", None)
                     db.commit()
                 if not _app_hive_rowid:
                     # get start hive_rowid from start block
@@ -69,6 +69,7 @@ class PlugSync:
                     while True:
                         _start_hive_rowid = db.select(f"SELECT min(id) FROM hive.plug_play_operations_view WHERE block_num = {start_block};")
                         if _start_hive_rowid:
+                            print(_start_hive_rowid)
                             app_hive_rowid = _start_hive_rowid[0][0]
                             break
                         start_block -= 1
@@ -116,8 +117,8 @@ class PlugSync:
                 _app_hive_rowid = db.select("SELECT latest_hive_opid FROM plug_sync WHERE plug_name = 'podping';")
                 if _app_hive_rowid is None:
                     db.execute(
-                        """INSERT INTO plug_sync (plug_name,latest_hive_opid,state_hive_opid)
-                            VALUES ('podping',0,0);""", None)
+                        """INSERT INTO plug_sync (plug_name, latest_block_num, latest_hive_opid, state_hive_opid)
+                            VALUES ('podping',0,0,0);""", None)
                     db.commit()
                 if not _app_hive_rowid:
                     # get start hive_rowid from start block
