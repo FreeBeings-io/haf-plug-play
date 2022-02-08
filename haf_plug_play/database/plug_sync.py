@@ -74,6 +74,7 @@ class PlugSync:
                             break
                         start_block -= 1
                 else:
+                    print(f"DEBUG: {_app_hive_rowid}")
                     app_hive_rowid = _app_hive_rowid[0][0]
                 if (head_hive_rowid - app_hive_rowid) > 1000:
                     steps = range_split((app_hive_rowid + 1), head_hive_rowid, BATCH_PROCESS_SIZE)
