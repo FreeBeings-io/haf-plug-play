@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS public.hpp_podping_ops(
     ppop_id BIGINT NOT NULL REFERENCES public.plug_play_ops(id),
     block_num INTEGER NOT NULL,
     created TIMESTAMP NOT NULL,
+    transaction_id CHAR(40) NOT NULL,
     req_auths VARCHAR(16)[],
     req_posting_auths VARCHAR(16)[],
     op_id VARCHAR(31),
