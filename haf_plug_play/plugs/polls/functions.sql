@@ -45,8 +45,8 @@ CREATE OR REPLACE FUNCTION public.hpp_polls_update( _begin BIGINT, _end BIGINT )
                     ARRAY(SELECT json_array_elements_text(req_posting_auths::json)) AS req_posting_auths,
                     ppops.op_json
                 FROM public.plug_play_ops ppops
-                WHERE ppops.id >= _begin
-                    AND ppops.id <= _end
+                WHERE ppops.hive_opid >= _begin
+                    AND ppops.hive_opid <= _end
                     AND ppops.op_id = 'polls'
             LOOP
                 BEGIN
