@@ -49,21 +49,12 @@ CREATE OR REPLACE FUNCTION public.hpp_polls_update( _begin BIGINT, _end BIGINT )
                     AND ppops.hive_opid <= _end
                     AND ppops.op_id = 'polls'
             LOOP
-                BEGIN
-                    _block_num := temprow.block_num;
-                    _hive_opid := temprow.hive_opid;
-                    _json := temprow.op_json::json;
-                    _header := (_json ->> 0)::json;
-                    _op_type := _json ->> 1;
-                    _op_payload := (_json ->> 2)::json;
-                EXCEPTION WHEN OTHERS THEN
-                    RAISE NOTICE E'Got exception:
-                    SQLSTATE: % 
-                    SQLERRM: %
-                    JSON: %
-                    BLOCK: %', SQLSTATE, SQLERRM, temprow.op_json, temprow.block_num; 
-                    CONTINUE;
-                END;
+                _block_num := temprow.block_num;
+                _hive_opid := temprow.hive_opid;
+                _json := temprow.op_json::json;
+                _header := (_json ->> 0)::json;
+                _op_type := _json ->> 1;
+                _op_payload := (_json ->> 2)::json;
 
                 INSERT INTO public.hpp_polls_ops as hppf(
                     ppop_id, block_num, created, transaction_id, req_auths, req_posting_auths, op_header, op_type, op_payload)
