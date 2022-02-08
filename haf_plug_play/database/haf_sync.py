@@ -191,6 +191,7 @@ class HafSync:
 
     @classmethod
     def main_loop(cls):
+        PlugSync.toggle_sync(False)
         while True:
             if cls.sync_enabled is True:
                 # get blocks range
