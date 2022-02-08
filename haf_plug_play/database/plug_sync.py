@@ -77,7 +77,6 @@ class PlugSync:
                             break
                         start_block -= 1
                 else:
-                    print(f"DEBUG: {_app_hive_rowid}")
                     app_hive_rowid = _app_hive_rowid[0][0]
                 if (head_hive_rowid - app_hive_rowid) > 1000:
                     steps = range_split((app_hive_rowid + 1), head_hive_rowid, BATCH_PROCESS_SIZE)
@@ -85,19 +84,14 @@ class PlugSync:
                         progress = round((s[1]/head_hive_rowid) * 100, 2)
                         cls.plug_sync_states['polls'] = f'synchronizing {progress} %'
                         SystemStatus.update_sync_status(plug_status=cls.plug_sync_states)
-                        #print(f"POLLS:: processing {s[0]} to {s[1]}     {progress}%")
                         db.select(f"SELECT public.hpp_polls_update( {s[0]}, {s[1]} );")
-                        #db.execute(f"UPDATE public.plug_sync SET latest_hive_opid = {s[1]}, state_hive_opid = {s[1]} WHERE plug_name='polls';", None)
                         db.commit()
                 elif (head_hive_rowid - app_hive_rowid) > 0:
-                    #print(f"POLLS:: processing {app_hive_rowid+1} to {head_hive_rowid}")
                     progress = round((app_hive_rowid/head_hive_rowid) * 100, 2)
                     cls.plug_sync_states['polls'] = f'synchronizing {progress} %'
                     db.select(f"SELECT public.hpp_polls_update( {app_hive_rowid+1}, {head_hive_rowid} );")
-                    #db.execute(f"UPDATE public.plug_sync SET latest_hive_opid = {head_hive_rowid}, state_hive_opid = {head_hive_rowid} WHERE plug_name='polls';", None)
                     db.commit()
                 elif (head_hive_rowid - app_hive_rowid) < 0:
-                    print("No new data, skipping")
                     continue
                 else:
                     cls.plug_sync_states['polls'] = 'synchronized'
@@ -127,7 +121,7 @@ class PlugSync:
                     db.commit()
                 if not _app_hive_rowid:
                     # get start hive_rowid from start block
-                    #print("PODPING:: Finding app_hive_opid using start_block")
+                    print("PODPING:: Finding app_hive_opid using start_block")
                     start_block = START_BLOCK_PODPING
                     while True:
                         _start_hive_rowid = db.select(f"SELECT min(id) FROM hive.plug_play_operations_view WHERE block_num = {start_block};")
@@ -137,7 +131,6 @@ class PlugSync:
                             break
                         start_block -= 1
                 else:
-                    print(f"DEBUG: {_app_hive_rowid}")
                     app_hive_rowid = _app_hive_rowid[0][0]
                 if (head_hive_rowid - app_hive_rowid) > 1000:
                     steps = range_split((app_hive_rowid + 1), head_hive_rowid, BATCH_PROCESS_SIZE)
@@ -145,16 +138,12 @@ class PlugSync:
                         progress = round((s[1]/head_hive_rowid) * 100, 2)
                         cls.plug_sync_states['podping'] = f'synchronizing {progress} %'
                         SystemStatus.update_sync_status(plug_status=cls.plug_sync_states)
-                        #print(f"PODPING:: processing {s[0]} to {s[1]}     {progress}%")
                         db.select(f"SELECT public.hpp_podping_update( {s[0]}, {s[1]} );")
-                        #db.execute(f"UPDATE public.plug_sync SET latest_hive_opid = {s[1]}, state_hive_opid = {s[1]} WHERE plug_name='podping';", None)
                         db.commit()
                 elif (head_hive_rowid - app_hive_rowid) > 0:
-                    #print(f"PODPING:: processing {app_hive_rowid+1} to {head_hive_rowid}")
                     progress = round((app_hive_rowid/head_hive_rowid) * 100, 2)
                     cls.plug_sync_states['podping'] = f'synchronizing {progress} %'
                     db.select(f"SELECT public.hpp_podping_update( {app_hive_rowid+1}, {head_hive_rowid} );")
-                    #db.execute(f"UPDATE public.plug_sync SET latest_hive_opid = {head_hive_rowid}, state_hive_opid = {head_hive_rowid} WHERE plug_name='podping';", None)
                     db.commit()
                 elif (head_hive_rowid - app_hive_rowid) < 0:
                     continue
