@@ -191,7 +191,6 @@ class HafSync:
 
     @classmethod
     def main_loop(cls):
-        PlugSync.toggle_sync(False)
         while True:
             if cls.sync_enabled is True:
                 # get blocks range
@@ -216,7 +215,6 @@ class HafSync:
                 (first_block, last_block) = blocks_range
                 if (last_block - first_block) > 100:
                     print("massive sync in progress")
-                    PlugSync.toggle_sync(False)
                     steps = range_split(first_block, last_block, BATCH_PROCESS_SIZE)
                     for s in steps:
                         db.select(f"SELECT hive.app_context_detach( '{APPLICATION_CONTEXT}' );")
@@ -230,14 +228,13 @@ class HafSync:
                         #print("context attached again")
                         db.commit()
                     print("massive sync done")
-                    PlugSync.toggle_sync()
+                    PlugSync.run_plug_sync()
                     continue
-                PlugSync.toggle_sync(False)
                 SystemStatus.update_sync_status(sync_status=f"Synchronizing: {first_block} to {last_block}")
                 db.select(f"SELECT public.update_plug_play_ops( {first_block}, {last_block} );")
                 SystemStatus.update_sync_status(sync_status=f"Synchronized... on block {last_block}")
                 db.commit()
-                PlugSync.toggle_sync()
+                PlugSync.run_plug_sync()
             time.sleep(0.5)
 
 
