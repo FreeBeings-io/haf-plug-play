@@ -198,10 +198,10 @@ class HafSync:
                 print(f"Blocks range: {blocks_range}")
                 (first_block, last_block) = blocks_range
                 if not blocks_range:
-                    time.sleep(0.5)
+                    time.sleep(0.2)
                     continue
                 if not first_block:
-                    time.sleep(0.5)
+                    time.sleep(0.2)
                     continue
                 if blocks_range[0] < GLOBAL_START_BLOCK:
                     print(f"Starting from global_start_block: {GLOBAL_START_BLOCK}")
@@ -228,18 +228,12 @@ class HafSync:
                         #print("context attached again")
                         db.commit()
                     print("massive sync done")
-                    PlugSync.run_plug_sync()
+                    PlugSync.toggle_plug_sync()
                     continue
+                PlugSync.toggle_plug_sync(False)
                 SystemStatus.update_sync_status(sync_status=f"Synchronizing: {first_block} to {last_block}")
                 db.select(f"SELECT public.update_plug_play_ops( {first_block}, {last_block} );")
                 SystemStatus.update_sync_status(sync_status=f"Synchronized... on block {last_block}")
                 db.commit()
-                PlugSync.run_plug_sync()
-            time.sleep(0.5)
-
-
-
-if __name__ == "__main__":
-    HafSync.init()
-    HafSync.toggle_sync()
-    HafSync.main_loop()
+                PlugSync.toggle_plug_sync()
+            time.sleep(0.2)
