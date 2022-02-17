@@ -17,7 +17,7 @@ class StateQuery:
             if not latest: return None # TODO: notify??
             block_range = [latest - 864000, latest] # default 30 days
         query = f"""
-                    SELECT url, COUNT(DISTINCT url)
+                    SELECT url, COUNT(url)
                     FROM hpp_podping_feed_updates
                     WHERE block_num BETWEEN {block_range[0]} AND {block_range[1]}
                     GROUP BY url
