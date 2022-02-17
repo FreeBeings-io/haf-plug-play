@@ -79,7 +79,8 @@ CREATE OR REPLACE FUNCTION public.hpp_podping_update( _begin BIGINT, _end BIGINT
                 SELECT pp_podping_opid INTO _new_id FROM _ins;
                 PERFORM hpp_podping_process_op(_new_id, _block_num, _block_timestamp, _required_posting_auths[1], _op_id, _op_payload);
             END LOOP;
-            UPDATE public.plug_sync SET latest_block_num = _block_num, latest_hive_opid = _hive_opid, state_hive_opid = _hive_opid WHERE plug_name='podping';
+            IF _block_num IS NOT NULL AND _hive_opid IS NOT NULL
+                UPDATE public.plug_sync SET latest_block_num = _block_num, latest_hive_opid = _hive_opid, state_hive_opid = _hive_opid WHERE plug_name='podping';
         END;
         $function$;
 
