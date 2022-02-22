@@ -105,8 +105,8 @@ class PlugSync:
                 _app_hive_rowid = db.select("SELECT latest_hive_opid FROM plug_sync WHERE plug_name = 'podping';")
                 if _app_hive_rowid is None:
                     db.execute(
-                        """INSERT INTO plug_sync (plug_name, latest_block_num, latest_hive_opid, state_hive_opid)
-                            VALUES ('podping',0,0,0);""", None)
+                        """INSERT INTO plug_sync (plug_name, latest_hive_opid)
+                            VALUES ('podping',0);""", None)
                     db.commit()
                 if not _app_hive_rowid:
                     # get start hive_rowid from start block
