@@ -55,7 +55,7 @@ class PlugSync:
                 _app_hive_rowid = db.select("SELECT latest_hive_opid FROM plug_sync WHERE plug_name = 'polls';")
                 if _app_hive_rowid is None:
                     db.execute(
-                        """INSERT INTO plug_sync (plug_name, latest_block_num, latest_hive_opid, state_hive_opid)
+                        """INSERT INTO plug_sync (plug_name, latest_hive_opid)
                             VALUES ('polls',0,0,0);""", None)
                     db.commit()
                 if not _app_hive_rowid:
