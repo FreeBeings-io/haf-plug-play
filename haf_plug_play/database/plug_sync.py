@@ -56,7 +56,7 @@ class PlugSync:
                 if _app_hive_rowid is None:
                     db.execute(
                         """INSERT INTO plug_sync (plug_name, latest_hive_opid)
-                            VALUES ('polls',0,0,0);""", None)
+                            VALUES ('polls',0);""", None)
                     db.commit()
                 if not _app_hive_rowid:
                     # get start hive_rowid from start block
