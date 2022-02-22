@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS public.hpp_podping_ops(
     pp_podping_opid BIGSERIAL PRIMARY KEY,
-    ppop_id BIGINT NOT NULL REFERENCES public.plug_play_ops(id),
+    ppop_id BIGINT NOT NULL REFERENCES public.plug_play_ops(id) ON DELETE CASCADE,
     block_num INTEGER NOT NULL,
     created TIMESTAMP NOT NULL,
     transaction_id CHAR(40) NOT NULL,
