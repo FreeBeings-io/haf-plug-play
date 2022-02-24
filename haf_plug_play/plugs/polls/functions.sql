@@ -5,13 +5,15 @@ CREATE OR REPLACE FUNCTION public.hpp_polls_update( _begin BIGINT, _end BIGINT )
         DECLARE
             temprow RECORD;
             head_hive_rowid BIGINT;
+            _block_num BIGINT;
+            _hive_opid BIGINT;
             _header JSON;
             _op_type VARCHAR(16);
             _op_payload JSON;
             _json JSON;
         BEGIN
             -- Preparations
-            SELECT MAX(latest_hive_rowid) INTO head_hive_rowid FROM public.plug_sync WHERE plug_name = 'polls';
+            SELECT MAX(latest_hive_opid) INTO head_hive_rowid FROM public.plug_sync WHERE plug_name = 'polls';
             RAISE NOTICE '%', head_hive_rowid;
             IF head_hive_rowid IS NULL THEN
                 head_hive_rowid := 0;
@@ -34,7 +36,8 @@ CREATE OR REPLACE FUNCTION public.hpp_polls_update( _begin BIGINT, _end BIGINT )
             -- Sync update
             FOR temprow IN
                 SELECT
-                    ppops.id AS ppop_id,
+                    ppops.id,
+                    ppops.hive_opid,
                     ppops.block_num,
                     ppops.timestamp,
                     ppops.transaction_id,
@@ -42,34 +45,28 @@ CREATE OR REPLACE FUNCTION public.hpp_polls_update( _begin BIGINT, _end BIGINT )
                     ARRAY(SELECT json_array_elements_text(req_posting_auths::json)) AS req_posting_auths,
                     ppops.op_json
                 FROM public.plug_play_ops ppops
-                WHERE ppops.id >= _begin
-                    AND ppops.id <= _end
+                WHERE ppops.hive_opid >= _begin
+                    AND ppops.hive_opid <= _end
                     AND ppops.op_id = 'polls'
             LOOP
-                BEGIN
-                    _json := temprow.op_json::json;
-                    _header := (_json ->> 0)::json;
-                    _op_type := _json ->> 1;
-                    _op_payload := (_json ->> 2)::json;
-                EXCEPTION WHEN OTHERS THEN
-                    RAISE NOTICE E'Got exception:
-                    SQLSTATE: % 
-                    SQLERRM: %
-                    JSON: %
-                    BLOCK: %', SQLSTATE, SQLERRM, temprow.op_json, temprow.block_num; 
-                    CONTINUE;
-                END;
+                _block_num := temprow.block_num;
+                _hive_opid := temprow.hive_opid;
+                _json := temprow.op_json::json;
+                _header := (_json ->> 0)::json;
+                _op_type := _json ->> 1;
+                _op_payload := (_json ->> 2)::json;
 
                 INSERT INTO public.hpp_polls_ops as hppf(
                     ppop_id, block_num, created, transaction_id, req_auths, req_posting_auths, op_header, op_type, op_payload)
                 VALUES (
-                    temprow.ppop_id, temprow.block_num, temprow.timestamp, temprow.transaction_id,
+                    temprow.id, temprow.block_num, temprow.timestamp, temprow.transaction_id,
                     temprow.req_auths, temprow.req_posting_auths, _header, _op_type,
                     _op_payload
                 );
                 -- Update state tables
-                PERFORM hpp_polls_update_state(temprow.ppop_id, temprow.timestamp, temprow.req_posting_auths[1], temprow.req_auths[1], _header, _op_type, _op_payload);
+                PERFORM hpp_polls_update_state(temprow.id, temprow.timestamp, temprow.req_posting_auths[1], temprow.req_auths[1], _header, _op_type, _op_payload);
             END LOOP;
+            UPDATE public.plug_sync SET latest_hive_opid = _end WHERE plug_name='polls';
         END;
         $function$;
 

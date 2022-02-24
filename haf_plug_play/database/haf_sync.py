@@ -8,8 +8,8 @@ from haf_plug_play.server.system_status import SystemStatus
 from haf_plug_play.utils.tools import range_split
 
 APPLICATION_CONTEXT = "plug_play"
-GLOBAL_START_BLOCK = 59913162
-BATCH_PROCESS_SIZE = 100000
+GLOBAL_START_BLOCK = 1
+BATCH_PROCESS_SIZE = 1000000
 
 db = WriteDb().db
 config = Config.config
@@ -47,6 +47,7 @@ class HafSyncSetup:
             f"""
                 CREATE TABLE IF NOT EXISTS public.plug_play_ops(
                     id BIGSERIAL PRIMARY KEY,
+                    hive_opid BIGINT NOT NULL,
                     block_num INTEGER NOT NULL,
                     timestamp TIMESTAMP,
                     transaction_id CHAR(40),
@@ -56,6 +57,12 @@ class HafSyncSetup:
                     op_json VARCHAR NOT NULL
                 )
                 INHERITS( hive.{APPLICATION_CONTEXT} );
+            """, None
+        )
+        db.execute(
+            f"""
+                CREATE INDEX IF NOT EXISTS custom_json_ops_ix_hive_opid
+                ON public.plug_play_ops (hive_opid);
             """, None
         )
         db.execute(
@@ -74,7 +81,7 @@ class HafSyncSetup:
             f"""
                 CREATE TABLE IF NOT EXISTS public.apps(
                     app_name varchar(32) PRIMARY KEY,
-                    op_ids varchar(16)[],
+                    op_ids varchar(31)[],
                     last_updated timestamp DEFAULT NOW(),
                     enabled boolean
                 );
@@ -84,15 +91,14 @@ class HafSyncSetup:
             f"""
                 CREATE TABLE IF NOT EXISTS public.plug_sync(
                     plug_name varchar(16) NOT NULL,
-                    latest_hive_rowid bigint DEFAULT 0,
-                    state_hive_rowid bigint DEFAULT 0
+                    latest_hive_opid bigint DEFAULT 0
                 );
             """, None
         )
         db.execute(
             f"""
                 CREATE TABLE IF NOT EXISTS public.global_props(
-                    head_hive_rowid bigint DEFAULT 0,
+                    head_hive_opid bigint DEFAULT 0,
                     head_block_num bigint DEFAULT 0,
                     head_block_time timestamp
                 );
@@ -100,7 +106,7 @@ class HafSyncSetup:
         )
         db.execute(
             f"""
-                INSERT INTO public.global_props (head_hive_rowid)
+                INSERT INTO public.global_props (head_hive_opid)
                 SELECT '0'
                 WHERE NOT EXISTS (SELECT * FROM public.global_props);
             """, None
@@ -115,8 +121,7 @@ class HafSyncSetup:
                 VOLATILE AS $function$
                     DECLARE
                         temprow RECORD;
-                        _id BIGINT;
-                        _head_hive_rowid BIGINT;
+                        _hive_opid BIGINT;
                         _block_num INTEGER;
                         _block_timestamp TIMESTAMP;
                         _required_auths JSON;
@@ -128,8 +133,7 @@ class HafSyncSetup:
                     BEGIN
                         FOR temprow IN
                             SELECT
-                                ppov.id,
-                                ppov.id AS head_hive_rowid,
+                                ppov.id AS hive_opid,
                                 ppov.block_num,
                                 ppov.timestamp,
                                 ppov.trx_in_block,
@@ -143,9 +147,8 @@ class HafSyncSetup:
                                 AND ppov.op_type_id = 18
                             ORDER BY ppov.block_num, ppov.id
                         LOOP
-                            _id := temprow.id;
+                            _hive_opid := temprow.hive_opid;
                             _block_num := temprow.block_num;
-                            _head_hive_rowid = temprow.head_hive_rowid;
                             _block_timestamp = temprow.timestamp;
                             _required_auths := temprow.required_auths;
                             _required_posting_auths := temprow.required_posting_auths;
@@ -157,13 +160,13 @@ class HafSyncSetup:
                                 AND pptv.trx_in_block = temprow.trx_in_block);
                             _transaction_id := encode(_hash::bytea, 'escape');
                             INSERT INTO public.plug_play_ops as ppops(
-                                id, block_num, timestamp, transaction_id, req_auths,
+                                hive_opid, block_num, timestamp, transaction_id, req_auths,
                                 req_posting_auths, op_id, op_json)
                             VALUES
-                                (_id, _block_num, _block_timestamp, _transaction_id, _required_auths,
+                                (_hive_opid, _block_num, _block_timestamp, _transaction_id, _required_auths,
                                 _required_posting_auths, _op_id, _op_json);
                         END LOOP;
-                        UPDATE global_props SET (head_hive_rowid, head_block_num, head_block_time) = (_head_hive_rowid, _block_num, _block_timestamp);
+                        UPDATE global_props SET (head_hive_opid, head_block_num, head_block_time) = (_hive_opid, _block_num, _block_timestamp);
                     END;
                     $function$;
             """, None
@@ -192,12 +195,11 @@ class HafSync:
                 blocks_range = db.select(f"SELECT * FROM hive.app_next_block('{APPLICATION_CONTEXT}');")[0]
                 #print(f"Blocks range: {blocks_range}")
                 (first_block, last_block) = blocks_range
-                PlugSync.toggle_sync()
                 if not blocks_range:
-                    time.sleep(0.5)
+                    time.sleep(0.2)
                     continue
                 if not first_block:
-                    time.sleep(0.5)
+                    time.sleep(0.2)
                     continue
                 if blocks_range[0] < GLOBAL_START_BLOCK:
                     print(f"Starting from global_start_block: {GLOBAL_START_BLOCK}")
@@ -210,29 +212,26 @@ class HafSync:
 
                 (first_block, last_block) = blocks_range
                 if (last_block - first_block) > 100:
-                    PlugSync.toggle_sync(False)
+                    print("massive sync in progress")
                     steps = range_split(first_block, last_block, BATCH_PROCESS_SIZE)
                     for s in steps:
                         db.select(f"SELECT hive.app_context_detach( '{APPLICATION_CONTEXT}' );")
-                        print("context detached")
-                        print(f"processing {s[0]} to {s[1]}")
+                        #print("context detached")
+                        #print(f"processing {s[0]} to {s[1]}")
                         progress = round(((s[0]/last_block) * 100),2)
                         SystemStatus.update_sync_status(sync_status=f"Massive sync in progress: {s[0]} to {s[1]}    ({progress} %)")
                         db.select(f"SELECT public.update_plug_play_ops( {s[0]}, {s[1]} );")
-                        print("batch sync done")
+                        #print("batch sync done")
                         db.select(f"SELECT hive.app_context_attach( '{APPLICATION_CONTEXT}', {s[1]} );")
-                        print("context attached again")
+                        #print("context attached again")
                         db.commit()
+                    print("massive sync done")
+                    PlugSync.toggle_plug_sync()
                     continue
+                PlugSync.toggle_plug_sync(False)
                 SystemStatus.update_sync_status(sync_status=f"Synchronizing: {first_block} to {last_block}")
                 db.select(f"SELECT public.update_plug_play_ops( {first_block}, {last_block} );")
                 SystemStatus.update_sync_status(sync_status=f"Synchronized... on block {last_block}")
                 db.commit()
-            time.sleep(0.5)
-
-
-
-if __name__ == "__main__":
-    HafSync.init()
-    HafSync.toggle_sync()
-    HafSync.main_loop()
+                PlugSync.toggle_plug_sync()
+            time.sleep(0.2)

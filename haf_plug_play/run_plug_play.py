@@ -1,5 +1,6 @@
 import os
 from threading import Thread
+import time
 
 from haf_plug_play.config import Config
 from haf_plug_play.server.serve import run_server
@@ -16,7 +17,7 @@ def run():
     Thread(target=HafSync.main_loop).start()
     # start plug sync
     PlugInitSetup.init()
-    PlugSync.start_sync()
+    PlugSync.start_plugs()
     run_server(config)
 
 

@@ -1,4 +1,4 @@
-"""Plug endpoints for community ops."""
+"""Plug endpoints for the polls protocol."""
 import re
 from jsonrpcserver import method, Result, Success, Error, result
 from haf_plug_play.database.access import ReadDb
