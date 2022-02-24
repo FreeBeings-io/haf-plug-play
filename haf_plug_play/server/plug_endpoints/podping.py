@@ -1,13 +1,11 @@
 """Plug endpoints for podping."""
-import re
-from jsonrpcserver import method, Result, Success, Error, result
+
 from haf_plug_play.database.access import ReadDb
 from haf_plug_play.plugs.podping.podping import SearchQuery, StateQuery
 from haf_plug_play.server.normalize import populate_by_schema
 
 db = ReadDb().db
 
-@method(name="plug_play_api.podping.get_podping_counts")
 async def get_podping_counts(block_range=None):
     """Returns count summaries for podpings."""
     if block_range:
@@ -21,4 +19,4 @@ async def get_podping_counts(block_range=None):
         result.append(populate_by_schema(
             entry, ['url', 'count']
         ))
-    return Success(result)
+    return result

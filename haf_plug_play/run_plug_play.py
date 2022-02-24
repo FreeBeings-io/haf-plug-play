@@ -1,6 +1,4 @@
-import os
 from threading import Thread
-import time
 
 from haf_plug_play.config import Config
 from haf_plug_play.server.serve import run_server
@@ -10,6 +8,7 @@ from haf_plug_play.database.plug_sync import PlugInitSetup, PlugSync
 config = Config.config
 
 def run():
+    """Runs main application processes and server."""
     print("---   Hive Plug & Play (HAF) started   ---")
     # start haf sync
     HafSync.init()

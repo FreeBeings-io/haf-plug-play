@@ -7,15 +7,15 @@ assert sys.version_info[0] == 3 and sys.version_info[1] >= 6, "Hive Plug & Play 
 
 setup(
     name='haf_plug_play',
-    version='0.5.0',
+    version='0.6.0',
     description='Customizable streaming and parsing microservice for custom_json ops on Hive.',
-    long_description=open('README.md').read(),
+    long_description=open('README.md', 'r', encoding='UTF-8').read(),
     packages=find_packages(exclude=['scripts']),
     install_requires=[
         'psycopg2',
         'requests',
-        'aiohttp',
-        'jsonrpcserver'
+        'fastapi',
+        'uvicorn'
     ],
     entry_points = {
         'console_scripts': [
