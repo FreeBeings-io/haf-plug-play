@@ -29,7 +29,7 @@ app.add_api_route(
     "/polls/new_permlink",
     polls.get_poll_permlink,
     tags=["polls"],
-    methods=["GET"],
+    methods=["POST"],
     summary="A valid and unique permlink to use with a new poll"
 )
 app.add_api_route(
