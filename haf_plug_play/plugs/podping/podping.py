@@ -22,7 +22,7 @@ class StateQuery:
                     WHERE block_num BETWEEN {block_range[0]} AND {block_range[1]}
                     GROUP BY url
                     ORDER BY url_count DESC
-                    LIMIT 100;
+                    LIMIT 20;
         """
         return query
 
