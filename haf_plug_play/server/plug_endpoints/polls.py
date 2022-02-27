@@ -1,12 +1,16 @@
 """Plug endpoints for the polls protocol."""
 import re
+import string
+
+from fastapi import HTTPException
+
 from haf_plug_play.database.access import ReadDb
 from haf_plug_play.plugs.polls.polls import SearchQuery, StateQuery
 from haf_plug_play.server.normalize import populate_by_schema
 
 db = ReadDb().db
 
-def does_poll_exist(author,permlink):
+def does_poll_exist(author:string,permlink:string):
     """Checks whether the given poll exists already in the database."""
     sql = f"""
         SELECT 1 FROM public.hpp_polls_content
@@ -15,12 +19,25 @@ def does_poll_exist(author,permlink):
     exists = bool(db.db.select(sql))
     return exists
 
-async def get_poll_permlink(author, question):
+async def get_poll_permlink(author:string, question:string):
     """Returns a valid and unique permlink to use with a new poll."""
-    assert isinstance(author, str), "Poll author must be a string"
-    assert len(author) <= 16, "Poll author must be no more than 16 characters"
-    assert isinstance(question, str), "Poll question must be a string"
-    assert len(question) <= 255, "Poll question must be no more than 255 characters"
+    if not isinstance(author, str):
+        raise HTTPException(status_code=400, detail="Poll author must be a string")
+    if not len(author) <= 16:
+        raise HTTPException(
+            status_code=400,
+            detail="Poll author must be no more than 16 characters"
+        )
+    if not isinstance(question, str):
+        raise HTTPException(
+            status_code=400,
+            detail="Poll question must be a string"
+        )
+    if not len(question) <= 255:
+        raise HTTPException(
+            status_code=400,
+            detail="Poll question must be no more than 255 characters"
+        )
     _body = question
     _body = _body.replace("&", " and ")
     _body = _body.replace("  ", " ")
@@ -31,10 +48,12 @@ async def get_poll_permlink(author, question):
         total_len = 0
         for w in _clean_title:
             total_len += len(w)
-            if total_len > 32: break
+            if total_len > 32:
+                break
             clean_title += f"{w}-"
         plink = re.sub(r'[^a-z-]+', '', clean_title[:-1].lower())
-        if tries > 0: plink = f"{plink}-{str(tries)}"
+        if tries > 0:
+            plink = f"{plink}-{str(tries)}"
         exists = does_poll_exist(author, plink)
         if not exists:
             break
@@ -42,7 +61,7 @@ async def get_poll_permlink(author, question):
             tries += 1
     return plink
 
-async def get_poll_ops(op_type=None, block_range=None):
+async def get_poll_ops(op_type:string, block_range:list):
     """Returns a list of 'polls' ops within the specified block or time range."""
     sql = SearchQuery.poll_ops(
         op_type=op_type,
@@ -58,10 +77,12 @@ async def get_poll_ops(op_type=None, block_range=None):
 
     return result
 
-async def get_polls_active(tag=None):
+async def get_polls_active(tag=""):
     """Returns a list of current active polls, filterable by tag."""
-    assert isinstance(tag, str), "Poll tag must be a string"
-    assert len(tag) <= 16, "Poll tags must be no more than 16 characters"
+    if not isinstance(tag, str):
+        raise HTTPException(status_code=400, detail="Poll tag must be a string")
+    if not len(tag) <= 16:
+        raise HTTPException(status_code=400, detail="Poll tags must be no more than 16 characters")
     sql = StateQuery.get_polls_active(tag)
     result = []
     res = db.db.select(sql) or []
@@ -71,12 +92,28 @@ async def get_polls_active(tag=None):
         ))
     return result
 
-async def get_poll(author,permlink, summary=True):
+async def get_poll(author: string, permlink:string, summary=True):
     """Returns a poll and vote details."""
-    assert isinstance(author, str), "Poll author must be a string"
-    assert len(author) <= 16, "Poll author must be no more than 16 characters"
-    assert isinstance(permlink, str), "Poll permlink must be a string"
-    assert len(permlink) <= 255, "Poll permlink must be no more than 255 characters"
+    if not isinstance(author, str):
+        raise HTTPException(
+            status_code=400,
+            detail="Poll author must be a string"
+        )
+    if not len(author) <= 16:
+        raise HTTPException(
+            status_code=400,
+            detail="Poll author must be no more than 16 characters"
+        )
+    if not isinstance(permlink, str):
+        raise HTTPException(
+            status_code=400,
+            detail="Poll permlink must be a string"
+        )
+    if not len(permlink) <= 255:
+        raise HTTPException(
+            status_code=400,
+            detail="Poll permlink must be no more than 255 characters"
+        )
     sql = StateQuery.get_poll(author,permlink)
     _votes = []
     res = db.db.select(sql) or None
@@ -95,12 +132,28 @@ async def get_poll(author,permlink, summary=True):
     result['votes'] = _votes
     return result
 
-async def get_poll_votes(author, permlink):
+async def get_poll_votes(author: string, permlink: string):
     """Returns votes for specified poll."""
-    assert isinstance(author, str), "Poll author must be a string"
-    assert len(author) <= 16, "Hive accounts must be no more than 16 characters"
-    assert isinstance(permlink, str), "Poll permlink must be a string"
-    assert len(permlink) <= 255, "Poll permlink must be no more than 255 characters"
+    if not isinstance(author, str):
+        raise HTTPException(
+            status_code=400,
+            detail="Poll author must be a string"
+        )
+    if not len(author) <= 16:
+        raise HTTPException(
+            status_code=400,
+            detail="Hive accounts must be no more than 16 characters"
+        )
+    if not isinstance(permlink, str):
+        raise HTTPException(
+            status_code=400,
+            detail="Poll permlink must be a string"
+    )
+    if not len(permlink) <= 255:
+        raise HTTPException(
+            status_code=400,
+            detail="Poll permlink must be no more than 255 characters"
+        )
     sql = StateQuery.get_poll_votes(author, permlink)
     result = []
     res = db.db.select(sql) or []
@@ -110,14 +163,34 @@ async def get_poll_votes(author, permlink):
         ))
     return result
 
-async def get_polls_user(author, active=False, tag=None):
+async def get_polls_user(author: string, active=False, tag=""):
     """Returns polls created by the specified user."""
-    assert isinstance(author, str), "Poll author must be a string"
-    assert len(author) <= 16, "Hive accounts must be no more than 16 characters"
-    assert isinstance(active, bool), "Active parameter must be boolean"
+    if not isinstance(author, str):
+        raise HTTPException(
+            status_code=400,
+            detail="Poll author must be a string"
+        )
+    if not len(author) <= 16:
+        raise HTTPException(
+            status_code=400,
+            detail="Hive accounts must be no more than 16 characters"
+        )
+    if not isinstance(active, bool):
+        raise HTTPException(
+            status_code=400,
+            detail="Active parameter must be boolean"
+        )
     if tag:
-        assert isinstance(tag, str), "Poll tag must be a string"
-        assert len(tag) <= 16, "Poll tags must be no more than 16 characters"
+        if not isinstance(tag, str):
+            raise HTTPException(
+                status_code=400,
+                detail="Poll tag must be a string"
+            )
+        if not len(tag) <= 16:
+            raise HTTPException(
+                status_code=400,
+                detail="Poll tags must be no more than 16 characters"
+            )
     sql = StateQuery.get_polls_user(author,active,tag)
     result = []
     res = db.db.select(sql) or []
