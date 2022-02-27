@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS public.hpp_podping_ops(
 
 CREATE TABLE IF NOT EXISTS public.hpp_podping_feed_updates(
     feed_update_id BIGSERIAL PRIMARY KEY,
-    pp_podping_opid BIGINT NOT NULL REFERENCES public.hpp_podping_ops(pp_podping_opid),
+    pp_podping_opid BIGINT NOT NULL REFERENCES public.hpp_podping_ops(pp_podping_opid) ON DELETE CASCADE,
     block_num INTEGER NOT NULL,
     created TIMESTAMP NOT NULL,
     url VARCHAR(500)
