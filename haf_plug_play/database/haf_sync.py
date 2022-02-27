@@ -15,10 +15,12 @@ db = WriteDb().db
 config = Config.config
 
 class HafSyncSetup:
+    """Setup functions for core schema."""
     
     @classmethod
     def prepare_global_data(cls):
-        app_entry = db.select(f"SELECT 1 FROM public.apps WHERE app_name='polls';")
+        """Prepares global data."""
+        app_entry = db.select("SELECT 1 FROM public.apps WHERE app_name='polls';")
         if app_entry is None:
             db.execute(
                 """
@@ -29,12 +31,12 @@ class HafSyncSetup:
 
     @classmethod
     def prepare_app_data(cls):
-        # prepare app data
+        """Prepares app data."""
         exists = db.select(
             f"SELECT hive.app_context_exists( '{APPLICATION_CONTEXT}' );"
         )[0][0]
         print(exists)
-        if exists == False:
+        if exists is False:
             db.select(f"SELECT hive.app_create_context( '{APPLICATION_CONTEXT}' );")
             db.commit()
             print("Created context: plug_play")
@@ -60,25 +62,25 @@ class HafSyncSetup:
             """, None
         )
         db.execute(
-            f"""
+            """
                 CREATE INDEX IF NOT EXISTS custom_json_ops_ix_hive_opid
                 ON public.plug_play_ops (hive_opid);
             """, None
         )
         db.execute(
-            f"""
+            """
                 CREATE INDEX IF NOT EXISTS custom_json_ops_ix_block_num
                 ON public.plug_play_ops (block_num);
             """, None
         )
         db.execute(
-            f"""
+            """
                 CREATE INDEX IF  NOT EXISTS custom_json_ops_ix_op_id
                 ON public.plug_play_ops (op_id);
             """, None
         )
         db.execute(
-            f"""
+            """
                 CREATE TABLE IF NOT EXISTS public.apps(
                     app_name varchar(32) PRIMARY KEY,
                     op_ids varchar(31)[],
@@ -88,7 +90,7 @@ class HafSyncSetup:
             """, None
         )
         db.execute(
-            f"""
+            """
                 CREATE TABLE IF NOT EXISTS public.plug_sync(
                     plug_name varchar(16) NOT NULL,
                     latest_hive_opid bigint DEFAULT 0
@@ -96,7 +98,7 @@ class HafSyncSetup:
             """, None
         )
         db.execute(
-            f"""
+            """
                 CREATE TABLE IF NOT EXISTS public.global_props(
                     head_hive_opid bigint DEFAULT 0,
                     head_block_num bigint DEFAULT 0,
@@ -105,7 +107,7 @@ class HafSyncSetup:
             """, None
         )
         db.execute(
-            f"""
+            """
                 INSERT INTO public.global_props (head_hive_opid)
                 SELECT '0'
                 WHERE NOT EXISTS (SELECT * FROM public.global_props);
@@ -114,7 +116,7 @@ class HafSyncSetup:
         db.commit()
         # create update ops function
         db.execute(
-            f"""
+            """
                 CREATE OR REPLACE FUNCTION public.update_plug_play_ops( _first_block BIGINT, _last_block BIGINT )
                 RETURNS void
                 LANGUAGE plpgsql
@@ -174,21 +176,25 @@ class HafSyncSetup:
         db.commit()
 
 class HafSync:
+    """Main HAF sync processes."""
 
     sync_enabled = False
-    
+
     @classmethod
     def init(cls):
+        """Initialize the class."""
         DbSetup.check_db(config)
         HafSyncSetup.prepare_app_data()
         HafSyncSetup.prepare_global_data()
-    
+
     @classmethod
     def toggle_sync(cls, enabled=True):
+        """Turns sync on and off."""
         cls.sync_enabled = enabled
 
     @classmethod
     def main_loop(cls):
+        """Main application loop."""
         while True:
             if cls.sync_enabled is True:
                 # get blocks range

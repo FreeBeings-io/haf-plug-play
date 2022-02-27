@@ -1,4 +1,5 @@
 tests/
-config.dat
 __pycache__/
+.vscode/
 *.egg-info/
+config.dat

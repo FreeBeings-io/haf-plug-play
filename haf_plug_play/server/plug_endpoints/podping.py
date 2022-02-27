@@ -1,19 +1,20 @@
 """Plug endpoints for podping."""
-import re
-from jsonrpcserver import method, Result, Success, Error, result
+from fastapi import HTTPException
+
 from haf_plug_play.database.access import ReadDb
 from haf_plug_play.plugs.podping.podping import SearchQuery, StateQuery
 from haf_plug_play.server.normalize import populate_by_schema
 
 db = ReadDb().db
 
-@method(name="plug_play_api.podping.get_podping_counts")
 async def get_podping_counts(block_range=None):
     """Returns count summaries for podpings."""
     if block_range:
-        assert isinstance(block_range, list), "Block range must be an array"
-        for x in block_range:
-            assert isinstance(x, int), "Block range items must be integers"
+        if not isinstance(block_range, list):
+            raise HTTPException(status_code=400, detail="Block range must be an array")
+        for block_num in block_range:
+            if not isinstance(block_num, int):
+                raise HTTPException(status_code=400, detail="Block range items must be integers")
     sql = StateQuery.get_podping_counts(block_range)
     result = []
     res = db.db.select(sql) or []
@@ -21,4 +22,4 @@ async def get_podping_counts(block_range=None):
         result.append(populate_by_schema(
             entry, ['url', 'count']
         ))
-    return Success(result)
+    return result
