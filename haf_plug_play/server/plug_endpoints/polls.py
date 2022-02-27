@@ -10,7 +10,7 @@ from haf_plug_play.server.normalize import populate_by_schema
 
 db = ReadDb().db
 
-def does_poll_exist(author:string,permlink:string):
+def does_poll_exist(author:str,permlink:str):
     """Checks whether the given poll exists already in the database."""
     sql = f"""
         SELECT 1 FROM public.hpp_polls_content
@@ -19,7 +19,7 @@ def does_poll_exist(author:string,permlink:string):
     exists = bool(db.db.select(sql))
     return exists
 
-async def get_poll_permlink(author:string, question:string):
+async def get_poll_permlink(author:str, question:str):
     """Returns a valid and unique permlink to use with a new poll."""
     if not isinstance(author, str):
         raise HTTPException(status_code=400, detail="Poll author must be a string")
@@ -61,7 +61,7 @@ async def get_poll_permlink(author:string, question:string):
             tries += 1
     return plink
 
-async def get_poll_ops(op_type:string, block_range:list):
+async def get_poll_ops(op_type:str, block_range:list):
     """Returns a list of 'polls' ops within the specified block or time range."""
     sql = SearchQuery.poll_ops(
         op_type=op_type,
@@ -92,7 +92,7 @@ async def get_polls_active(tag=""):
         ))
     return result
 
-async def get_poll(author: string, permlink:string, summary=True):
+async def get_poll(author: str, permlink:str, summary=True):
     """Returns a poll and vote details."""
     if not isinstance(author, str):
         raise HTTPException(
@@ -132,7 +132,7 @@ async def get_poll(author: string, permlink:string, summary=True):
     result['votes'] = _votes
     return result
 
-async def get_poll_votes(author: string, permlink: string):
+async def get_poll_votes(author: str, permlink: str):
     """Returns votes for specified poll."""
     if not isinstance(author, str):
         raise HTTPException(
@@ -163,7 +163,7 @@ async def get_poll_votes(author: string, permlink: string):
         ))
     return result
 
-async def get_polls_user(author: string, active=False, tag=""):
+async def get_polls_user(author: str, active=False, tag=""):
     """Returns polls created by the specified user."""
     if not isinstance(author, str):
         raise HTTPException(
