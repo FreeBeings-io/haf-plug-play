@@ -117,16 +117,21 @@ async def get_poll(author: str, permlink:str, summary=True):
     sql = StateQuery.get_poll(author,permlink)
     _votes = []
     res = db.db.select(sql) or None
+    if not res:
+        raise HTTPException(
+            status_code=400,
+            detail="Poll not found"
+        )
     result = populate_by_schema(res[0], ['author', 'permlink', 'question'
                 'answers', 'expires', 'tag', 'created'])
     if summary:
         sql = StateQuery.get_poll_votes_summary(author,permlink)
-        res = db.db.select(sql) or None
+        res = db.db.select(sql) or []
         for entry in res:
             _votes.append(populate_by_schema(entry, ['answer', 'count']))
     else:
         sql = StateQuery.get_poll_votes(author,permlink)
-        res = db.db.select(sql) or None
+        res = db.db.select(sql) or []
         for entry in res:
             _votes.append(populate_by_schema(entry, ['account', 'answer']))
     result['votes'] = _votes
