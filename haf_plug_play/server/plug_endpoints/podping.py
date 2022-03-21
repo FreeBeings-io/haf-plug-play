@@ -1,4 +1,6 @@
 """Plug endpoints for podping."""
+from sre_parse import State
+from unittest import result
 from fastapi import HTTPException
 
 from haf_plug_play.database.access import ReadDb
@@ -23,3 +25,13 @@ async def get_podping_counts(block_range=None):
             entry, ['url', 'count']
         ))
     return result
+
+async def get_podping_url_latest(url:str):
+    """Returns the `block_num` and `timestamp` from the latest update from a given URL."""
+    sql_feed_update = StateQuery.get_podping_url_latest_payload(url)
+    result = {}
+    res = db.db.select(sql_feed_update) or None
+    if res:
+        result['feed_update'] = populate_by_schema(res[0], ['block_num', 'created'])
+    return res
+    

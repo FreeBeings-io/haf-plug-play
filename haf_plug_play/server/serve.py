@@ -78,6 +78,14 @@ app.add_api_route(
     summary="Returns count summaries for podpings"
 )
 
+app.add_api_route(
+    "/api/podping/history/url",
+    podping.get_podping_url_latest,
+    tags=["podping"],
+    methods=["GET"],
+    summary="Returns block_num and timestamp of latest updates"
+)
+
 def run_server(config):
     """Run server."""
 

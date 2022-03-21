@@ -26,3 +26,13 @@ class StateQuery:
         """
         return query
 
+    @classmethod
+    def get_podping_url_latest_payload(cls, url):
+        query = f"""
+            SELECT block_num, created
+            FROM public.hpp_podping_ops
+            WHERE url = '{url}'
+            ORDER BY pp_podping_opid
+            LIMIT 1;
+        """
+        return query
