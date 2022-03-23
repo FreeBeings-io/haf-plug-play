@@ -32,7 +32,7 @@ class StateQuery:
             SELECT block_num, created
             FROM public.hpp_podping_feed_updates
             WHERE url = '{url}'
-            ORDER BY pp_podping_opid
+            ORDER BY pp_podping_opid DESC
             LIMIT 1;
         """
         return query
