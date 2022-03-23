@@ -12,9 +12,9 @@ Applications or protocols use their own IDs to broadcast their `custom_json` ops
 
 ```
 [
-    [1, "app_name/version"],      dictionary
+    [1, "app_name/version"],      array
     "op_internal_name",         string(64)
-    {} or []                    dictionary/list
+    {} or []                    dictionary/array
 ]
 ```
 
