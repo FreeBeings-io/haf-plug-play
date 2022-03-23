@@ -33,7 +33,7 @@ class StateQuery:
             FROM public.hpp_podping_feed_updates fu
             JOIN public.hpp_podping_ops po ON po.pp_podping_opid = fu.pp_podping_opid
             WHERE url = '{url}'
-            ORDER BY pp_podping_opid DESC
+            ORDER BY pp_fu.podping_opid DESC
             LIMIT 5;
         """
         return query
