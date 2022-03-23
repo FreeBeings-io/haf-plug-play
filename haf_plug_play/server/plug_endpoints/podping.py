@@ -27,7 +27,7 @@ async def get_podping_counts(block_range=None):
     return result
 
 async def get_podping_url_latest(url:str):
-    """Returns the `block_num` and `timestamp` from the latest update from a given URL."""
+    """Returns the latest feed update from a given URL."""
     sql_feed_update = StateQuery.get_podping_url_latest_feed_update(url)
     result = {}
     res = db.db.select(sql_feed_update) or None
