@@ -27,7 +27,7 @@ class StateQuery:
         return query
 
     @classmethod
-    def get_podping_url_latest_payload(cls, url):
+    def get_podping_url_latest_feed_update(cls, url):
         query = f"""
             SELECT block_num, created
             FROM public.hpp_podping_feed_updates
