@@ -79,7 +79,7 @@ app.add_api_route(
 )
 
 app.add_api_route(
-    "/api/podping/history/url",
+    "/api/podping/history/latest/url",
     podping.get_podping_url_latest,
     tags=["podping"],
     methods=["GET"],
