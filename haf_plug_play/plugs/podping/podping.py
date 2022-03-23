@@ -30,7 +30,7 @@ class StateQuery:
     def get_podping_url_latest_payload(cls, url):
         query = f"""
             SELECT block_num, created
-            FROM public.hpp_podping_ops
+            FROM public.hpp_podping_feed_updates
             WHERE url = '{url}'
             ORDER BY pp_podping_opid
             LIMIT 1;
