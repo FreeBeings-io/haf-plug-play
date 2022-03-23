@@ -30,8 +30,14 @@ async def get_podping_url_latest(url:str):
     """Returns the latest feed update from a given URL."""
     sql_feed_update = StateQuery.get_podping_url_latest_feed_update(url)
     result = {}
-    res = db.db.select(sql_feed_update) or None
+    feed_updates = []
+    res = db.db.select(sql_feed_update) or []
     if res:
-        result['feed_update'] = populate_by_schema(res[0], ['block_num', 'created'])
+        for entry in res:
+            feed_updates.append(
+                populate_by_schema(
+                    entry, ['trx_id', 'block_num', 'created']
+                ))
+        result['feed_updates'] = feed_updates
     return result
     

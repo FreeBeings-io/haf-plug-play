@@ -29,10 +29,11 @@ class StateQuery:
     @classmethod
     def get_podping_url_latest_feed_update(cls, url):
         query = f"""
-            SELECT block_num, created
-            FROM public.hpp_podping_feed_updates
+            SELECT po.transaction_id, fu.block_num, fu.created
+            FROM public.hpp_podping_feed_updates fu
+            JOIN public.hpp_podping_ops po ON po.pp_podping_opid = fu.pp_podping_opid
             WHERE url = '{url}'
             ORDER BY pp_podping_opid DESC
-            LIMIT 1;
+            LIMIT 5;
         """
         return query
