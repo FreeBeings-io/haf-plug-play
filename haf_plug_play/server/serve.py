@@ -7,7 +7,7 @@ from haf_plug_play.server.plug_endpoints import polls, podping
 
 from haf_plug_play.server.system_status import SystemStatus
 from haf_plug_play.server.normalize import normalize_types
-from haf_plug_play.utils.api_desc import TITLE, DESCRIPTION, VERSION, CONTACT, LICENSE
+from haf_plug_play.utils.api_metadata import TITLE, DESCRIPTION, VERSION, CONTACT, LICENSE, TAGS_METADATA
 
 
 app = FastAPI(
@@ -16,6 +16,7 @@ app = FastAPI(
     version=VERSION,
     contact=CONTACT,
     license_info=LICENSE,
+    openapi_tags=TAGS_METADATA,
     openapi_url="/api/openapi.json"
 )
 

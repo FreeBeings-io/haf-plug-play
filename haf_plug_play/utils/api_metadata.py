@@ -1,5 +1,7 @@
 """Metadata for the FastAPI instance"""
 
+# Main
+
 TITLE = "Hive Plug & Play (API)"
 
 DESCRIPTION = """
@@ -19,3 +21,17 @@ CONTACT = {
 LICENSE = {
     "name": "MIT License"
 }
+
+
+# Tags for Plugs
+
+TAGS_METADATA = [
+    {
+        "name": "podping",
+        "description": "Podping is a distributed notification system for new podcast episodes based on the Hive blockchain",
+    },
+    {
+        "name": "polls",
+        "description": "Endpoints for `polls`, a decentralized protocol for polls on the Hive blockchain "
+    }
+]
