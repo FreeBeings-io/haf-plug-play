@@ -32,6 +32,10 @@ TAGS_METADATA = [
     },
     {
         "name": "polls",
-        "description": "Endpoints for `polls`, a decentralized protocol for polls on the Hive blockchain "
+        "description": "Endpoints for `polls`, a decentralized protocol for polls on the Hive blockchain",
+        "externalDocs": {
+            "description": "Broadcast Ops",
+            "url": "https://github.com/imwatsi/haf-plug-play/blob/master/docs/protocols/polls.md"
+        }
     }
 ]
