@@ -7,8 +7,17 @@ from haf_plug_play.server.plug_endpoints import polls, podping
 
 from haf_plug_play.server.system_status import SystemStatus
 from haf_plug_play.server.normalize import normalize_types
+from haf_plug_play.utils.api_desc import TITLE, DESCRIPTION, VERSION, CONTACT, LICENSE
 
-app = FastAPI(openapi_url="/api/openapi.json")
+
+app = FastAPI(
+    title=TITLE,
+    description=DESCRIPTION,
+    version=VERSION,
+    contact=CONTACT,
+    license_info=LICENSE,
+    openapi_url="/api/openapi.json"
+)
 
 async def root():
     """Reports the status of Hive Plug & Play."""
@@ -106,4 +115,3 @@ def run_server(config):
             port=int(config['server_port']),
             log_level="info"
         )
-
