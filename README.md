@@ -2,18 +2,13 @@
 
 **Customizable streaming and parsing microservice for custom_json ops on Hive.**
 
-## HAF
-
-Plug & Play uses the Hive Application Framework to retrieve `custom_json` ops from Hive blocks.
-
-For an overview of how HAF works read this post: https://hive.blog/hive-139531/@mickiewicz/what-is-haf
-
+*Plug & Play uses the Hive Application Framework to retrieve `custom_json` ops from Hive blocks.*
 
 ## Documentation
 
 Documentation can be found here:
 
-- [API Documentation](docs/api/api.md)
+- [API Documentation](https://plug-play.imwatsi.com/docs)
 
 ## Development
 
@@ -184,5 +179,4 @@ Run HAF Plug & Play: `haf_plug_play`
 
 ### Check HAF Plug & Play sync status
 
-- Visiting https://plug-play.imwatsi.com/ or
-- Making this call on the API - https://github.com/imwatsi/haf-plug-play/blob/master/docs/api/standard_endpoints.md#get_sync_status
+Visit https://plug-play.imwatsi.com/docs#/system/root_api_get or

@@ -1,3 +1,5 @@
+"""SQL queries for the polls protocol."""
+
 import os
 
 from haf_plug_play.server.system_status import SystemStatus
@@ -5,9 +7,11 @@ from haf_plug_play.server.system_status import SystemStatus
 WDIR_POLLS = os.path.dirname(__file__)
 
 class SearchQuery:
+    """Search related queries."""
 
     @classmethod
     def poll_ops(cls, op_type=None, block_range=None):
+        """Retrieve poll operations."""
         if block_range is None:
             latest = SystemStatus.get_latest_block()
             if not latest: return None # TODO: notify??
@@ -24,10 +28,12 @@ class SearchQuery:
 
 
 class StateQuery:
+    """State related queries."""
 
     @classmethod
     def get_polls_active(cls, tag=None):
-        query = f"""
+        """Retrieve active polls."""
+        query = """
             SELECT author, permlink, question,
                 answers, expires, tag, created
             FROM hpp_polls_content
@@ -39,6 +45,7 @@ class StateQuery:
 
     @classmethod
     def get_poll(cls, author, permlink):
+        """Retrieve an individual poll."""
         query = f"""
             SELECT author, permlink, question
                 answers, expires, tag, created
@@ -49,6 +56,7 @@ class StateQuery:
 
     @classmethod
     def get_poll_votes_summary(cls, author, permlink):
+        """Retrieve the summary of votes associated with a specific poll."""
         query = f"""
             SELECT t_content.answers[t_votes.answer] AS parsed_answer, COUNT(DISTINCT t_votes.account)
             FROM hpp_polls_content t_content 
@@ -64,6 +72,7 @@ class StateQuery:
 
     @classmethod
     def get_poll_votes(cls, author, permlink):
+        """Retrieve all votes associated with a specific poll."""
         query = f"""
             SELECT t_votes.account, t_content.answers[t_votes.answer] AS answer
             FROM hpp_polls_content t_content 
@@ -74,6 +83,7 @@ class StateQuery:
     
     @classmethod
     def get_polls_user(cls, author, active=False, tag=None):
+        """Retrieve polls that a specific user has created."""
         query = f"""
             SELECT permlink, question,
                 answers, expires, tag, created

@@ -1,6 +1,4 @@
 """Plug endpoints for podping."""
-from sre_parse import State
-from unittest import result
 from fastapi import HTTPException
 
 from haf_plug_play.database.access import ReadDb
