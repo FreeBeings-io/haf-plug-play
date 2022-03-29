@@ -10,7 +10,16 @@ from haf_plug_play.server.normalize import populate_by_schema
 db = ReadDb().db
 
 async def get_podping_counts(block_range=None):
-    """Returns count summaries for podpings."""
+    """Returns count summaries for podpings.
+    
+    `block_range` <array(int)> (optional, default 30 days; 864,000 blocks): start and end block of ops to consider
+
+    **Example params:**
+
+    ```
+    block_range=[62187823,63051823]
+    ```
+    """
     if block_range:
         if not isinstance(block_range, list):
             raise HTTPException(status_code=400, detail="Block range must be an array")
@@ -27,7 +36,16 @@ async def get_podping_counts(block_range=None):
     return result
 
 async def get_podping_url_latest(url:str):
-    """Returns the latest feed update from a given URL."""
+    """Returns the latest feed update from a given URL.
+
+    `url` <string>: the url of the podping
+
+    **Example params:**
+    
+    ```
+    url=https%3A%2F%2Ffeeds.captivate.fm%2Felmatutinodela91
+    ```
+    """
     sql_feed_update = StateQuery.get_podping_url_latest_feed_update(url)
     result = {}
     feed_updates = []
