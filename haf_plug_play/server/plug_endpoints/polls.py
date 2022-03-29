@@ -1,6 +1,5 @@
 """Plug endpoints for the polls protocol."""
 import re
-import string
 
 from fastapi import HTTPException
 
