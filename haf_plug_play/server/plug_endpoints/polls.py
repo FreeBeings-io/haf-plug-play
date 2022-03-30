@@ -1,6 +1,5 @@
 """Plug endpoints for the polls protocol."""
 import re
-import string
 
 from fastapi import HTTPException
 
@@ -10,8 +9,9 @@ from haf_plug_play.server.normalize import populate_by_schema
 
 db = ReadDb().db
 
-def does_poll_exist(author:str,permlink:str):
+def _does_poll_exist(author:str,permlink:str):
     """Checks whether the given poll exists already in the database."""
+
     sql = f"""
         SELECT 1 FROM public.hpp_polls_content
         WHERE author = '{author}' AND permlink = '{permlink}';
@@ -20,7 +20,19 @@ def does_poll_exist(author:str,permlink:str):
     return exists
 
 async def get_poll_permlink(author:str, question:str):
-    """Returns a valid and unique permlink to use with a new poll."""
+    """Returns a valid and unique permlink to use with a new poll.
+    
+    `author` <string(16)>: Hive account name of the author
+    `question` <string(255)>: Question asked by the poll
+
+    **Example params:**
+
+    ```
+    author="imwatsi"
+    question="What do you think the price of Hive will be next year"
+    ```
+    """
+
     if not isinstance(author, str):
         raise HTTPException(status_code=400, detail="Poll author must be a string")
     if not len(author) <= 16:
@@ -54,15 +66,27 @@ async def get_poll_permlink(author:str, question:str):
         plink = re.sub(r'[^a-z-]+', '', clean_title[:-1].lower())
         if tries > 0:
             plink = f"{plink}-{str(tries)}"
-        exists = does_poll_exist(author, plink)
+        exists = _does_poll_exist(author, plink)
         if not exists:
             break
         else:
             tries += 1
     return plink
 
-async def get_poll_ops(op_type:str, block_range:list):
-    """Returns a list of 'polls' ops within the specified block or time range."""
+async def get_poll_ops(op_type:str, block_range=None):
+    """Returns a list of 'polls' ops within the specified block range.
+    
+    `op_type` <string> ( valid options: create | vote )
+    `block_range` <array(int)> (optional, default 24 hours; 28,800 blocks): start and end block of ops to consider
+
+    **Example params:**
+
+    ```
+    `op_type`="create"
+    `block_range=[63040238,63069038]
+    ```
+    """
+
     sql = SearchQuery.poll_ops(
         op_type=op_type,
         block_range=block_range
