@@ -102,7 +102,16 @@ async def get_poll_ops(op_type:str, block_range=None):
     return result
 
 async def get_polls_active(tag=""):
-    """Returns a list of current active polls, filterable by tag."""
+    """Returns a list of current active polls, filterable by tag.
+    
+    `tag` <string(500)> (optional)
+
+    **Example params:**
+
+    ```
+    `tag`="@author/permlink"
+    ```
+    """
     if not isinstance(tag, str):
         raise HTTPException(status_code=400, detail="Poll tag must be a string")
     if not len(tag) <= 16:
