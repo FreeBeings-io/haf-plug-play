@@ -126,7 +126,20 @@ async def get_polls_active(tag=""):
     return result
 
 async def get_poll(author: str, permlink:str, summary=True):
-    """Returns a poll and vote details."""
+    """Returns a poll and vote details.
+    
+    `author` <string(16)> Hive account that created the poll
+    `permlink` <string(255)> The permlink of the poll
+    `summary` <boolean> (optional) Choose to include a summary of the poll's votes,  not a full list
+
+    **Example params:**
+
+    ```
+    `author`="@imwatsi.test"
+    `permlink`="do-you-like-polls"
+    `summary`=true
+    ```
+    """
     if not isinstance(author, str):
         raise HTTPException(
             status_code=400,
