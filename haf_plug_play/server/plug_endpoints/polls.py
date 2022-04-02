@@ -22,8 +22,8 @@ def _does_poll_exist(author:str,permlink:str):
 async def get_poll_permlink(author:str, question:str):
     """Returns a valid and unique permlink to use with a new poll.
     
-    `author` <string(16)>: Hive account name of the author
-    `question` <string(255)>: Question asked by the poll
+    - `author` <string(16)>: Hive account name of the author
+    - `question` <string(255)>: Question asked by the poll
 
     **Example params:**
 
@@ -76,8 +76,8 @@ async def get_poll_permlink(author:str, question:str):
 async def get_poll_ops(op_type:str, block_range=None):
     """Returns a list of 'polls' ops within the specified block range.
     
-    `op_type` <string> ( valid options: create | vote )
-    `block_range` <array(int)> (optional, default: `24 hours; 28,800 blocks`): start and end block of ops to consider
+    - `op_type` <string>: ( valid options: create | vote )
+    - `block_range` <array(int)>: (optional, default: `24 hours; 28,800 blocks`); start and end block of ops to consider
 
     **Example params:**
 
@@ -104,7 +104,7 @@ async def get_poll_ops(op_type:str, block_range=None):
 async def get_polls_active(tag=""):
     """Returns a list of current active polls, filterable by tag.
     
-    `tag` <string(500)> (optional)
+    - `tag` <string(500)>: (optional)
 
     **Example params:**
 
@@ -128,9 +128,9 @@ async def get_polls_active(tag=""):
 async def get_poll(author: str, permlink:str, summary=True):
     """Returns a poll and vote details.
     
-    `author` <string(16)> Hive account that created the poll
-    `permlink` <string(255)> The permlink of the poll
-    `summary` <boolean> (optional) Choose to include a summary of the poll's votes,  not a full list
+    - `author` <string(16)>: Hive account that created the poll
+    - `permlink` <string(255)>: The permlink of the poll
+    - `summary` <boolean>: (optional) Choose to include a summary of the poll's votes,  not a full list
 
     **Example params:**
 
@@ -186,8 +186,8 @@ async def get_poll(author: str, permlink:str, summary=True):
 async def get_poll_votes(author: str, permlink: str):
     """Returns votes for specified poll.
 
-    `author` <string(16)> Hive account that created the poll
-    `permlink` <string(255)> The permlink of the poll
+    - `author` <string(16)>: Hive account that created the poll
+    - `permlink` <string(255)>: The permlink of the poll
 
     **Example params:**
     ```
@@ -227,9 +227,9 @@ async def get_poll_votes(author: str, permlink: str):
 async def get_polls_user(author: str, active=False, tag=""):
     """Returns polls created by the specified user.
     
-    `author` <string(16)> Hive account that created the poll
-    `active` <boolean> (default: `false`) Only include active polls, `true` | `false`
-    `tag` <string(500)> (optional)
+    - `author` <string(16)>: Hive account that created the poll
+    - `active` <boolean>: (default: `false`) Only include active polls, `true` | `false`
+    - `tag` <string(500)>: (optional)
 
     **Example params:**
     ```
