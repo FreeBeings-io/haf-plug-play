@@ -77,7 +77,7 @@ async def get_poll_ops(op_type:str, block_range=None):
     """Returns a list of 'polls' ops within the specified block range.
     
     `op_type` <string> ( valid options: create | vote )
-    `block_range` <array(int)> (optional, default 24 hours; 28,800 blocks): start and end block of ops to consider
+    `block_range` <array(int)> (optional, default: `24 hours; 28,800 blocks`): start and end block of ops to consider
 
     **Example params:**
 
@@ -184,7 +184,17 @@ async def get_poll(author: str, permlink:str, summary=True):
     return result
 
 async def get_poll_votes(author: str, permlink: str):
-    """Returns votes for specified poll."""
+    """Returns votes for specified poll.
+
+    `author` <string(16)> Hive account that created the poll
+    `permlink` <string(255)> The permlink of the poll
+
+    **Example params:**
+    ```
+    `author`="@imwatsi.test"
+    `permlink`="do-you-like-polls"
+    ```
+    """
     if not isinstance(author, str):
         raise HTTPException(
             status_code=400,
@@ -215,7 +225,18 @@ async def get_poll_votes(author: str, permlink: str):
     return result
 
 async def get_polls_user(author: str, active=False, tag=""):
-    """Returns polls created by the specified user."""
+    """Returns polls created by the specified user.
+    
+    `author` <string(16)> Hive account that created the poll
+    `active` <boolean> (default: `false`) Only include active polls, `true` | `false`
+    `tag` <string(500)> (optional)
+
+    **Example params:**
+    ```
+    `author`="@imwatsi.test"
+    `permlink`="do-you-like-polls"
+    ```
+    """
     if not isinstance(author, str):
         raise HTTPException(
             status_code=400,
