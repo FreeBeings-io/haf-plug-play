@@ -27,8 +27,8 @@ LICENSE = {
 
 TAGS_METADATA = [
     {
-        "name": "podping",
-        "description": "Podping is a distributed notification system for new podcast episodes based on the Hive blockchain",
+        "name": "system",
+        "description": "System endpoints"
     },
     {
         "name": "polls",
@@ -37,5 +37,9 @@ TAGS_METADATA = [
             "description": "Broadcast Ops",
             "url": "https://github.com/imwatsi/haf-plug-play/blob/master/docs/protocols/polls.md"
         }
+    },
+    {
+        "name": "podping",
+        "description": "Podping is a distributed notification system for new podcast episodes based on the Hive blockchain",
     }
 ]
