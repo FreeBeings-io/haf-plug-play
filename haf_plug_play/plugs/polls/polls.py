@@ -38,6 +38,7 @@ class StateQuery:
                 answers, expires, tag, created
             FROM hpp_polls_content
             WHERE expires >= NOW() AT TIME ZONE 'utc'
+            AND deleted = false
         """
         if tag:
             query += f" AND tag = '{tag}';"
@@ -50,7 +51,7 @@ class StateQuery:
             SELECT author, permlink, question
                 answers, expires, tag, created
             FROM hpp_polls_content
-            WHERE author = '{author}' AND permlink = '{permlink}';
+            WHERE author = '{author}' AND permlink = '{permlink}' AND deleted = false;
         """
         return query
 
@@ -63,6 +64,7 @@ class StateQuery:
             JOIN hpp_polls_votes t_votes ON t_content.author = t_votes.author
                 AND t_content.permlink = t_votes.permlink
             WHERE t_content.author = '{author}'
+                AND t_content.deleted = false
                 AND t_content.permlink = '{permlink}'
                 AND t_votes.created <= COALESCE(
                     t_content.expires, t_content.created - INTERVAL '7 DAYS')
@@ -77,7 +79,7 @@ class StateQuery:
             SELECT t_votes.account, t_content.answers[t_votes.answer] AS answer
             FROM hpp_polls_content t_content 
             JOIN hpp_polls_votes t_votes ON t_content.author = t_votes.author AND t_content.permlink = t_votes.permlink
-            WHERE t_content.author = '{author}' AND t_content.permlink = '{permlink}';
+            WHERE t_content.author = '{author}' AND t_content.permlink = '{permlink}' AND t_content.deleted = false;
         """
         return query
     
@@ -89,6 +91,7 @@ class StateQuery:
                 answers, expires, tag, created
             FROM hpp_polls_content
             WHERE author = '{author}'
+            AND deleted = false
         """
         if active is True:
             query += " AND expires >= NOW() AT TIME ZONE 'utc'"
