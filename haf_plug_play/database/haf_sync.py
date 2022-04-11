@@ -240,4 +240,4 @@ class HafSync:
                 SystemStatus.update_sync_status(sync_status=f"Synchronized... on block {last_block}")
                 db.commit()
                 PlugSync.toggle_plug_sync()
-            time.sleep(2)
+            time.sleep(0.5)
