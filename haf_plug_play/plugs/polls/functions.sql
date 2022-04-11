@@ -122,7 +122,9 @@ CREATE OR REPLACE FUNCTION public.hpp_polls_update_state( _ppop_id BIGINT, _crea
                     _permlink := _op_payload ->> 'permlink';
                     SELECT * INTO temprow FROM public.hpp_polls_content WHERE author = _posting_acc and permlink = _permlink;
                     IF FOUND THEN
-                        UPDATE public.hpp_polls_content SET deleted = true WHERE pp_poll_opid = temprow.pp_poll_opid;
+                        IF temprow.expires >= NOW() AT TIME ZONE 'utc' THEN
+                            UPDATE public.hpp_polls_content SET deleted = true WHERE pp_poll_opid = temprow.pp_poll_opid;
+                        END IF;
                     END IF;
                 END IF;
             END IF;
