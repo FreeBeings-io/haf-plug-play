@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS public.hpp_polls_ops(
-    ppop_id BIGINT NOT NULL UNIQUE REFERENCES public.plug_play_ops(id) DEFERRABLE ON DELETE CASCADE,
+    ppop_id BIGINT NOT NULL UNIQUE REFERENCES public.plug_play_ops(id) ON DELETE CASCADE DEFERRABLE,
     pp_poll_opid BIGSERIAL UNIQUE,
     block_num INTEGER NOT NULL,
     created TIMESTAMP NOT NULL,
@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS public.hpp_polls_ops(
 ) INHERITS( hive.plug_play );
 
 CREATE TABLE IF NOT EXISTS public.hpp_polls_content(
-    pp_poll_opid BIGINT NOT NULL UNIQUE REFERENCES public.hpp_polls_ops(pp_poll_opid) DEFERRABLE ON DELETE CASCADE,
+    pp_poll_opid BIGINT NOT NULL UNIQUE REFERENCES public.hpp_polls_ops(pp_poll_opid) ON DELETE CASCADE DEFERRABLE,
     poll_id BIGSERIAL PRIMARY KEY,
     created TIMESTAMP,
     permlink VARCHAR(255),
@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS public.hpp_polls_content(
 ) INHERITS( hive.plug_play );
 
 CREATE TABLE IF NOT EXISTS public.hpp_polls_votes(
-    pp_poll_opid BIGINT NOT NULL UNIQUE REFERENCES public.hpp_polls_ops(pp_poll_opid) DEFERRABLE ON DELETE CASCADE,
+    pp_poll_opid BIGINT NOT NULL UNIQUE REFERENCES public.hpp_polls_ops(pp_poll_opid) ON DELETE CASCADE DEFERRABLE,
     permlink VARCHAR(255),
     author VARCHAR(16),
     created TIMESTAMP,
