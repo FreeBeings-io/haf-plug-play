@@ -77,9 +77,15 @@ CREATE OR REPLACE FUNCTION public.hpp_podping_update( _begin BIGINT, _end BIGINT
                     RETURNING pp_podping_opid
                 )
                 SELECT pp_podping_opid INTO _new_id FROM _ins;
+                COMMIT;
                 PERFORM hpp_podping_process_op(_new_id, _block_num, _block_timestamp, _required_posting_auths[1], _op_id, _op_payload);
             END LOOP;
             UPDATE public.plug_sync SET latest_hive_opid = _end WHERE plug_name='podping';
+            COMMIT;
+        EXCEPTION WHEN OTHERS THEN
+                RAISE NOTICE E'Got exception:
+                SQLSTATE: % 
+                SQLERRM: %', SQLSTATE, SQLERRM;
         END;
         $function$;
 
@@ -94,6 +100,10 @@ CREATE OR REPLACE FUNCTION public.hpp_podping_process_op(_pp_podping_opid BIGINT
             IF _op_id = 'podping' THEN
                 PERFORM hpp_podping_process_podping(_pp_podping_opid, _block_num, _created, _posting_acc, _payload);
             END IF;
+        EXCEPTION WHEN OTHERS THEN
+                RAISE NOTICE E'Got exception:
+                SQLSTATE: % 
+                SQLERRM: %', SQLSTATE, SQLERRM;
         END;
     $function$;
 
@@ -116,7 +126,12 @@ CREATE OR REPLACE FUNCTION public.hpp_podping_process_podping(_pp_podping_opid B
                     --RAISE NOTICE '%', _url;
                     INSERT INTO public.hpp_podping_feed_updates(pp_podping_opid, block_num, created, url)
                     VALUES (_pp_podping_opid, _block_num, _created, _url);
+                    COMMIT;
                 END LOOP;
             END IF;
+        EXCEPTION WHEN OTHERS THEN
+                RAISE NOTICE E'Got exception:
+                SQLSTATE: % 
+                SQLERRM: %', SQLSTATE, SQLERRM;
         END;
     $function$;
