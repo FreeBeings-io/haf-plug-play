@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS public.hpp_podping_ops(
     pp_podping_opid BIGSERIAL PRIMARY KEY,
-    ppop_id BIGINT NOT NULL REFERENCES public.plug_play_ops(id) DEFERRED ON DELETE CASCADE,
+    ppop_id BIGINT NOT NULL REFERENCES public.plug_play_ops(id) DEFERRABLE ON DELETE CASCADE,
     block_num INTEGER NOT NULL,
     created TIMESTAMP NOT NULL,
     transaction_id CHAR(40) NOT NULL,
@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS public.hpp_podping_ops(
 
 CREATE TABLE IF NOT EXISTS public.hpp_podping_feed_updates(
     feed_update_id BIGSERIAL PRIMARY KEY,
-    pp_podping_opid BIGINT NOT NULL REFERENCES public.hpp_podping_ops(pp_podping_opid) DEFERRED ON DELETE CASCADE,
+    pp_podping_opid BIGINT NOT NULL REFERENCES public.hpp_podping_ops(pp_podping_opid) DEFERRABLE ON DELETE CASCADE,
     block_num INTEGER NOT NULL,
     created TIMESTAMP NOT NULL,
     url VARCHAR(500)
