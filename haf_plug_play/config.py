@@ -10,7 +10,6 @@ CONFIG_FIELDS = [
 
 
 class Config:
-    # TODO: split witness_config from server_config
     config = {}
 
     @classmethod
