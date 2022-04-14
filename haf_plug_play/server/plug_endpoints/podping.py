@@ -9,7 +9,7 @@ db = ReadDb().db
 
 async def get_podping_counts(block_range=None):
     """Returns count summaries for podpings.
-    
+
     - `block_range` <array(int)> (optional, default: `30 days; 864,000 blocks`): start and end block of ops to consider
 
     **Example params:**
@@ -33,18 +33,18 @@ async def get_podping_counts(block_range=None):
         ))
     return result
 
-async def get_podping_url_latest(url:str):
+async def get_podping_url_latest(url:str, limit: int = 5):
     """Returns the latest feed update from a given URL.
 
     - `url` <string(500)>: the url of the podping
 
     **Example params:**
-    
+
     ```
     url=https%3A%2F%2Ffeeds.captivate.fm%2Felmatutinodela91
     ```
     """
-    sql_feed_update = StateQuery.get_podping_url_latest_feed_update(url)
+    sql_feed_update = StateQuery.get_podping_url_latest_feed_update(url, limit)
     result = {}
     feed_updates = []
     res = db.db.select(sql_feed_update) or []
@@ -56,4 +56,3 @@ async def get_podping_url_latest(url:str):
                 ))
         result['feed_updates'] = feed_updates
     return result
-    
