@@ -37,6 +37,7 @@ async def get_podping_url_latest(url:str, limit: int = 5):
     """Returns the latest feed update from a given URL.
 
     - `url` <string(500)>: the url of the podping
+    - `limit` <int> (default = 5): max number of results to return
 
     **Example params:**
 
