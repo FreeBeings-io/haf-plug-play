@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS public.hpp_polls_ops(
     op_header JSON,
     op_type VARCHAR(16),
     op_payload JSON
-) INHERITS( hive.plug_play );
+);
 
 CREATE TABLE IF NOT EXISTS public.hpp_polls_content(
     pp_poll_opid BIGINT NOT NULL UNIQUE REFERENCES public.hpp_polls_ops(pp_poll_opid) ON DELETE CASCADE DEFERRABLE,
@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS public.hpp_polls_content(
     expires TIMESTAMP,
     tag VARCHAR(500),
     deleted BOOLEAN DEFAULT false
-) INHERITS( hive.plug_play );
+);
 
 CREATE TABLE IF NOT EXISTS public.hpp_polls_votes(
     pp_poll_opid BIGINT NOT NULL UNIQUE REFERENCES public.hpp_polls_ops(pp_poll_opid) ON DELETE CASCADE DEFERRABLE,
@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS public.hpp_polls_votes(
     created TIMESTAMP,
     account VARCHAR(16),
     answer SMALLINT
-) INHERITS( hive.plug_play );
+);
 
 
 CREATE INDEX IF NOT EXISTS hpp_polls_ops_ix_ppop_id
