@@ -9,7 +9,7 @@ from haf_plug_play.plugs.podping.podping import WDIR_PODPING
 
 BATCH_PROCESS_SIZE = 200000
 START_BLOCK_POLLS = 59594882
-START_BLOCK_PODPING =  53691004 # TODO: confirm
+START_BLOCK_PODPING = 53691004 # TODO: confirm
 
 class PlugInitSetup:
 
