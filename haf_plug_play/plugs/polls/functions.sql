@@ -69,11 +69,6 @@ CREATE OR REPLACE FUNCTION public.hpp_polls_update( _begin BIGINT, _end BIGINT )
             END LOOP;
             UPDATE public.plug_sync SET latest_hive_opid = _end WHERE plug_name='polls';
             COMMIT;
-        EXCEPTION WHEN OTHERS THEN
-                RAISE NOTICE E'Got exception:
-                SQLSTATE: % 
-                SQLERRM: %', SQLSTATE, SQLERRM;
-        END;
         $function$;
 
 CREATE OR REPLACE FUNCTION public.hpp_polls_update_state( _ppop_id BIGINT, _created TIMESTAMP, _posting_acc VARCHAR(16), _active_acc VARCHAR(16), _header JSON, _op_type VARCHAR, _op_payload JSON)
@@ -137,9 +132,4 @@ CREATE OR REPLACE FUNCTION public.hpp_polls_update_state( _ppop_id BIGINT, _crea
                     END IF;
                 END IF;
             END IF;
-        EXCEPTION WHEN OTHERS THEN
-                RAISE NOTICE E'Got exception:
-                SQLSTATE: % 
-                SQLERRM: %', SQLSTATE, SQLERRM;
-        END;
         $function$;
