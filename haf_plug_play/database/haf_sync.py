@@ -8,7 +8,7 @@ from haf_plug_play.server.system_status import SystemStatus
 from haf_plug_play.utils.tools import range_split
 
 APPLICATION_CONTEXT = "plug_play"
-GLOBAL_START_BLOCK = 50000000
+GLOBAL_START_BLOCK = 63503000
 BATCH_PROCESS_SIZE = 1000000
 
 db = WriteDb().db
