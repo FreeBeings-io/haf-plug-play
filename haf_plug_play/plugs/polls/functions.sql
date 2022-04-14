@@ -56,19 +56,17 @@ CREATE OR REPLACE FUNCTION public.hpp_polls_update( _begin BIGINT, _end BIGINT )
                 _op_type := _json ->> 1;
                 _op_payload := (_json ->> 2)::json;
 
-                INSERT INTO public.hpp_polls_ops as hppf(
+                INSERT INTO public.hpp_polls_ops(
                     ppop_id, block_num, created, transaction_id, req_auths, req_posting_auths, op_header, op_type, op_payload)
                 VALUES (
                     temprow.id, temprow.block_num, temprow.timestamp, temprow.transaction_id,
                     temprow.req_auths, temprow.req_posting_auths, _header, _op_type,
                     _op_payload
                 );
-                COMMIT;
                 -- Update state tables
                 PERFORM hpp_polls_update_state(temprow.id, temprow.timestamp, temprow.req_posting_auths[1], temprow.req_auths[1], _header, _op_type, _op_payload);
             END LOOP;
             UPDATE public.plug_sync SET latest_hive_opid = _end WHERE plug_name='polls';
-            COMMIT;
         END;
     $function$;
 
@@ -111,7 +109,6 @@ CREATE OR REPLACE FUNCTION public.hpp_polls_update_state( _ppop_id BIGINT, _crea
                             _pp_poll_opid, _posting_acc, _permlink, _question,
                             _answers, _expires, _tag, _created
                         );
-                        COMMIT;
                     END IF;
                 ELSIF _op_type = 'vote' THEN
                     -- vote on a poll
@@ -120,7 +117,6 @@ CREATE OR REPLACE FUNCTION public.hpp_polls_update_state( _ppop_id BIGINT, _crea
                     _permlink := _op_payload ->> 'permlink';
                     INSERT INTO public.hpp_polls_votes (pp_poll_opid, permlink, author, created, account, answer)
                     VALUES (_pp_poll_opid, _permlink, _author, _created, _posting_acc, _answer);
-                    COMMIT;
                 ELSIF _op_type = 'delete' THEN
                     -- delete a poll
                     _permlink := _op_payload ->> 'permlink';
@@ -128,7 +124,6 @@ CREATE OR REPLACE FUNCTION public.hpp_polls_update_state( _ppop_id BIGINT, _crea
                     IF FOUND THEN
                         IF temprow.expires >= NOW() AT TIME ZONE 'utc' THEN
                             UPDATE public.hpp_polls_content SET deleted = true WHERE pp_poll_opid = temprow.pp_poll_opid;
-                            COMMIT;
                         END IF;
                     END IF;
                 END IF;
