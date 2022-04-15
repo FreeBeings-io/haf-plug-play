@@ -32,9 +32,9 @@ async def root():
     sys_time = datetime.strptime(report['sync']['system']['head_block_time'], UTC_TIMESTAMP_FORMAT)
     diff = cur_time - sys_time
     if diff.seconds > 30:
-        report['sync']['system']['is_behind'] = True
+        report['sync']['health'] = "BAD"
     else:
-        report['sync']['system']['is_behind'] = False
+        report['sync']['health'] = "GOOD"
     return report
 
 # SYSTEM
