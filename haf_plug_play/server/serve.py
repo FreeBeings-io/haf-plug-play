@@ -8,6 +8,7 @@ from haf_plug_play.server.plug_endpoints import polls, podping
 from haf_plug_play.server.system_status import SystemStatus
 from haf_plug_play.server.normalize import normalize_types
 from haf_plug_play.utils.api_metadata import TITLE, DESCRIPTION, VERSION, CONTACT, LICENSE, TAGS_METADATA
+from haf_plug_play.utils.tools import UTC_TIMESTAMP_FORMAT
 
 
 app = FastAPI(
@@ -27,6 +28,13 @@ async def root():
         'sync': normalize_types(SystemStatus.get_sync_status()),
         'timestamp': datetime.utcnow().isoformat()
     }
+    cur_time = datetime.strptime(report['timestamp'], UTC_TIMESTAMP_FORMAT)
+    sys_time = datetime.strptime(report['sync']['system']['head_block_time'], UTC_TIMESTAMP_FORMAT)
+    diff = cur_time - sys_time
+    if diff.seconds > 30:
+        report['sync']['system']['is_behind'] = True
+    else:
+        report['sync']['system']['is_behind'] = False
     return report
 
 # SYSTEM
