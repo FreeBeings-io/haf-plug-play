@@ -79,11 +79,13 @@ class PlugSync:
                         SystemStatus.update_sync_status(plug_status=cls.plug_sync_states)
                         db.select(f"SELECT public.hpp_polls_update( {s[0]}, {s[1]} );")
                         db.commit()
+                    cls.plug_sync_states['polls'] = 'synchronized'
                 elif (head_hive_rowid - app_hive_rowid) > 0:
                     progress = round((app_hive_rowid/head_hive_rowid) * 100, 2)
                     cls.plug_sync_states['polls'] = f'synchronizing {progress} %'
                     db.select(f"SELECT public.hpp_polls_update( {app_hive_rowid+1}, {head_hive_rowid} );")
                     db.commit()
+                    cls.plug_sync_states['polls'] = 'synchronized'
                 else:
                     cls.plug_sync_states['polls'] = 'synchronized'
                 SystemStatus.update_sync_status(plug_status=cls.plug_sync_states)
