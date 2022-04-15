@@ -26,7 +26,7 @@ async def root():
     report = {
         'name': 'Hive Plug & Play',
         'sync': normalize_types(SystemStatus.get_sync_status()),
-        'timestamp': datetime.utcnow().isoformat()
+        'timestamp': datetime.utcnow().strftime(UTC_TIMESTAMP_FORMAT)
     }
     cur_time = datetime.strptime(report['timestamp'], UTC_TIMESTAMP_FORMAT)
     sys_time = datetime.strptime(report['sync']['system']['head_block_time'], UTC_TIMESTAMP_FORMAT)
