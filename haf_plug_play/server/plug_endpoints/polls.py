@@ -13,7 +13,7 @@ def _does_poll_exist(author:str,permlink:str):
     """Checks whether the given poll exists already in the database."""
 
     sql = f"""
-        SELECT 1 FROM public.hpp_polls_content
+        SELECT 1 FROM hpp.polls_content
         WHERE author = '{author}' AND permlink = '{permlink}';
     """
     exists = bool(db.db.select(sql))
