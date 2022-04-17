@@ -20,11 +20,11 @@ class HafSyncSetup:
     @classmethod
     def prepare_global_data(cls):
         """Prepares global data."""
-        app_entry = db.select("SELECT 1 FROM public.apps WHERE app_name='polls';")
+        app_entry = db.select("SELECT 1 FROM hpp.apps WHERE app_name='polls';")
         if app_entry is None:
             db.execute(
                 """
-                    INSERT INTO public.apps (app_name, op_ids, enabled)
+                    INSERT INTO hpp.apps (app_name, op_ids, enabled)
                     VALUES ('polls','{"polls"}',true);
                 """, None
             )
@@ -44,10 +44,13 @@ class HafSyncSetup:
             f"SELECT hive.app_context_exists( '{APPLICATION_CONTEXT}' );"
             )[0][0]
             print(exists)
-        # create table
+
+        # create schema and tables
+        db.execute(f"CREATE SCHEMA IF NOT EXISTS hpp;")
+
         db.execute(
             f"""
-                CREATE TABLE IF NOT EXISTS public.plug_play_ops(
+                CREATE TABLE IF NOT EXISTS hpp.plug_play_ops(
                     id BIGSERIAL PRIMARY KEY,
                     hive_opid BIGINT NOT NULL,
                     block_num INTEGER NOT NULL,
@@ -63,25 +66,25 @@ class HafSyncSetup:
         )
         db.execute(
             """
-                CREATE INDEX IF NOT EXISTS custom_json_ops_ix_hive_opid
-                ON public.plug_play_ops (hive_opid);
+                CREATE INDEX IF NOT EXISTS hpp.custom_json_ops_ix_hive_opid
+                ON hpp.plug_play_ops (hive_opid);
             """, None
         )
         db.execute(
             """
-                CREATE INDEX IF NOT EXISTS custom_json_ops_ix_block_num
-                ON public.plug_play_ops (block_num);
+                CREATE INDEX IF NOT EXISTS hpp.custom_json_ops_ix_block_num
+                ON hpp.plug_play_ops (block_num);
             """, None
         )
         db.execute(
             """
-                CREATE INDEX IF  NOT EXISTS custom_json_ops_ix_op_id
-                ON public.plug_play_ops (op_id);
+                CREATE INDEX IF  NOT EXISTS hpp.custom_json_ops_ix_op_id
+                ON hpp.plug_play_ops (op_id);
             """, None
         )
         db.execute(
             """
-                CREATE TABLE IF NOT EXISTS public.apps(
+                CREATE TABLE IF NOT EXISTS hpp.apps(
                     app_name varchar(32) PRIMARY KEY,
                     op_ids varchar(31)[],
                     last_updated timestamp DEFAULT NOW(),
@@ -91,7 +94,7 @@ class HafSyncSetup:
         )
         db.execute(
             """
-                CREATE TABLE IF NOT EXISTS public.plug_sync(
+                CREATE TABLE IF NOT EXISTS hpp.plug_sync(
                     plug_name varchar(16) NOT NULL,
                     latest_hive_opid bigint DEFAULT 0
                 );
@@ -99,7 +102,7 @@ class HafSyncSetup:
         )
         db.execute(
             """
-                CREATE TABLE IF NOT EXISTS public.global_props(
+                CREATE TABLE IF NOT EXISTS hpp.global_props(
                     head_hive_opid bigint DEFAULT 0,
                     head_block_num bigint DEFAULT 0,
                     head_block_time timestamp
@@ -108,16 +111,16 @@ class HafSyncSetup:
         )
         db.execute(
             """
-                INSERT INTO public.global_props (head_hive_opid)
+                INSERT INTO hpp.global_props (head_hive_opid)
                 SELECT '0'
-                WHERE NOT EXISTS (SELECT * FROM public.global_props);
+                WHERE NOT EXISTS (SELECT * FROM hpp.global_props);
             """, None
         )
         db.commit()
         # create update ops function
         db.execute(
             """
-                CREATE OR REPLACE FUNCTION public.update_plug_play_ops( _first_block BIGINT, _last_block BIGINT )
+                CREATE OR REPLACE FUNCTION hpp.update_plug_play_ops( _first_block BIGINT, _last_block BIGINT )
                 RETURNS void
                 LANGUAGE plpgsql
                 VOLATILE AS $function$
@@ -161,14 +164,14 @@ class HafSyncSetup:
                                 WHERE pptv.block_num = temprow.block_num
                                 AND pptv.trx_in_block = temprow.trx_in_block);
                             _transaction_id := encode(_hash::bytea, 'escape');
-                            INSERT INTO public.plug_play_ops as ppops(
+                            INSERT INTO hpp.plug_play_ops as ppops(
                                 hive_opid, block_num, timestamp, transaction_id, req_auths,
                                 req_posting_auths, op_id, op_json)
                             VALUES
                                 (_hive_opid, _block_num, _block_timestamp, _transaction_id, _required_auths,
                                 _required_posting_auths, _op_id, _op_json);
                         END LOOP;
-                        UPDATE global_props SET (head_hive_opid, head_block_num, head_block_time) = (_hive_opid, _block_num, _block_timestamp);
+                        UPDATE hpp.global_props SET (head_hive_opid, head_block_num, head_block_time) = (_hive_opid, _block_num, _block_timestamp);
                     END;
                     $function$;
             """, None
@@ -226,7 +229,7 @@ class HafSync:
                         #print(f"processing {s[0]} to {s[1]}")
                         progress = round(((s[0]/last_block) * 100),2)
                         SystemStatus.update_sync_status(sync_status=f"Massive sync in progress: {s[0]} to {s[1]}    ({progress} %)")
-                        db.select(f"SELECT public.update_plug_play_ops( {s[0]}, {s[1]} );")
+                        db.select(f"SELECT hpp.update_plug_play_ops( {s[0]}, {s[1]} );")
                         #print("batch sync done")
                         db.select(f"SELECT hive.app_context_attach( '{APPLICATION_CONTEXT}', {s[1]} );")
                         #print("context attached again")
@@ -236,7 +239,7 @@ class HafSync:
                     continue
                 PlugSync.toggle_plug_sync(False)
                 SystemStatus.update_sync_status(sync_status=f"Synchronizing: {first_block} to {last_block}")
-                db.select(f"SELECT public.update_plug_play_ops( {first_block}, {last_block} );")
+                db.select(f"SELECT hpp.update_plug_play_ops( {first_block}, {last_block} );")
                 SystemStatus.update_sync_status(sync_status=f"Synchronized... on block {last_block}")
                 db.commit()
                 PlugSync.toggle_plug_sync()
