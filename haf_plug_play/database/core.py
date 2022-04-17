@@ -3,8 +3,17 @@ import psycopg2
 
 class DbSession:
     def __init__(self, config):
-        # TODO: retrieve from env_variables
-        self.conn = psycopg2.connect(f"dbname=haf user={config['db_username']} password={config['db_password']}")
+        self.conn = psycopg2.connect(
+            host=config['db_host'],
+            database=config['db_name'],
+            user=config['db_username'],
+            password=config['db_password'],
+            connect_timeout=3,
+            keepalives=1,
+            keepalives_idle=5,
+            keepalives_interval=2,
+            keepalives_count=2
+        )
         self.conn.autocommit = False
         self.cur = self.conn.cursor()
 
@@ -45,13 +54,21 @@ class DbSetup:
 
     @classmethod
     def check_db(cls, config):
-        # check if it exists
         try:
-            # TODO: retrieve authentication from config 
-            cls.conn = psycopg2.connect(f"dbname=haf user={config['db_username']} password={config['db_password']}")
+            cls.conn = psycopg2.connect(
+            host=config['db_host'],
+            database=config['db_name'],
+            user=config['db_username'],
+            password=config['db_password'],
+            connect_timeout=3,
+            keepalives=1,
+            keepalives_idle=5,
+            keepalives_interval=2,
+            keepalives_count=2
+        )
         except psycopg2.OperationalError as e:
-            if "haf" in e.args[0] and "does not exist" in e.args[0]:
-                print("No database found. Please create a 'haf' database in PostgreSQL.")
+            if config['db_name'] in e.args[0] and "does not exist" in e.args[0]:
+                print(f"No database found. Please create a '{config['db_name']}' database in PostgreSQL.")
                 os._exit(1)
             else:
                 print(e)
