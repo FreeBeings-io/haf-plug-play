@@ -8,7 +8,6 @@ from haf_plug_play.server.system_status import SystemStatus
 from haf_plug_play.utils.tools import range_split
 
 APPLICATION_CONTEXT = "plug_play"
-GLOBAL_START_BLOCK = 53500000
 BATCH_PROCESS_SIZE = 1000000
 
 db = WriteDb().db
@@ -35,15 +34,13 @@ class HafSyncSetup:
         exists = db.select(
             f"SELECT hive.app_context_exists( '{APPLICATION_CONTEXT}' );"
         )[0][0]
-        print(exists)
         if exists is False:
             db.select(f"SELECT hive.app_create_context( '{APPLICATION_CONTEXT}' );")
             db.commit()
-            print("Created context: plug_play")
+            print(f"HAF SYNC:: created context: {APPLICATION_CONTEXT}")
             exists = db.select(
             f"SELECT hive.app_context_exists( '{APPLICATION_CONTEXT}' );"
             )[0][0]
-            print(exists)
 
         # create schema and tables
         db.execute(f"CREATE SCHEMA IF NOT EXISTS hpp;")
@@ -198,6 +195,7 @@ class HafSync:
     @classmethod
     def main_loop(cls):
         """Main application loop."""
+        massive_sync = False
         while True:
             if cls.sync_enabled is True:
                 # get blocks range
@@ -210,31 +208,30 @@ class HafSync:
                 if not first_block:
                     time.sleep(0.2)
                     continue
-                if blocks_range[0] < GLOBAL_START_BLOCK:
-                    print(f"Starting from global_start_block: {GLOBAL_START_BLOCK}")
+                if blocks_range[0] < config['global_start_block']:
+                    print(f"HAF SYNC:: starting from global_start_block: {config['global_start_block']}")
                     db.select(f"SELECT hive.app_context_detach( '{APPLICATION_CONTEXT}' );")
-                    print("context detached")
-                    db.select(f"SELECT hive.app_context_attach( '{APPLICATION_CONTEXT}', {(GLOBAL_START_BLOCK-1)} );")
-                    print("context attached again")
+                    print("HAF SYNC:: context detached")
+                    db.select(f"SELECT hive.app_context_attach( '{APPLICATION_CONTEXT}', {(config['global_start_block']-1)} );")
+                    print("HAF SYNC:: context attached again")
                     blocks_range = db.select(f"SELECT * FROM hive.app_next_block('{APPLICATION_CONTEXT}');")[0]
-                    print(f"blocks range: {blocks_range}")
+                    print(f"HAF SYNC:: blocks range: {blocks_range}")
+                    (first_block, last_block) = blocks_range
+                    massive_sync = True
 
-                (first_block, last_block) = blocks_range
-                if (last_block - first_block) > 100:
-                    print("massive sync in progress")
+                if massive_sync:
+                    print("HAF SYNC:: starting massive sync")
                     steps = range_split(first_block, last_block, BATCH_PROCESS_SIZE)
+                    tot = last_block - first_block
+                    db.select(f"SELECT hive.app_context_detach( '{APPLICATION_CONTEXT}' );")
                     for s in steps:
-                        db.select(f"SELECT hive.app_context_detach( '{APPLICATION_CONTEXT}' );")
-                        #print("context detached")
-                        #print(f"processing {s[0]} to {s[1]}")
-                        progress = round(((s[0]/last_block) * 100),2)
+                        progress = int(((tot - (last_block - s[0])) / tot) * 100)
                         SystemStatus.update_sync_status(sync_status=f"Massive sync in progress: {s[0]} to {s[1]}    ({progress} %)")
                         db.select(f"SELECT hpp.update_plug_play_ops( {s[0]}, {s[1]} );")
-                        #print("batch sync done")
-                        db.select(f"SELECT hive.app_context_attach( '{APPLICATION_CONTEXT}', {s[1]} );")
-                        #print("context attached again")
                         db.commit()
-                    print("massive sync done")
+                    db.select(f"SELECT hive.app_context_attach( '{APPLICATION_CONTEXT}', {s[1]} );")
+                    print("HAF SYNC:: massive sync done")
+                    massive_sync = False
                     PlugSync.toggle_plug_sync()
                     continue
                 PlugSync.toggle_plug_sync(False)
