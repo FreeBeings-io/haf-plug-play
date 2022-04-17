@@ -1,41 +1,4 @@
-import psycopg2
-
-
-class DbSession:
-    def __init__(self, config):
-        # TODO: retrieve from env_variables
-        self.conn = psycopg2.connect(f"dbname=haf user={config['db_username']} password={config['db_password']}")
-        self.conn.autocommit = False
-        self.cur = self.conn.cursor()
-    
-    def select(self, sql):
-        self.cur.execute(sql)
-        res = self.cur.fetchall()
-        if len(res) == 0:
-            return None
-        else:
-            return res
-    
-    def execute_immediate(self, sql,  data):
-        self.cur.execute(sql, data)
-        self.conn.commit()
-    
-    def get_query(self,sql, data):
-        return self.cur.mogrify(sql,data)
-    
-    def execute(self, sql, data):
-        try:
-            self.cur.execute(sql, data)
-        except Exception as e:
-            print(e)
-            print(f"SQL:  {sql}")
-            print(f"DATA:   {data}")
-            self.conn.rollback()
-            raise Exception ('DB error occurred')
-    
-    def commit(self):
-        self.conn.commit()
-
+from haf_plug_play.database.core import DbSession
 
 class PlugPlayDb:
     """Avails method handlers for common DB operations and also exposes direct
@@ -148,20 +111,3 @@ class PlugPlayDb:
         _res = self.db.select("SELECT * FROM global_props;")
         res = self._populate_by_schema(_res[0], cols)
         return res
-
-    # OPS
-
-    def get_ops_by_block(self, block_num):
-        cols = ['transaction_id', 'req_auths', 'req_posting_auths', 'op_id', 'op_json']
-        _res = self.db.select(
-            f"""
-                SELECT transaction_id, req_auths, req_posting_auths, op_id, op_json
-                    FROM public.plug_play_ops
-                    WHERE block_num = {block_num};
-            """
-        )
-        if _res is None: return []
-        result = []
-        for r in _res:
-            result.append(self._populate_by_schema(r, cols))
-        return result
