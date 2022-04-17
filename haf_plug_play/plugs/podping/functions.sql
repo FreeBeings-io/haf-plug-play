@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION public.hpp_podping_update( _begin BIGINT, _end BIGINT )
+CREATE OR REPLACE FUNCTION hpp.podping_update( _begin BIGINT, _end BIGINT )
     RETURNS void
     LANGUAGE plpgsql
     VOLATILE AS $function$
@@ -68,7 +68,7 @@ CREATE OR REPLACE FUNCTION public.hpp_podping_update( _begin BIGINT, _end BIGINT
                 _transaction_id := temprow.transaction_id;
                 -- Make new entry
                 WITH _ins AS (
-                    INSERT INTO public.hpp_podping_ops(
+                    INSERT INTO hpp.podping_ops(
                         ppop_id, block_num, created, transaction_id, req_auths,
                         req_posting_auths, op_id, op_payload)
                     VALUES
@@ -83,7 +83,7 @@ CREATE OR REPLACE FUNCTION public.hpp_podping_update( _begin BIGINT, _end BIGINT
         END;
     $function$;
 
-CREATE OR REPLACE FUNCTION public.hpp_podping_process_op(_pp_podping_opid BIGINT, _block_num BIGINT, _created TIMESTAMP, _posting_acc VARCHAR(16), _op_id VARCHAR(31), _payload JSON)
+CREATE OR REPLACE FUNCTION hpp.podping_process_op(_pp_podping_opid BIGINT, _block_num BIGINT, _created TIMESTAMP, _posting_acc VARCHAR(16), _op_id VARCHAR(31), _payload JSON)
     RETURNS void
     LANGUAGE plpgsql
     VOLATILE AS $function$
@@ -97,7 +97,7 @@ CREATE OR REPLACE FUNCTION public.hpp_podping_process_op(_pp_podping_opid BIGINT
         END;
     $function$;
 
-CREATE OR REPLACE FUNCTION public.hpp_podping_process_podping(_pp_podping_opid BIGINT, _block_num BIGINT, _created TIMESTAMP, _posting_acc VARCHAR(16), _payload JSON)
+CREATE OR REPLACE FUNCTION hpp.podping_process_podping(_pp_podping_opid BIGINT, _block_num BIGINT, _created TIMESTAMP, _posting_acc VARCHAR(16), _payload JSON)
     RETURNS void
     LANGUAGE plpgsql
     VOLATILE AS $function$
@@ -114,7 +114,7 @@ CREATE OR REPLACE FUNCTION public.hpp_podping_process_podping(_pp_podping_opid B
                 FOREACH _url IN ARRAY (_urls)
                 LOOP
                     --RAISE NOTICE '%', _url;
-                    INSERT INTO public.hpp_podping_feed_updates(pp_podping_opid, block_num, created, url)
+                    INSERT INTO hpp.podping_feed_updates(pp_podping_opid, block_num, created, url)
                     VALUES (_pp_podping_opid, _block_num, _created, _url);
                 END LOOP;
             END IF;

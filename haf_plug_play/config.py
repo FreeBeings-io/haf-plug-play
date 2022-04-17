@@ -4,8 +4,8 @@ import os
 HOME_DIR = os.environ.get('PLUG_PLAY_HOME') or "/etc/haf-plug-play"
 
 CONFIG_FIELDS = [
-    'db_username', 'db_password', 'server_host',
-    'server_port', 'ssl_cert', 'ssl_key'
+    'db_host', 'db_name', 'db_username',
+    'db_password', 'server_host', 'server_port'
 ]
 
 

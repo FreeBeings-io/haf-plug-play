@@ -1,6 +1,6 @@
-CREATE TABLE IF NOT EXISTS public.hpp_podping_ops(
+CREATE TABLE IF NOT EXISTS hpp.podping_ops(
     pp_podping_opid BIGSERIAL PRIMARY KEY,
-    ppop_id BIGINT NOT NULL REFERENCES public.plug_play_ops(id) ON DELETE CASCADE DEFERRABLE,
+    ppop_id BIGINT NOT NULL REFERENCES hpp.plug_play_ops(id) ON DELETE CASCADE DEFERRABLE,
     block_num INTEGER NOT NULL,
     created TIMESTAMP NOT NULL,
     transaction_id CHAR(40) NOT NULL,
@@ -10,20 +10,20 @@ CREATE TABLE IF NOT EXISTS public.hpp_podping_ops(
     op_payload JSON
 );
 
-CREATE TABLE IF NOT EXISTS public.hpp_podping_feed_updates(
+CREATE TABLE IF NOT EXISTS hpp.podping_feed_updates(
     feed_update_id BIGSERIAL PRIMARY KEY,
-    pp_podping_opid BIGINT NOT NULL REFERENCES public.hpp_podping_ops(pp_podping_opid) ON DELETE CASCADE DEFERRABLE,
+    pp_podping_opid BIGINT NOT NULL REFERENCES hpp.podping_ops(pp_podping_opid) ON DELETE CASCADE DEFERRABLE,
     block_num INTEGER NOT NULL,
     created TIMESTAMP NOT NULL,
     url VARCHAR(500)
 );
 
 
-CREATE INDEX IF NOT EXISTS hpp_podping_ops_ix_pp_podping_opid
-    ON public.hpp_podping_ops (pp_podping_opid);
+CREATE INDEX IF NOT EXISTS hpp.podping_ops_ix_pp_podping_opid
+    ON hpp.podping_ops (pp_podping_opid);
 
-CREATE INDEX IF NOT EXISTS hpp_podping_feed_updates_ix_block_num
-    ON public.hpp_podping_feed_updates (block_num);
+CREATE INDEX IF NOT EXISTS hpp.podping_feed_updates_ix_block_num
+    ON hpp.podping_feed_updates (block_num);
 
-CREATE INDEX IF NOT EXISTS hpp_podping_feed_updates_ix_created
-    ON public.hpp_podping_feed_updates (created);
+CREATE INDEX IF NOT EXISTS hpp.podping_feed_updates_ix_created
+    ON hpp.podping_feed_updates (created);

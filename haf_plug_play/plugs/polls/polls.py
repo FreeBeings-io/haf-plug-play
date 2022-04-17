@@ -18,7 +18,7 @@ class SearchQuery:
             block_range = [latest - 28800, latest]
         query = f"""
                     SELECT transaction_id, req_posting_auths, op_type, op_payload
-                    FROM hpp_polls_ops
+                    FROM hpp.polls_ops
                     WHERE block_num BETWEEN {block_range[0]} AND {block_range[1]}
         """
         if op_type:
@@ -36,7 +36,7 @@ class StateQuery:
         query = """
             SELECT author, permlink, question,
                 answers, expires, tag, created
-            FROM hpp_polls_content
+            FROM hpp.polls_content
             WHERE expires >= NOW() AT TIME ZONE 'utc'
             AND deleted = false
         """
@@ -50,7 +50,7 @@ class StateQuery:
         query = f"""
             SELECT author, permlink, question
                 answers, expires, tag, created
-            FROM hpp_polls_content
+            FROM hpp.polls_content
             WHERE author = '{author}' AND permlink = '{permlink}' AND deleted = false;
         """
         return query
@@ -60,8 +60,8 @@ class StateQuery:
         """Retrieve the summary of votes associated with a specific poll."""
         query = f"""
             SELECT t_content.answers[t_votes.answer] AS parsed_answer, COUNT(DISTINCT t_votes.account)
-            FROM hpp_polls_content t_content 
-            JOIN hpp_polls_votes t_votes ON t_content.author = t_votes.author
+            FROM hpp.polls_content t_content 
+            JOIN hpp.polls_votes t_votes ON t_content.author = t_votes.author
                 AND t_content.permlink = t_votes.permlink
             WHERE t_content.author = '{author}'
                 AND t_content.deleted = false
@@ -77,8 +77,8 @@ class StateQuery:
         """Retrieve all votes associated with a specific poll."""
         query = f"""
             SELECT t_votes.account, t_content.answers[t_votes.answer] AS answer
-            FROM hpp_polls_content t_content 
-            JOIN hpp_polls_votes t_votes ON t_content.author = t_votes.author AND t_content.permlink = t_votes.permlink
+            FROM hpp.polls_content t_content 
+            JOIN hpp.polls_votes t_votes ON t_content.author = t_votes.author AND t_content.permlink = t_votes.permlink
             WHERE t_content.author = '{author}' AND t_content.permlink = '{permlink}' AND t_content.deleted = false;
         """
         return query
@@ -89,7 +89,7 @@ class StateQuery:
         query = f"""
             SELECT permlink, question,
                 answers, expires, tag, created
-            FROM hpp_polls_content
+            FROM hpp.polls_content
             WHERE author = '{author}'
             AND deleted = false
         """

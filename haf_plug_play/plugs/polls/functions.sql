@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION public.hpp_polls_update( _begin BIGINT, _end BIGINT )
+CREATE OR REPLACE FUNCTION hpp.polls_update( _begin BIGINT, _end BIGINT )
     RETURNS void
     LANGUAGE plpgsql
     VOLATILE AS $function$
@@ -13,7 +13,7 @@ CREATE OR REPLACE FUNCTION public.hpp_polls_update( _begin BIGINT, _end BIGINT )
             _json JSON;
         BEGIN
             -- Preparations
-            SELECT MAX(latest_hive_opid) INTO head_hive_rowid FROM public.plug_sync WHERE plug_name = 'polls';
+            SELECT MAX(latest_hive_opid) INTO head_hive_rowid FROM hpp.plug_sync WHERE plug_name = 'polls';
             RAISE NOTICE '%', head_hive_rowid;
             IF head_hive_rowid IS NULL THEN
                 head_hive_rowid := 0;
@@ -44,7 +44,7 @@ CREATE OR REPLACE FUNCTION public.hpp_polls_update( _begin BIGINT, _end BIGINT )
                     ARRAY(SELECT json_array_elements_text(req_auths::json))  AS req_auths,
                     ARRAY(SELECT json_array_elements_text(req_posting_auths::json)) AS req_posting_auths,
                     ppops.op_json
-                FROM public.plug_play_ops ppops
+                FROM hpp.plug_play_ops ppops
                 WHERE ppops.hive_opid >= _begin
                     AND ppops.hive_opid <= _end
                     AND ppops.op_id = 'polls'
@@ -56,7 +56,7 @@ CREATE OR REPLACE FUNCTION public.hpp_polls_update( _begin BIGINT, _end BIGINT )
                 _op_type := _json ->> 1;
                 _op_payload := (_json ->> 2)::json;
 
-                INSERT INTO public.hpp_polls_ops(
+                INSERT INTO hpp.polls_ops(
                     ppop_id, block_num, created, transaction_id, req_auths, req_posting_auths, op_header, op_type, op_payload)
                 VALUES (
                     temprow.id, temprow.block_num, temprow.timestamp, temprow.transaction_id,
@@ -64,13 +64,13 @@ CREATE OR REPLACE FUNCTION public.hpp_polls_update( _begin BIGINT, _end BIGINT )
                     _op_payload
                 );
                 -- Update state tables
-                PERFORM hpp_polls_update_state(temprow.id, temprow.timestamp, temprow.req_posting_auths[1], temprow.req_auths[1], _header, _op_type, _op_payload);
+                PERFORM hpp.polls_update_state(temprow.id, temprow.timestamp, temprow.req_posting_auths[1], temprow.req_auths[1], _header, _op_type, _op_payload);
             END LOOP;
-            UPDATE public.plug_sync SET latest_hive_opid = _end WHERE plug_name='polls';
+            UPDATE hpp.plug_sync SET latest_hive_opid = _end WHERE plug_name='polls';
         END;
     $function$;
 
-CREATE OR REPLACE FUNCTION public.hpp_polls_update_state( _ppop_id BIGINT, _created TIMESTAMP, _posting_acc VARCHAR(16), _active_acc VARCHAR(16), _header JSON, _op_type VARCHAR, _op_payload JSON)
+CREATE OR REPLACE FUNCTION hpp.polls_update_state( _ppop_id BIGINT, _created TIMESTAMP, _posting_acc VARCHAR(16), _active_acc VARCHAR(16), _header JSON, _op_type VARCHAR, _op_payload JSON)
     RETURNS void
     LANGUAGE plpgsql
     VOLATILE AS $function$
@@ -90,7 +90,7 @@ CREATE OR REPLACE FUNCTION public.hpp_polls_update_state( _ppop_id BIGINT, _crea
         BEGIN
             _op_version := _header ->> 0;
             _app_name := _header ->> 1;
-            SELECT pp_poll_opid INTO _pp_poll_opid FROM public.hpp_polls_ops WHERE ppop_id = _ppop_id;
+            SELECT pp_poll_opid INTO _pp_poll_opid FROM hpp.polls_ops WHERE ppop_id = _ppop_id;
 
             RAISE NOTICE 'op_version: % \n app_name: %', _op_version, _app_name;
 
@@ -102,9 +102,9 @@ CREATE OR REPLACE FUNCTION public.hpp_polls_update_state( _ppop_id BIGINT, _crea
                     _answers := ARRAY(SELECT json_array_elements_text((_op_payload ->> 'answers')::json));
                     _expires := _op_payload ->> 'expires';
                     _tag := _op_payload ->> 'tag';
-                    SELECT * INTO temprow FROM public.hpp_polls_content WHERE author = _posting_acc and permlink = _permlink;
+                    SELECT * INTO temprow FROM hpp.polls_content WHERE author = _posting_acc and permlink = _permlink;
                     IF NOT FOUND THEN
-                        INSERT INTO public.hpp_polls_content (pp_poll_opid, author, permlink, question, answers, expires, tag, created)
+                        INSERT INTO hpp.polls_content (pp_poll_opid, author, permlink, question, answers, expires, tag, created)
                         VALUES (
                             _pp_poll_opid, _posting_acc, _permlink, _question,
                             _answers, _expires, _tag, _created
@@ -115,15 +115,15 @@ CREATE OR REPLACE FUNCTION public.hpp_polls_update_state( _ppop_id BIGINT, _crea
                     _answer := _op_payload ->> 'answer';
                     _author := _op_payload ->> 'author';
                     _permlink := _op_payload ->> 'permlink';
-                    INSERT INTO public.hpp_polls_votes (pp_poll_opid, permlink, author, created, account, answer)
+                    INSERT INTO hpp.polls_votes (pp_poll_opid, permlink, author, created, account, answer)
                     VALUES (_pp_poll_opid, _permlink, _author, _created, _posting_acc, _answer);
                 ELSIF _op_type = 'delete' THEN
                     -- delete a poll
                     _permlink := _op_payload ->> 'permlink';
-                    SELECT * INTO temprow FROM public.hpp_polls_content WHERE author = _posting_acc and permlink = _permlink;
+                    SELECT * INTO temprow FROM hpp.polls_content WHERE author = _posting_acc and permlink = _permlink;
                     IF FOUND THEN
                         IF temprow.expires >= NOW() AT TIME ZONE 'utc' THEN
-                            UPDATE public.hpp_polls_content SET deleted = true WHERE pp_poll_opid = temprow.pp_poll_opid;
+                            UPDATE hpp.polls_content SET deleted = true WHERE pp_poll_opid = temprow.pp_poll_opid;
                         END IF;
                     END IF;
                 END IF;
