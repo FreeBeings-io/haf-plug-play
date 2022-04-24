@@ -4,9 +4,8 @@ class PlugPlayDb:
     """Avails method handlers for common DB operations and also exposes direct
        DB actions through `self.db.select`, `self.db.execute` and `self.db.execute_immediate`"""
 
-    def __init__(self, config):
-        self.db = DbSession(config)
-        self.config = config
+    def __init__(self):
+        self.db = DbSession()
 
     # TOOLS
 
