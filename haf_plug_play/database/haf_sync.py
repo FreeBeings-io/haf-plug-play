@@ -63,19 +63,19 @@ class HafSyncSetup:
         )
         db.execute(
             """
-                CREATE INDEX IF NOT EXISTS hpp.custom_json_ops_ix_hive_opid
+                CREATE INDEX IF NOT EXISTS custom_json_ops_ix_hive_opid
                 ON hpp.plug_play_ops (hive_opid);
             """, None
         )
         db.execute(
             """
-                CREATE INDEX IF NOT EXISTS hpp.custom_json_ops_ix_block_num
+                CREATE INDEX IF NOT EXISTS custom_json_ops_ix_block_num
                 ON hpp.plug_play_ops (block_num);
             """, None
         )
         db.execute(
             """
-                CREATE INDEX IF  NOT EXISTS hpp.custom_json_ops_ix_op_id
+                CREATE INDEX IF  NOT EXISTS custom_json_ops_ix_op_id
                 ON hpp.plug_play_ops (op_id);
             """, None
         )
@@ -196,6 +196,7 @@ class HafSync:
     def main_loop(cls):
         """Main application loop."""
         massive_sync = False
+        config['global_start_block'] = int(config['global_start_block'])
         while True:
             if cls.sync_enabled is True:
                 # get blocks range
@@ -240,4 +241,4 @@ class HafSync:
                 SystemStatus.update_sync_status(sync_status=f"Synchronized... on block {last_block}")
                 db.commit()
                 PlugSync.toggle_plug_sync()
-            time.sleep(0.5)
+            time.sleep(1)
