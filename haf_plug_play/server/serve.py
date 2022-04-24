@@ -8,7 +8,6 @@ from haf_plug_play.server.plug_endpoints import polls, podping
 from haf_plug_play.server.system_status import SystemStatus
 from haf_plug_play.server.normalize import normalize_types
 from haf_plug_play.utils.api_metadata import TITLE, DESCRIPTION, VERSION, CONTACT, LICENSE, TAGS_METADATA
-from haf_plug_play.utils.tools import UTC_TIMESTAMP_FORMAT
 
 
 app = FastAPI(
@@ -25,19 +24,8 @@ async def root():
     """Reports the status of Hive Plug & Play."""
     report = {
         'name': 'Hive Plug & Play',
-        'sync': normalize_types(SystemStatus.get_sync_status()),
-        'timestamp': datetime.utcnow().strftime(UTC_TIMESTAMP_FORMAT)
+        'status': normalize_types(SystemStatus.get_sync_status())
     }
-    cur_time = datetime.strptime(report['timestamp'], UTC_TIMESTAMP_FORMAT)
-    sys_time = datetime.strptime(report['sync']['system']['head_block_time'], UTC_TIMESTAMP_FORMAT)
-    diff = cur_time - sys_time
-    health = "GOOD"
-    for s in report['sync']['plugs']:
-        if report['sync']['plugs'][s] != "synchronized":
-            health = "BAD"
-    if diff.seconds > 30:
-        health = "BAD"
-    report['sync']['health'] = health
     return report
 
 # SYSTEM
@@ -109,21 +97,11 @@ app.add_api_route(
 
 def run_server(config):
     """Run server."""
-
-    if config['ssl_cert'] != '' and config['ssl_key'] != '':
-        uvicorn.run(
-            app,
-            host=config['server_host'],
-            port=int(config['server_port']),
-            log_level="info",
-            ssl_certfile=config['ssl_cert'],
-            ssl_keyfile=config['ssl_key'],
-            reload=True
-        )
-    else:
-        uvicorn.run(
-            app,
-            host=config['server_host'],
-            port=int(config['server_port']),
-            log_level="info"
-        )
+    uvicorn.run(
+        "haf_plug_play.server.serve:app",
+        host=config['server_host'],
+        port=int(config['server_port']),
+        log_level="info",
+        reload=True,
+        workers=50
+    )
