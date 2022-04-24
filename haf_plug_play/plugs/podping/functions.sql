@@ -19,7 +19,7 @@ CREATE OR REPLACE FUNCTION hpp.podping_update( _begin BIGINT, _end BIGINT )
 
         BEGIN
             -- Preparations
-            SELECT MAX(latest_hive_opid) INTO head_hive_rowid FROM public.plug_sync WHERE plug_name = 'podping';
+            SELECT MAX(latest_hive_opid) INTO head_hive_rowid FROM hpp.plug_sync WHERE plug_name = 'podping';
             RAISE NOTICE '%', head_hive_rowid;
             IF head_hive_rowid IS NULL THEN
                 head_hive_rowid := 0;
@@ -51,7 +51,7 @@ CREATE OR REPLACE FUNCTION hpp.podping_update( _begin BIGINT, _end BIGINT )
                     ppops.req_posting_auths,
                     ppops.op_id,
                     ppops.op_json
-                FROM public.plug_play_ops ppops
+                FROM hpp.plug_play_ops ppops
                 WHERE ppops.hive_opid >= _begin
                     AND ppops.hive_opid <= _end
                     AND ppops.op_id = 'podping'
@@ -79,7 +79,7 @@ CREATE OR REPLACE FUNCTION hpp.podping_update( _begin BIGINT, _end BIGINT )
                 SELECT pp_podping_opid INTO _new_id FROM _ins;
                 PERFORM hpp_podping_process_op(_new_id, _block_num, _block_timestamp, _required_posting_auths[1], _op_id, _op_payload);
             END LOOP;
-            UPDATE public.plug_sync SET latest_hive_opid = _end WHERE plug_name='podping';
+            UPDATE hpp.plug_sync SET latest_hive_opid = _end WHERE plug_name='podping';
         END;
     $function$;
 
