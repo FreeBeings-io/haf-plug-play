@@ -183,7 +183,7 @@ class HafSync:
     @classmethod
     def init(cls):
         """Initialize the class."""
-        DbSetup.check_db(config)
+        DbSetup.check_db()
         HafSyncSetup.prepare_app_data()
         HafSyncSetup.prepare_global_data()
 
