@@ -83,7 +83,7 @@ class PlugSync:
                 elif (head_hive_rowid - app_hive_rowid) > 0:
                     progress = round((app_hive_rowid/head_hive_rowid) * 100, 2)
                     cls.plug_sync_states['polls'] = f'synchronizing {progress} %'
-                    db.select(f"SELECT hpp.hpp_polls_update( {app_hive_rowid+1}, {head_hive_rowid} );")
+                    db.select(f"SELECT hpp.polls_update( {app_hive_rowid+1}, {head_hive_rowid} );")
                     db.commit()
                     cls.plug_sync_states['polls'] = 'synchronized'
                 else:
