@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS hpp.podping_ops(
     req_posting_auths VARCHAR(16)[],
     op_id VARCHAR(31),
     op_payload JSON
-);
+) INHERITS( hive.plug_play );
 
 CREATE TABLE IF NOT EXISTS hpp.podping_feed_updates(
     feed_update_id BIGSERIAL PRIMARY KEY,
@@ -16,14 +16,14 @@ CREATE TABLE IF NOT EXISTS hpp.podping_feed_updates(
     block_num INTEGER NOT NULL,
     created TIMESTAMP NOT NULL,
     url VARCHAR(500)
-);
+) INHERITS( hive.plug_play );
 
 
-CREATE INDEX IF NOT EXISTS hpp.podping_ops_ix_pp_podping_opid
+CREATE INDEX IF NOT EXISTS podping_ops_ix_pp_podping_opid
     ON hpp.podping_ops (pp_podping_opid);
 
-CREATE INDEX IF NOT EXISTS hpp.podping_feed_updates_ix_block_num
+CREATE INDEX IF NOT EXISTS podping_feed_updates_ix_block_num
     ON hpp.podping_feed_updates (block_num);
 
-CREATE INDEX IF NOT EXISTS hpp.podping_feed_updates_ix_created
+CREATE INDEX IF NOT EXISTS podping_feed_updates_ix_created
     ON hpp.podping_feed_updates (created);
