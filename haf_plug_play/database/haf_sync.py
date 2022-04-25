@@ -197,6 +197,7 @@ class HafSync:
         """Main application loop."""
         massive_sync = False
         config['global_start_block'] = int(config['global_start_block'])
+        sleep_timer = 1
         while True:
             if cls.sync_enabled is True:
                 # get blocks range
@@ -209,6 +210,11 @@ class HafSync:
                 if not first_block:
                     time.sleep(0.2)
                     continue
+                if (last_block - first_block) > 10:
+                    # fast sync to catch up
+                    sleep_timer = 0.2
+                else:
+                    sleep_timer = 1
                 if blocks_range[0] < config['global_start_block']:
                     print(f"HAF SYNC:: starting from global_start_block: {config['global_start_block']}")
                     db.select(f"SELECT hive.app_context_detach( '{APPLICATION_CONTEXT}' );")
@@ -241,4 +247,4 @@ class HafSync:
                 SystemStatus.update_sync_status(sync_status=f"Synchronized... on block {last_block}")
                 db.commit()
                 PlugSync.toggle_plug_sync()
-            time.sleep(1)
+            time.sleep(sleep_timer)
