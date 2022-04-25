@@ -11,7 +11,7 @@ class SearchQuery:
 class StateQuery:
 
     @classmethod
-    def get_podping_counts(cls, block_range=None):
+    def get_podping_counts(cls, block_range=None, limit: int = 20):
         if block_range is None:
             latest = SystemStatus.get_latest_block()
             if not latest: return None # TODO: notify??
@@ -22,7 +22,7 @@ class StateQuery:
                     WHERE block_num BETWEEN {block_range[0]} AND {block_range[1]}
                     GROUP BY url
                     ORDER BY url_count DESC
-                    LIMIT 20;
+                    LIMIT {limit};
         """
         return query
 

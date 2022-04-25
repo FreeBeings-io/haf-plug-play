@@ -7,10 +7,12 @@ from haf_plug_play.server.normalize import populate_by_schema
 
 db = ReadDb().db
 
-async def get_podping_counts(block_range=None):
+
+async def get_podping_counts(block_range=None, limit: int = 20):
     """Returns count summaries for podpings.
 
     - `block_range` <array(int)> (optional, default: `30 days; 864,000 blocks`): start and end block of ops to consider
+    - `limit` (int) (optional, default: 20 highest count items)
 
     **Example params:**
 
@@ -23,17 +25,18 @@ async def get_podping_counts(block_range=None):
             raise HTTPException(status_code=400, detail="Block range must be an array")
         for block_num in block_range:
             if not isinstance(block_num, int):
-                raise HTTPException(status_code=400, detail="Block range items must be integers")
-    sql = StateQuery.get_podping_counts(block_range)
+                raise HTTPException(
+                    status_code=400, detail="Block range items must be integers"
+                )
+    sql = StateQuery.get_podping_counts(block_range, limit)
     result = []
     res = db.db.select(sql) or []
     for entry in res:
-        result.append(populate_by_schema(
-            entry, ['url', 'count']
-        ))
+        result.append(populate_by_schema(entry, ["url", "count"]))
     return result
 
-async def get_podping_url_latest(url:str, limit: int = 5):
+
+async def get_podping_url_latest(url: str, limit: int = 5):
     """Returns the latest feed update from a given URL.
 
     - `url` <string(500)>: the url of the podping
@@ -52,8 +55,7 @@ async def get_podping_url_latest(url:str, limit: int = 5):
     if res:
         for entry in res:
             feed_updates.append(
-                populate_by_schema(
-                    entry, ['trx_id', 'block_num', 'created']
-                ))
-        result['feed_updates'] = feed_updates
+                populate_by_schema(entry, ["trx_id", "block_num", "created"])
+            )
+        result["feed_updates"] = feed_updates
     return result
