@@ -210,7 +210,7 @@ class HafSync:
                 if not first_block:
                     time.sleep(0.2)
                     continue
-                if (last_block - first_block) > 10:
+                if (last_block - first_block) > 4:
                     # fast sync to catch up
                     sleep_timer = 0.2
                 else:
