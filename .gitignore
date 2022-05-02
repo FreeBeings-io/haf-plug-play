@@ -2,5 +2,6 @@ tests/
 __pycache__/
 .vscode/
 .venv/
+.env
 *.egg-info/
 config.dat
