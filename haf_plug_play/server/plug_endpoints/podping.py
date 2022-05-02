@@ -1,12 +1,14 @@
 """Plug endpoints for podping."""
-from fastapi import HTTPException
+from fastapi import APIRouter, HTTPException
 
 from haf_plug_play.database.access import ReadDb
 from haf_plug_play.plugs.podping.podping import SearchQuery, StateQuery
 from haf_plug_play.server.normalize import populate_by_schema
 
 db = ReadDb().db
+router_podping = APIRouter()
 
+@router_podping.get("/api/podping/history/counts", tags=['podping'])
 async def get_podping_counts(block_range=None):
     """Returns count summaries for podpings.
 
@@ -33,6 +35,7 @@ async def get_podping_counts(block_range=None):
         ))
     return result
 
+@router_podping.get("/api/podping/history/latest/url", tags=['podping'])
 async def get_podping_url_latest(url:str, limit: int = 5):
     """Returns the latest feed update from a given URL.
 
