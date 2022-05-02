@@ -1,13 +1,14 @@
 """Plug endpoints for the polls protocol."""
 import re
 
-from fastapi import HTTPException
+from fastapi import HTTPException, APIRouter
 
 from haf_plug_play.database.access import ReadDb
 from haf_plug_play.plugs.polls.polls import SearchQuery, StateQuery
 from haf_plug_play.server.normalize import populate_by_schema
 
 db = ReadDb().db
+router_polls = APIRouter()
 
 def _does_poll_exist(author:str,permlink:str):
     """Checks whether the given poll exists already in the database."""
@@ -19,6 +20,7 @@ def _does_poll_exist(author:str,permlink:str):
     exists = bool(db.db.select(sql))
     return exists
 
+@router_polls.post("/api/polls/new_permlink", tags=['polls'])
 async def get_poll_permlink(author:str, question:str):
     """Returns a valid and unique permlink to use with a new poll.
     
@@ -73,6 +75,7 @@ async def get_poll_permlink(author:str, question:str):
             tries += 1
     return plink
 
+@router_polls.get("/api/polls/ops", tags=['polls'])
 async def get_poll_ops(op_type:str, block_range=None):
     """Returns a list of 'polls' ops within the specified block range.
     
@@ -101,6 +104,7 @@ async def get_poll_ops(op_type:str, block_range=None):
 
     return result
 
+@router_polls.get("/api/polls/active", tags=['polls'])
 async def get_polls_active(tag=""):
     """Returns a list of current active polls, filterable by tag.
     
@@ -125,6 +129,7 @@ async def get_polls_active(tag=""):
         ))
     return result
 
+router_polls.get("/api/polls/{author}/{permlink}", tags=['polls'])
 async def get_poll(author: str, permlink:str, summary=True):
     """Returns a poll and vote details.
     
@@ -183,6 +188,7 @@ async def get_poll(author: str, permlink:str, summary=True):
     result['votes'] = _votes
     return result
 
+@router_polls.get("/api/polls/{author}/{permlink}/votes", tags=['polls'])
 async def get_poll_votes(author: str, permlink: str):
     """Returns votes for specified poll.
 
@@ -224,6 +230,7 @@ async def get_poll_votes(author: str, permlink: str):
         ))
     return result
 
+@router_polls.get("/api/polls/{author}", tags=['polls'])
 async def get_polls_user(author: str, active=False, tag=""):
     """Returns polls created by the specified user.
     
