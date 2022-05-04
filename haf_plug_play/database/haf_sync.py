@@ -1,3 +1,4 @@
+import os
 import time
 
 from haf_plug_play.config import Config
@@ -8,7 +9,7 @@ from haf_plug_play.server.system_status import SystemStatus
 from haf_plug_play.utils.tools import range_split
 
 APPLICATION_CONTEXT = "plug_play"
-BATCH_PROCESS_SIZE = 1000000
+BATCH_PROCESS_SIZE = 100000
 
 db = WriteDb().db
 config = Config.config
@@ -212,9 +213,9 @@ class HafSync:
                     continue
                 if (last_block - first_block) > 4:
                     # fast sync to catch up
-                    sleep_timer = 0.2
+                    sleep_timer = 0.1
                 else:
-                    sleep_timer = 1
+                    sleep_timer = 0.25
                 if blocks_range[0] < config['global_start_block']:
                     print(f"HAF SYNC:: starting from global_start_block: {config['global_start_block']}")
                     db.select(f"SELECT hive.app_context_detach( '{APPLICATION_CONTEXT}' );")
@@ -234,17 +235,29 @@ class HafSync:
                     for s in steps:
                         progress = int(((tot - (last_block - s[0])) / tot) * 100)
                         SystemStatus.update_sync_status(sync_status=f"Massive sync in progress: {s[0]} to {s[1]}    ({progress} %)")
-                        db.select(f"SELECT hpp.update_plug_play_ops( {s[0]}, {s[1]} );")
-                        db.commit()
-                    db.select(f"SELECT hive.app_context_attach( '{APPLICATION_CONTEXT}', {s[1]} );")
-                    print("HAF SYNC:: massive sync done")
-                    massive_sync = False
-                    PlugSync.toggle_plug_sync()
+                        try:
+                            db.select(f"SELECT hpp.update_plug_play_ops( {s[0]}, {s[1]} );")
+                            db.commit()
+                            error = False
+                        except:
+                            error = True
+                            db.conn.rollback()
+                            rev_block = s[0] - 1
+                            db.select(f"SELECT hive.app_context_attach( '{APPLICATION_CONTEXT}', {rev_block} );")
+                    if not error:
+                        db.select(f"SELECT hive.app_context_attach( '{APPLICATION_CONTEXT}', {s[1]} );")
+                        print("HAF SYNC:: massive sync done")
+                        massive_sync = False
+                        PlugSync.toggle_plug_sync()
                     continue
                 PlugSync.toggle_plug_sync(False)
                 SystemStatus.update_sync_status(sync_status=f"Synchronizing: {first_block} to {last_block}")
-                db.select(f"SELECT hpp.update_plug_play_ops( {first_block}, {last_block} );")
-                SystemStatus.update_sync_status(sync_status=f"Synchronized... on block {last_block}")
-                db.commit()
-                PlugSync.toggle_plug_sync()
+                try:
+                    db.select(f"SELECT hpp.update_plug_play_ops( {first_block}, {last_block} );")
+                    db.commit()
+                    SystemStatus.update_sync_status(sync_status=f"Synchronized... on block {last_block}")
+                    PlugSync.toggle_plug_sync()
+                except:
+                    db.conn.rollback()
+                    os._exit(1)
             time.sleep(sleep_timer)
