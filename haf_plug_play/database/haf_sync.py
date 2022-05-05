@@ -9,7 +9,7 @@ from haf_plug_play.server.system_status import SystemStatus
 from haf_plug_play.utils.tools import range_split
 
 APPLICATION_CONTEXT = "plug_play"
-BATCH_PROCESS_SIZE = 100000
+BATCH_PROCESS_SIZE = 20000000
 
 db = WriteDb().db
 config = Config.config
