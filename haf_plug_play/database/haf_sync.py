@@ -143,8 +143,12 @@ class HafSyncSetup:
                                 (ppov.body::json -> 'value' -> 'required_auths')::json AS required_auths,
                                 (ppov.body::json -> 'value' -> 'required_posting_auths')::json AS required_posting_auths,
                                 ppov.body::json->'value'->>'id' AS op_id,
-                                ppov.body::json->'value'->>'json' AS op_json
+                                ppov.body::json->'value'->>'json' AS op_json,
+                                pptv.trx_hash
                             FROM hive.plug_play_operations_view ppov
+                            LEFT JOIN hive.plug_play_transactions_view pptv
+                                ON pptv.block_num = gnsov.block_num
+                                AND pptv.trx_in_block = gnsov.trx_in_block
                             WHERE ppov.block_num >= _first_block
                                 AND ppov.block_num <= _last_block
                                 AND ppov.op_type_id = 18
@@ -157,10 +161,7 @@ class HafSyncSetup:
                             _required_posting_auths := temprow.required_posting_auths;
                             _op_id := temprow.op_id;
                             _op_json := temprow.op_json;
-                            _hash := (
-                                SELECT pptv.trx_hash FROM hive.plug_play_transactions_view pptv
-                                WHERE pptv.block_num = temprow.block_num
-                                AND pptv.trx_in_block = temprow.trx_in_block);
+                            _hash := temprow.trx_hash;
                             INSERT INTO hpp.plug_play_ops as ppops(
                                 hive_opid, block_num, timestamp, transaction_id, req_auths,
                                 req_posting_auths, op_id, op_json)
