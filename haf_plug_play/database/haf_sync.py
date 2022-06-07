@@ -161,7 +161,7 @@ class HafSyncSetup:
                             _required_posting_auths := temprow.required_posting_auths;
                             _op_id := temprow.op_id;
                             _op_json := temprow.op_json;
-                            _hash := convert_from(temprow.trx_hash,'UTF8');
+                            _hash := temprow.trx_hash;
                             INSERT INTO hpp.plug_play_ops as ppops(
                                 hive_opid, block_num, timestamp, transaction_id, req_auths,
                                 req_posting_auths, op_id, op_json)
