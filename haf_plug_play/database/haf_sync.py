@@ -147,8 +147,8 @@ class HafSyncSetup:
                                 pptv.trx_hash
                             FROM hive.plug_play_operations_view ppov
                             LEFT JOIN hive.plug_play_transactions_view pptv
-                                ON pptv.block_num = gnsov.block_num
-                                AND pptv.trx_in_block = gnsov.trx_in_block
+                                ON pptv.block_num = ppov.block_num
+                                AND pptv.trx_in_block = ppov.trx_in_block
                             WHERE ppov.block_num >= _first_block
                                 AND ppov.block_num <= _last_block
                                 AND ppov.op_type_id = 18
