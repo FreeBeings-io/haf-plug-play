@@ -53,7 +53,7 @@ class HafSyncSetup:
                     hive_opid BIGINT NOT NULL,
                     block_num INTEGER NOT NULL,
                     timestamp TIMESTAMP,
-                    transaction_id CHAR(40),
+                    transaction_id VARCHAR,
                     req_auths JSON,
                     req_posting_auths JSON,
                     op_id VARCHAR(128) NOT NULL,
