@@ -161,12 +161,11 @@ class HafSyncSetup:
                                 SELECT pptv.trx_hash FROM hive.plug_play_transactions_view pptv
                                 WHERE pptv.block_num = temprow.block_num
                                 AND pptv.trx_in_block = temprow.trx_in_block);
-                            _transaction_id := encode(_hash::bytea, 'escape');
                             INSERT INTO hpp.plug_play_ops as ppops(
                                 hive_opid, block_num, timestamp, transaction_id, req_auths,
                                 req_posting_auths, op_id, op_json)
                             VALUES
-                                (_hive_opid, _block_num, _block_timestamp, _transaction_id, _required_auths,
+                                (_hive_opid, _block_num, _block_timestamp, _hash, _required_auths,
                                 _required_posting_auths, _op_id, _op_json);
                         END LOOP;
                         UPDATE hpp.global_props SET (head_hive_opid, head_block_num, head_block_time) = (_hive_opid, _block_num, _block_timestamp);
