@@ -202,7 +202,13 @@ class HafSync:
         while True:
             if cls.sync_enabled is True:
                 # get blocks range
-                blocks_range = db.select(f"SELECT * FROM hive.app_next_block('{APPLICATION_CONTEXT}');")[0]
+                try:
+                    blocks_range = db.select(f"SELECT * FROM hive.app_next_block('{APPLICATION_CONTEXT}');")[0]
+                except:
+                    # reattach context
+                    db_block = db.select("SELECT head_block_num FROM hpp.global_props")[0][0]
+                    db.select(f"SELECT hive.app_context_attach( '{APPLICATION_CONTEXT}', {(db_block-1)} );")
+                    blocks_range = db.select(f"SELECT * FROM hive.app_next_block('{APPLICATION_CONTEXT}');")[0]
                 #print(f"Blocks range: {blocks_range}")
                 (first_block, last_block) = blocks_range
                 if not blocks_range:
