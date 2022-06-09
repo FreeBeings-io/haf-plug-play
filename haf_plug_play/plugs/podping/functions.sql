@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION hpp.podping_update( _begin BIGINT, _end BIGINT )
+CREATE OR REPLACE FUNCTION podping.podping_update( _begin BIGINT, _end BIGINT )
     RETURNS void
     LANGUAGE plpgsql
     VOLATILE AS $function$
