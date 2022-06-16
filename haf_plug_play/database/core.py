@@ -2,6 +2,7 @@ import os
 import psycopg2
 
 from haf_plug_play.config import Config
+from haf_plug_play.tools import normalize_types
 
 config = Config.config
 
@@ -35,7 +36,18 @@ class DbSession:
         if len(res) == 0:
             return None
         else:
-            return res
+            return normalize_types(res)
+
+    def select_one(self, sql):
+        res = self.select(sql)
+        if res:
+            return res[0]
+        else:
+            return None
+    
+    def select_exists(self, sql):
+        res = self.select(f"SELECT EXISTS ({sql});")
+        return res == 't'
 
     def execute(self, sql,  data=None):
         cur = self.conn.cursor()
@@ -51,10 +63,13 @@ class DbSession:
             print(f"DATA:   {data}")
             self.conn.rollback()
             cur.close()
-            raise Exception ('DB error occurred')
+            raise Exception({'data': data, 'sql': sql})
 
     def commit(self):
         self.conn.commit()
+    
+    def is_open(self):
+        return self.conn.close == 0
 
 
 class DbSetup:
