@@ -3,6 +3,7 @@ import os
 import re
 from haf_plug_play.database.access import select, write
 from haf_plug_play.database.core import DbSession
+from haf_plug_play.database.plugs import AvailablePlugs, Plug
 
 from haf_plug_play.tools import INSTALL_DIR
 
@@ -12,6 +13,7 @@ SOURCE_DIR = os.path.dirname(__file__) + "/sql"
 class Haf:
 
     db = DbSession()
+    plug_list = []
 
     @classmethod
     def _is_valid_plug(cls, module):
@@ -58,20 +60,21 @@ class Haf:
 
     @classmethod
     def _init_plugs(cls):
-        plug_list = [f.name for f in os.scandir(dir) if cls._is_valid_plug(f.name)]
-        for plug in plug_list:
-            wd = f'{INSTALL_DIR}/plugs/{plug}'
-            defs = json.loads(open(f'{wd}/defs.json', 'r').read())
-            functions = open(f'{wd}/functions.sql', 'r').read()
-            tables = open(f'{wd}/tables.sql', 'r').read()
+        cls.plug_list = [f.name for f in os.scandir(dir) if cls._is_valid_plug(f.name)]
+        for plug in cls.plug_list:
+            working_dir = f'{INSTALL_DIR}/plugs/{plug}'
+            defs = json.loads(open(f'{working_dir}/defs.json', 'r', encoding='UTF-8').read())
+            functions = open(f'{working_dir}/functions.sql', 'r', encoding='UTF-8').read()
+            tables = open(f'{working_dir}/tables.sql', 'r', encoding='UTF-8').read()
             cls._check_context(plug, defs['props']['start_block'])
             cls._check_schema(plug, functions, tables)
             cls._check_defs(plug, defs)
-        
+            AvailablePlugs.add_plug(plug, Plug(plug, defs))
+
     @classmethod
     def _init_hpp(cls):
-        tables = open(f'{SOURCE_DIR}/tables.sql', 'r').read()
-        functions = open(f'{SOURCE_DIR}/functions.sql', 'r').read()
+        tables = open(f'{SOURCE_DIR}/tables.sql', 'r', encoding='UTF-8').read()
+        functions = open(f'{SOURCE_DIR}/functions.sql', 'r', encoding='UTF-8').read()
         cls.db.execute(tables, None)
         cls.db.execute(functions, None)
         cls.db.execute(
