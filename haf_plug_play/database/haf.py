@@ -1,6 +1,7 @@
 import json
 import os
 import re
+from threading import Thread
 from haf_plug_play.database.access import select, write
 from haf_plug_play.database.core import DbSession
 from haf_plug_play.database.plugs import AvailablePlugs, Plug
@@ -90,3 +91,4 @@ class Haf:
     def init(cls):
         cls._init_hpp()
         cls._init_plugs()
+        Thread(target=AvailablePlugs.plug_watch).start()
