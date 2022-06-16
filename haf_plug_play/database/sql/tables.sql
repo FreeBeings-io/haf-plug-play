@@ -13,7 +13,6 @@ CREATE TABLE IF NOT EXISTS hpp.plug_state(
     defs JSON,
     latest_block_num BIGINT DEFAULT 0,
     latest_hive_opid BIGINT DEFAULT 0,
-    sync_enabled BOOLEAN DEFAULT false,
     run_start BOOLEAN DEFAULT false,
     run_finish BOOLEAN DEFAULT false
 );
