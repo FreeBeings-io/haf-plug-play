@@ -6,7 +6,7 @@ from fastapi import HTTPException, APIRouter
 
 from haf_plug_play.database.access import select
 from haf_plug_play.plugs.polls.polls import SearchQuery, StateQuery
-from haf_plug_play.server.normalize import populate_by_schema
+from haf_plug_play.tools import populate_by_schema
 
 router_polls = APIRouter()
 
