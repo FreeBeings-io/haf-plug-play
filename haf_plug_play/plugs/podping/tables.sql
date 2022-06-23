@@ -1,3 +1,5 @@
+CREATE SCHEMA IF NOT EXISTS podping;
+
 CREATE TABLE IF NOT EXISTS podping.ops(
     id BIGSERIAL PRIMARY KEY,
     block_num INTEGER NOT NULL,
@@ -18,8 +20,8 @@ CREATE TABLE IF NOT EXISTS podping.feed_updates(
 ) INHERITS( hive.plug_play );
 
 
-CREATE INDEX IF NOT EXISTS podping.feed_updates_ix_block_num
+CREATE INDEX IF NOT EXISTS feed_updates_ix_block_num
     ON podping.feed_updates (block_num);
 
-CREATE INDEX IF NOT EXISTS podping.feed_updates_ix_created
+CREATE INDEX IF NOT EXISTS feed_updates_ix_created
     ON podping.feed_updates (created);
