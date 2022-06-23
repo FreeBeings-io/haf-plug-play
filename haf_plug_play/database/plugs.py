@@ -58,7 +58,8 @@ class AvailablePlugs:
                 plug = cls.plugs[_plug[0]]
                 if not plug.running() or not plug.is_connection_open():
                     # TODO: plug.error handling
-                    print(f"Plug '{_plug[0]}': creating new DB connection.")
-                    plug.create_new_connection()
-                    plug.start()
+                    if plug.is_enabled():
+                        print(f"Plug '{_plug[0]}': creating new DB connection.")
+                        plug.create_new_connection()
+                        plug.start()
             time.sleep(60)
