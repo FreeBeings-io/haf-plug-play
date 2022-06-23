@@ -36,18 +36,28 @@ class DbSession:
         if len(res) == 0:
             return None
         else:
-            return normalize_types(res)
+            return res
 
     def select_one(self, sql):
-        res = self.select(sql)
-        if res:
-            return res[0]
-        else:
+        cur = self.conn.cursor()
+        try:
+            cur.execute(sql)
+            res = cur.fetchone()
+            cur.close()
+        except Exception as e:
+            print(e)
+            print(f"SQL:  {sql}")
+            self.conn.rollback()
+            cur.close()
+            raise Exception ('DB error occurred')
+        if len(res) == 0:
             return None
+        else:
+            return res[0]
     
     def select_exists(self, sql):
-        res = self.select(f"SELECT EXISTS ({sql});")
-        return res == 't'
+        res = self.select_one(f"SELECT EXISTS ({sql});")
+        return res
 
     def execute(self, sql,  data=None):
         cur = self.conn.cursor()
@@ -69,7 +79,7 @@ class DbSession:
         self.conn.commit()
     
     def is_open(self):
-        return self.conn.close == 0
+        return self.conn.closed == 0
 
 
 class DbSetup:
