@@ -64,7 +64,7 @@ def _normalize(data):
         return data
 
 def normalize_types(data):
-    if isinstance(data, list):
+    if isinstance(data, list) or isinstance(data, tuple):
         res = []
         for l in data:
             res.append(_normalize(l))
