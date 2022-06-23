@@ -1,6 +1,5 @@
-from typing import Dict
+import time
 from haf_plug_play.database.core import DbSession
-
 
 
 class Plug:
@@ -32,20 +31,21 @@ class Plug:
     
     def running(self):
         running = self.db_conn.select_exists(
-            f"SELECT * FROM hpp.plug_state WHERE plug = '{self.name}' AND run_start=true AND run_finish=false;")
+            f"SELECT * FROM hpp.plug_state WHERE plug = '{self.name}' AND run_start=true AND run_finish=false")
         return running
     
     def start(self):
         try:
-            self.db_conn.execute(f"PERFORM hpp.sync_plug( '{self.name}' );")
-        except:
+            self.db_conn.execute(f"SELECT hpp.sync_plug( '{self.name}' );")
+        except Exception as err:
             print(f"Plug error: '{self.name}'")
+            print(err)
             self.error = True
             self.db_conn.conn.close()
 
 class AvailablePlugs:
 
-    plugs = Dict[str, Plug]()
+    plugs = dict[str, Plug]()
 
     @classmethod
     def add_plug(cls, plug_name, plug:Plug):
@@ -54,9 +54,11 @@ class AvailablePlugs:
     @classmethod
     def plug_watch(cls):
         while True:
-            for _plug_name in cls.plugs.items():
-                plug = cls.plugs[_plug_name]
-                if not plug.is_connection_open() and plug.error is False:
-                    print(f"Plug '{_plug_name}': creating new DB connection.")
+            for _plug in cls.plugs.items():
+                plug = cls.plugs[_plug[0]]
+                if not plug.running() or not plug.is_connection_open():
+                    # TODO: plug.error handling
+                    print(f"Plug '{_plug[0]}': creating new DB connection.")
                     plug.create_new_connection()
                     plug.start()
+            time.sleep(60)
