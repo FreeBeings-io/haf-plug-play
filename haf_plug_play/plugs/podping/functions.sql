@@ -10,6 +10,11 @@ CREATE OR REPLACE FUNCTION podping.process_cjop(_block_num BIGINT, _created TIME
             _op_payload JSON;
             _new_id BIGINT;
         BEGIN
+            _required_auths := ARRAY (SELECT json_array_elements_text(body -> 'value' -> 'required_auths')::json);
+            _required_posting_auths := ARRAY (SELECT json_array_elements_text(body -> 'value' -> 'required_posting_auths')::json);
+            _op_id := _body -> 'value' ->> 'id';
+            _op_payload := _body -> 'value'->> 'json'::json;
+            -- process by Custom JSON ID
             
         END;
     $function$;
