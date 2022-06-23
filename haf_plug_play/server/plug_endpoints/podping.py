@@ -1,11 +1,10 @@
 """Plug endpoints for podping."""
 from fastapi import APIRouter, HTTPException
+from haf_plug_play.database.core import DbSession
 
-from haf_plug_play.database.access import ReadDb
 from haf_plug_play.plugs.podping.podping import SearchQuery, StateQuery
-from haf_plug_play.server.normalize import populate_by_schema
+from haf_plug_play.database.access import select
 
-db = ReadDb().db
 router_podping = APIRouter()
 
 @router_podping.get("/api/podping/history/counts", tags=['podping'])
@@ -30,10 +29,7 @@ async def get_podping_counts(block_range=None, limit: int = 20):
                     status_code=400, detail="Block range items must be integers"
                 )
     sql = StateQuery.get_podping_counts(block_range, limit)
-    result = []
-    res = db.db.select(sql) or []
-    for entry in res:
-        result.append(populate_by_schema(entry, ["url", "count"]))
+    result = select(sql, ['url', 'count'])
     return result
 
 @router_podping.get("/api/podping/history/latest/url", tags=['podping'])
@@ -51,12 +47,6 @@ async def get_podping_url_latest(url:str, limit: int = 5):
     """
     sql_feed_update = StateQuery.get_podping_url_latest_feed_update(url, limit)
     result = {}
-    feed_updates = []
-    res = db.db.select(sql_feed_update) or []
-    if res:
-        for entry in res:
-            feed_updates.append(
-                populate_by_schema(entry, ["trx_id", "block_num", "created"])
-            )
-        result["feed_updates"] = feed_updates
+    feed_updates = select(sql_feed_update, ['trx_id', 'block_num', 'created'])
+    result["feed_updates"] = feed_updates
     return result
