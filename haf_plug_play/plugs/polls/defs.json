@@ -1,0 +1,13 @@
+{
+    "name": "polls",
+    "props":{
+        "enabled": true,
+        "schema": "polls",
+        "context": "polls",
+        "start_block": 59594882
+    },
+    "ops":
+    [
+        {"18": "polls.process_cjop"}
+    ]
+}
