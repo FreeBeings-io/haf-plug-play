@@ -1,8 +1,8 @@
 # Hive Plug & Play (HAF) [BETA]
 
-**Customizable streaming and parsing microservice for custom_json ops on Hive.**
+**A turnkey tool to extract and process custom data sets from the Hive blockchain and create APIs for them.**
 
-*Plug & Play uses the Hive Application Framework to retrieve `custom_json` ops from Hive blocks.*
+*Plug & Play uses the Hive Application Framework.*
 
 ## Documentation
 
@@ -11,6 +11,12 @@ Documentation can be found here:
 - [API Documentation](https://plug-play.imwatsi.com/docs)
 
 ## Development
+
+### Install PostgreSQL Debugger
+
+`sudo apt install postgresql-12-pldebugger`
+
+Then, in PSQL Tool, run `CREATE EXTENSION pldbgapi;`
 
 
 ### Install dependencies
