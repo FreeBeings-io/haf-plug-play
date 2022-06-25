@@ -6,8 +6,5 @@
         "context": "polls",
         "start_block": 59594882
     },
-    "ops":
-    [
-        {"18": "polls.process_cjop"}
-    ]
+    "ops": {"18": "polls.process_cjop"}
 }
