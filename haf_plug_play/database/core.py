@@ -2,7 +2,6 @@ import os
 import psycopg2
 
 from haf_plug_play.config import Config
-from haf_plug_play.tools import normalize_types
 
 config = Config.config
 
