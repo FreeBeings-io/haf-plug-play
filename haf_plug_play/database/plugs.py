@@ -36,7 +36,7 @@ class Plug:
     
     def start(self):
         try:
-            self.db_conn.execute(f"SELECT hpp.sync_plug( '{self.name}' );")
+            self.db_conn.execute(f"CALL hpp.sync_plug( '{self.name}' );")
         except Exception as err:
             print(f"Plug error: '{self.name}'")
             print(err)

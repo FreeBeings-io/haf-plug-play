@@ -1,9 +1,8 @@
 -- check context
 
-CREATE OR REPLACE FUNCTION hpp.sync_plug(_plug_name VARCHAR(64))
-    RETURNS void
+CREATE OR REPLACE PROCEDURE hpp.sync_plug(_plug_name VARCHAR(64))
     LANGUAGE plpgsql
-    VOLATILE AS $function$
+    AS $$
         DECLARE
             temprow RECORD;
             _app_context VARCHAR;
@@ -36,18 +35,18 @@ CREATE OR REPLACE FUNCTION hpp.sync_plug(_plug_name VARCHAR(64))
                     RAISE WARNING 'Waiting for next block...';
                 ELSE
                     RAISE NOTICE 'Attempting to process block range: <%,%>', _next_block_range.first_block, _next_block_range.last_block;
-                    PERFORM hpp.process_block_range(_plug_name, _app_context, _next_block_range.first_block, _next_block_range.last_block, _ops, _op_ids);
+                    CALL hpp.process_block_range(_plug_name, _app_context, _next_block_range.first_block, _next_block_range.last_block, _ops, _op_ids);
+                    COMMIT;
                 END IF;
             END LOOP;
             UPDATE hpp.plug_state SET run_start = false WHERE plug = _plug_name;
             UPDATE hpp.plug_state SET run_finish = false WHERE plug = _plug_name;
         END;
-    $function$;
+    $$;
 
-CREATE OR REPLACE FUNCTION hpp.process_block_range(_plug_name VARCHAR, _app_context VARCHAR, _start INTEGER, _end INTEGER, _ops JSON, _op_ids SMALLINT[] )
-    RETURNS void
+CREATE OR REPLACE PROCEDURE hpp.process_block_range(_plug_name VARCHAR, _app_context VARCHAR, _start INTEGER, _end INTEGER, _ops JSON, _op_ids SMALLINT[] )
     LANGUAGE plpgsql
-    VOLATILE AS $function$
+    AS $$
 
         DECLARE
             temprow RECORD;
@@ -58,7 +57,7 @@ CREATE OR REPLACE FUNCTION hpp.process_block_range(_plug_name VARCHAR, _app_cont
             _last_block INTEGER;
             _step INTEGER;
         BEGIN
-            _step := 1000;
+            _step := 10000;
             -- determine if massive sync is needed
             IF _end - _start > 0 THEN
                 -- detach context
@@ -74,7 +73,7 @@ CREATE OR REPLACE FUNCTION hpp.process_block_range(_plug_name VARCHAR, _app_cont
                 _last_block := _first_block + _step - 1;
 
                 IF _last_block > _end THEN --- in case the _step is larger than range length
-                _last_block := _end;
+                    _last_block := _end;
                 END IF;
 
                 RAISE NOTICE 'Attempting to process a block range: <%, %>', _first_block, _last_block;
@@ -106,12 +105,12 @@ CREATE OR REPLACE FUNCTION hpp.process_block_range(_plug_name VARCHAR, _app_cont
                 END LOOP;
                 -- save done as run end
                 RAISE NOTICE 'Block range: <%, %> processed successfully.', _first_block, _last_block;
+                UPDATE hpp.plug_state SET latest_block_num = _last_block WHERE plug = _plug_name;
+                COMMIT;
             END LOOP;
             IF _massive = true THEN
                 -- attach context
                 PERFORM hive.app_context_attach(_app_context, _last_block);
             END IF;
-            UPDATE hpp.plug_state SET latest_block_num = _last_block WHERE plug = _plug_name;
-            COMMIT;
         END;
-    $function$;
+    $$;
