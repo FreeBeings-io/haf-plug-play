@@ -1,10 +1,9 @@
 from datetime import datetime
 
-from haf_plug_play.database.access import ReadDb
-from haf_plug_play.server.normalize import normalize_types
-from haf_plug_play.utils.tools import UTC_TIMESTAMP_FORMAT
+from haf_plug_play.database.handlers import get_global_latest_state
+from haf_plug_play.tools import normalize_types
+from haf_plug_play.tools import UTC_TIMESTAMP_FORMAT
 
-db = ReadDb().db
 
 class SystemStatus:
     sync_status = {}
@@ -18,7 +17,7 @@ class SystemStatus:
 
     @classmethod
     def get_sync_status(cls):
-        glob_props = normalize_types(db.get_global_props())
+        glob_props = normalize_types(get_global_latest_state())
         cls.sync_status['system'] = glob_props
         timestamp = datetime.utcnow().strftime(UTC_TIMESTAMP_FORMAT)
         cur_time = datetime.strptime(timestamp, UTC_TIMESTAMP_FORMAT)

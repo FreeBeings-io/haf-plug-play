@@ -18,7 +18,7 @@ class SearchQuery:
             block_range = [latest - 28800, latest]
         query = f"""
                     SELECT transaction_id, req_posting_auths, op_type, op_payload
-                    FROM hpp.polls_ops
+                    FROM polls.ops
                     WHERE block_num BETWEEN {block_range[0]} AND {block_range[1]}
         """
         if op_type:
@@ -36,7 +36,7 @@ class StateQuery:
         query = """
             SELECT author, permlink, question,
                 answers, expires, tag, created
-            FROM hpp.polls_content
+            FROM polls.polls_content
             WHERE expires >= NOW() AT TIME ZONE 'utc'
             AND deleted = false
         """

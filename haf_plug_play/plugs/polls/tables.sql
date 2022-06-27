@@ -1,6 +1,7 @@
-CREATE TABLE IF NOT EXISTS hpp.polls_ops(
-    ppop_id BIGINT NOT NULL UNIQUE REFERENCES hpp.plug_play_ops(id) ON DELETE CASCADE DEFERRABLE,
-    pp_poll_opid BIGSERIAL UNIQUE,
+CREATE SCHEMA IF NOT EXISTS polls;
+
+CREATE TABLE IF NOT EXISTS polls.ops(
+    id BIGSERIAL UNIQUE,
     block_num INTEGER NOT NULL,
     created TIMESTAMP NOT NULL,
     transaction_id CHAR(40) NOT NULL,
@@ -9,10 +10,10 @@ CREATE TABLE IF NOT EXISTS hpp.polls_ops(
     op_header JSON,
     op_type VARCHAR(16),
     op_payload JSON
-) INHERITS( hive.plug_play );
+) INHERITS( hive.hpp );
 
-CREATE TABLE IF NOT EXISTS hpp.polls_content(
-    pp_poll_opid BIGINT NOT NULL UNIQUE REFERENCES hpp.polls_ops(pp_poll_opid) ON DELETE CASCADE DEFERRABLE,
+CREATE TABLE IF NOT EXISTS polls.content(
+    poll_opid BIGINT NOT NULL UNIQUE REFERENCES polls.ops(id) ON DELETE CASCADE DEFERRABLE,
     poll_id BIGSERIAL PRIMARY KEY,
     created TIMESTAMP,
     permlink VARCHAR(255),
@@ -22,32 +23,26 @@ CREATE TABLE IF NOT EXISTS hpp.polls_content(
     expires TIMESTAMP,
     tag VARCHAR(500),
     deleted BOOLEAN DEFAULT false
-) INHERITS( hive.plug_play );
+) INHERITS( hive.hpp );
 
-CREATE TABLE IF NOT EXISTS hpp.polls_votes(
-    pp_poll_opid BIGINT NOT NULL UNIQUE REFERENCES hpp.polls_ops(pp_poll_opid) ON DELETE CASCADE DEFERRABLE,
+CREATE TABLE IF NOT EXISTS polls.votes(
+    pp_poll_opid BIGINT NOT NULL UNIQUE REFERENCES polls.ops(id) ON DELETE CASCADE DEFERRABLE,
     permlink VARCHAR(255),
     author VARCHAR(16),
     created TIMESTAMP,
     account VARCHAR(16),
     answer SMALLINT
-) INHERITS( hive.plug_play );
+) INHERITS( hive.hpp );
 
 
-CREATE INDEX IF NOT EXISTS polls_ops_ix_ppop_id
-    ON hpp.polls_ops (ppop_id);
+CREATE INDEX IF NOT EXISTS ops_ix_op_type
+    ON polls.ops (op_type);
 
-CREATE INDEX IF NOT EXISTS polls_ops_ix_pp_poll_opid
-    ON hpp.polls_ops (pp_poll_opid);
+CREATE INDEX IF NOT EXISTS content_ix_expires
+    ON polls.content (expires);
 
-CREATE INDEX IF NOT EXISTS polls_ops_ix_op_type
-    ON hpp.polls_ops (op_type);
+CREATE INDEX IF NOT EXISTS content_ix_tag
+    ON polls.content (tag);
 
-CREATE INDEX IF NOT EXISTS polls_content_ix_expires
-    ON hpp.polls_content (expires);
-
-CREATE INDEX IF NOT EXISTS polls_content_ix_tag
-    ON hpp.polls_content (tag);
-
-CREATE INDEX IF NOT EXISTS polls_votes_ix_author_permlink
-    ON hpp.polls_votes (author,permlink);
+CREATE INDEX IF NOT EXISTS votes_ix_author_permlink
+    ON polls.votes (author,permlink);

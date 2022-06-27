@@ -1,13 +1,13 @@
 """Plug endpoints for the polls protocol."""
 import re
+from unittest import result
 
 from fastapi import HTTPException, APIRouter
 
-from haf_plug_play.database.access import ReadDb
+from haf_plug_play.database.access import select
 from haf_plug_play.plugs.polls.polls import SearchQuery, StateQuery
-from haf_plug_play.server.normalize import populate_by_schema
+from haf_plug_play.tools import populate_by_schema
 
-db = ReadDb().db
 router_polls = APIRouter()
 
 def _does_poll_exist(author:str,permlink:str):
@@ -17,7 +17,7 @@ def _does_poll_exist(author:str,permlink:str):
         SELECT 1 FROM hpp.polls_content
         WHERE author = '{author}' AND permlink = '{permlink}';
     """
-    exists = bool(db.db.select(sql))
+    exists = bool(select(sql))
     return exists
 
 @router_polls.post("/api/polls/new_permlink", tags=['polls'])
@@ -122,7 +122,7 @@ async def get_polls_active(tag=""):
         raise HTTPException(status_code=400, detail="Poll tags must be no more than 16 characters")
     sql = StateQuery.get_polls_active(tag)
     result = []
-    res = db.db.select(sql) or []
+    res = select(sql) or []
     for entry in res:
         result.append(populate_by_schema(
             entry, ['author', 'permlink', 'question', 'answers', 'expires', 'tag', 'created']
@@ -167,24 +167,23 @@ async def get_poll(author: str, permlink:str, summary=True):
         )
     sql = StateQuery.get_poll(author,permlink)
     _votes = []
-    res = db.db.select(sql) or None
-    if not res:
+    result = select(sql, ['author', 'permlink', 'question'
+                'answers', 'expires', 'tag', 'created'], True) or None
+    if not result:
         raise HTTPException(
             status_code=400,
             detail="Poll not found"
         )
-    result = populate_by_schema(res[0], ['author', 'permlink', 'question'
-                'answers', 'expires', 'tag', 'created'])
     if summary:
         sql = StateQuery.get_poll_votes_summary(author,permlink)
-        res = db.db.select(sql) or []
-        for entry in res:
-            _votes.append(populate_by_schema(entry, ['answer', 'count']))
+        res_summ = select(sql, ['answer', 'count']) or []
+        for entry in res_summ:
+            _votes.append(res_summ)
     else:
         sql = StateQuery.get_poll_votes(author,permlink)
-        res = db.db.select(sql) or []
-        for entry in res:
-            _votes.append(populate_by_schema(entry, ['account', 'answer']))
+        res_votes = select(sql, ['account', 'answer']) or []
+        for entry in res_votes:
+            _votes.append(entry)
     result['votes'] = _votes
     return result
 
