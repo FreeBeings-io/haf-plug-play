@@ -6,7 +6,7 @@ CREATE OR REPLACE FUNCTION podping.feed_update(_podping_id BIGINT, _block_num BI
     VOLATILE AS $function$
 
         DECLARE
-            _reason VARCHAR;
+            _version VARCHAR;
             _urls VARCHAR(500)[];
             _url VARCHAR(500);
         BEGIN
@@ -78,7 +78,6 @@ CREATE OR REPLACE FUNCTION podping.process_cjop(_block_num INTEGER, _created TIM
                 _reason := _op_payload ->> 'reason';
                 IF _reason = 'feed_update' THEN
                         PERFORM podping.feed_update(_saved_id, _block_num, _created, _op_payload);
-                    END IF;
                 END IF;
             END IF;
         END;

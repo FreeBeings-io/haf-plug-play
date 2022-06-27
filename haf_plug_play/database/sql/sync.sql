@@ -36,11 +36,11 @@ CREATE OR REPLACE PROCEDURE hpp.sync_plug(_plug_name VARCHAR(64))
                 ELSE
                     RAISE NOTICE 'Attempting to process block range: <%,%>', _next_block_range.first_block, _next_block_range.last_block;
                     CALL hpp.process_block_range(_plug_name, _app_context, _next_block_range.first_block, _next_block_range.last_block, _ops, _op_ids);
-                    COMMIT;
                 END IF;
             END LOOP;
             UPDATE hpp.plug_state SET run_start = false WHERE plug = _plug_name;
             UPDATE hpp.plug_state SET run_finish = false WHERE plug = _plug_name;
+            COMMIT;
         END;
     $$;
 
@@ -57,7 +57,7 @@ CREATE OR REPLACE PROCEDURE hpp.process_block_range(_plug_name VARCHAR, _app_con
             _last_block INTEGER;
             _step INTEGER;
         BEGIN
-            _step := 10000;
+            _step := 1000;
             -- determine if massive sync is needed
             IF _end - _start > 0 THEN
                 -- detach context
