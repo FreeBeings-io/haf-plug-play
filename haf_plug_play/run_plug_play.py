@@ -1,14 +1,9 @@
-import os
-import re
 import sys
-import time
 
-from threading import Thread
 
 from haf_plug_play.config import Config
 from haf_plug_play.server.serve import run_server
 from haf_plug_play.database.haf import Haf
-from haf_plug_play.tools import INSTALL_DIR
 
 config = Config.config
 
