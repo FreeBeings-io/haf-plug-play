@@ -1,3 +1,5 @@
+import json
+from operator import truediv
 import time
 from haf_plug_play.database.core import DbSession
 
@@ -18,10 +20,26 @@ class Plug:
     def get_defs(self):
         return self.defs
     
+    def disable(self):
+        self.defs['props']['enabled'] = False
+        _defs = json.dumps(self.defs)
+        self.db_conn.execute(
+            f"UPDATE hpp.plug_state SET defs = '{_defs}' WHERE plug = '{self.name}';"
+        )
+        self.db_conn.commit()
+    
+    def enable(self):
+        self.defs['props']['enabled'] = True
+        _defs = json.dumps(self.defs)
+        self.db_conn.execute(
+            f"UPDATE hpp.plug_state SET defs = '{_defs}' WHERE plug = '{self.name}';"
+        )
+        self.db_conn.commit()
+    
     def is_enabled(self):
         enabled = bool(
             self.db_conn.select_one(
-                f"SELECT defs->'props'->'enabled' FROM hpp.plug_state WHERE plug ='{self.name}'"
+                f"SELECT defs->'props'->'enabled' FROM hpp.plug_state WHERE plug ='{self.name}';"
             )
         )
         return enabled
@@ -57,9 +75,12 @@ class AvailablePlugs:
             for _plug in cls.plugs.items():
                 plug = cls.plugs[_plug[0]]
                 if not plug.running() or not plug.is_connection_open():
-                    # TODO: plug.error handling
                     if plug.is_enabled():
                         print(f"Plug '{_plug[0]}': creating new DB connection.")
                         plug.create_new_connection()
-                        plug.start()
+                        if plug.error is True:
+                            plug.disable()
+                            plug.error = False
+                        else:
+                            plug.start()
             time.sleep(60)
