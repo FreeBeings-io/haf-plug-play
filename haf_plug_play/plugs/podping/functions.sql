@@ -1,6 +1,6 @@
 -- VERSION 0.3
 
-CREATE OR REPLACE FUNCTION podping.03_feed_update(_podping_id BIGINT, _block_num BIGINT, _created TIMESTAMP, _payload JSON)
+CREATE OR REPLACE FUNCTION podping.feed_update(_podping_id BIGINT, _block_num BIGINT, _created TIMESTAMP, _payload JSON)
     RETURNS void
     LANGUAGE plpgsql
     VOLATILE AS $function$
@@ -10,13 +10,16 @@ CREATE OR REPLACE FUNCTION podping.03_feed_update(_podping_id BIGINT, _block_num
             _urls VARCHAR(500)[];
             _url VARCHAR(500);
         BEGIN
-            _urls := ARRAY (SELECT json_array_elements_text((_payload ->> 'urls')::json));
-            FOREACH _url IN ARRAY (_urls)
-            LOOP
-                --RAISE NOTICE '%', _url;
-                INSERT INTO podping.feed_updates(podping_id, block_num, created, url)
-                VALUES (_podping_id, _block_num, _created, _url);
-            END LOOP;
+            _version := _payload ->> 'version';
+            IF _version = '0.3' THEN
+                _urls := ARRAY (SELECT json_array_elements_text((_payload ->> 'urls')::json));
+                FOREACH _url IN ARRAY (_urls)
+                LOOP
+                    --RAISE NOTICE '%', _url;
+                    INSERT INTO podping.feed_updates(podping_id, block_num, created, url)
+                    VALUES (_podping_id, _block_num, _created, _url);
+                END LOOP;
+            END IF;
         END;
     $function$;
 
@@ -72,11 +75,9 @@ CREATE OR REPLACE FUNCTION podping.process_cjop(_block_num INTEGER, _created TIM
             IF _op_id = 'podping' THEN
                 -- save op
                 _saved_id := podping.save_op(_block_num, _created, _hash, _required_auths, _required_posting_auths, _op_id, _op_payload);
-                _version := _op_payload ->> 'version';
-                IF _version = '0.3' THEN
-                    _reason := _op_payload ->> 'reason';
-                    IF _reason = 'feed_update' THEN
-                            PERFORM podping.03_feed_update(_saved_id, _block_num, _created, _op_payload);
+                _reason := _op_payload ->> 'reason';
+                IF _reason = 'feed_update' THEN
+                        PERFORM podping.feed_update(_saved_id, _block_num, _created, _op_payload);
                     END IF;
                 END IF;
             END IF;
