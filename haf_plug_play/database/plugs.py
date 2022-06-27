@@ -54,6 +54,7 @@ class Plug:
     
     def start(self):
         try:
+            print(f"{self.name}:: starting")
             self.db_conn.execute(f"CALL hpp.sync_plug( '{self.name}' );")
         except Exception as err:
             print(f"Plug error: '{self.name}'")
@@ -76,7 +77,7 @@ class AvailablePlugs:
                 plug = cls.plugs[_plug[0]]
                 if not plug.running() or not plug.is_connection_open():
                     if plug.is_enabled():
-                        print(f"Plug '{_plug[0]}': creating new DB connection.")
+                        print(f"{_plug[0]}:: creating new DB connection.")
                         plug.create_new_connection()
                         if plug.error is True:
                             plug.disable()
