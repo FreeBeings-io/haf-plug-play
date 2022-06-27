@@ -18,7 +18,7 @@ class StateQuery:
             block_range = [latest - 864000, latest] # default 30 days
         query = f"""
                     SELECT url, COUNT(url) as url_count
-                    FROM hpp.podping_feed_updates
+                    FROM podping.feed_updates
                     WHERE block_num BETWEEN {block_range[0]} AND {block_range[1]}
                     GROUP BY url
                     ORDER BY url_count DESC
@@ -30,10 +30,10 @@ class StateQuery:
     def get_podping_url_latest_feed_update(cls, url: str, limit: int = 5):
         query = f"""
             SELECT po.transaction_id, fu.block_num, fu.created, po.req_auths, po.req_posting_auths
-            FROM hpp.podping_feed_updates fu
-            JOIN hpp.podping_ops po ON po.pp_podping_opid = fu.pp_podping_opid
+            FROM podping.feed_updates fu
+            JOIN podping.ops po ON po.id = fu.podping_id
             WHERE url = '{url}'
-            ORDER BY fu.pp_podping_opid DESC
+            ORDER BY fu.podping_id DESC
             LIMIT {limit};
         """
         return query
