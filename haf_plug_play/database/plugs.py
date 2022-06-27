@@ -1,7 +1,6 @@
 import json
 from operator import truediv
 import time
-from typing import Dict
 from haf_plug_play.database.core import DbSession
 
 
@@ -65,7 +64,7 @@ class Plug:
 
 class AvailablePlugs:
 
-    plugs = Dict[str, Plug]()
+    plugs = dict[str, Plug]()
 
     @classmethod
     def add_plug(cls, plug_name, plug:Plug):
