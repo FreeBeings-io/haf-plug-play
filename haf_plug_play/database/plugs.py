@@ -65,7 +65,7 @@ class Plug:
 
 class AvailablePlugs:
 
-    plugs = Dict[str, Plug]()
+    plugs = dict[str, Plug]()
 
     @classmethod
     def add_plug(cls, plug_name, plug:Plug):
