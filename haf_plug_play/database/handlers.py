@@ -1,28 +1,30 @@
 from haf_plug_play.database.access import select
 
 HPP_GLOBAL_PROPS_FIELDS = [
-    'latest_block_num', 'latest_hive_rowid', 'latest_hpp_op_id',
-    'latest_block_time', 'sync_enabled'
+    'latest_block_num', 'latest_block_time', 'sync_enabled'
 ]
-HPP_MODULE_STATE_FIELDS = ['module', 'latest_hpp_op_id']
+HPP_PLUG_STATE_FIELDS = ['latest_block_num', 'run_start', 'run_finish']
 
 def get_global_latest_state():
-        fields = ", ".join(HPP_GLOBAL_PROPS_FIELDS)
-        sql = f"""
-            SELECT {fields} FROM hpp.global_props;
-        """
-        res = select(sql, HPP_GLOBAL_PROPS_FIELDS)
-        return res[0]
-    
-def get_global_latest_hpp_op_id():
-    state = get_global_latest_state()
-    return state['latest_hpp_op_id']
-
-def get_plug_latest_hpp_op_id(plug):
-    fields = ", ".join(HPP_MODULE_STATE_FIELDS)
+    fields = ", ".join(HPP_GLOBAL_PROPS_FIELDS)
     sql = f"""
-        SELECT {fields} FROM hpp.plug_state
-        WHERE plug = '{plug}';
+        SELECT {fields} FROM hpp.global_props;
     """
-    res = select(sql, HPP_MODULE_STATE_FIELDS)
+    res = select(sql, HPP_GLOBAL_PROPS_FIELDS)
+    return res[0]
+
+def get_plugs_status():
+    fields = ", ".join(HPP_PLUG_STATE_FIELDS)
+    sql = f"""
+        SELECT {fields} FROM hpp.plug_state';
+    """
+    res = select(sql, HPP_PLUG_STATE_FIELDS)
+    return res
+
+def get_plug_status(plug):
+    fields = ", ".join(HPP_PLUG_STATE_FIELDS)
+    sql = f"""
+        SELECT {fields} FROM hpp.plug_state WHERE plug='{plug}';
+    """
+    res = select(sql, HPP_PLUG_STATE_FIELDS)
     return res[0]
