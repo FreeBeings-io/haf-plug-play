@@ -16,7 +16,7 @@ def get_global_latest_state():
 def get_plugs_status():
     fields = ", ".join(HPP_PLUG_STATE_FIELDS)
     sql = f"""
-        SELECT {fields} FROM hpp.plug_state';
+        SELECT {fields} FROM hpp.plug_state;
     """
     res = select(sql, HPP_PLUG_STATE_FIELDS)
     return res
