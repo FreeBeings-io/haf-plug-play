@@ -1,7 +1,7 @@
 from datetime import datetime
 from glob import glob
 
-from haf_plug_play.database.handlers import get_global_latest_state, get_plugs_status
+from haf_plug_play.database.handlers import get_global_latest_state, get_haf_sync_head, get_plugs_status
 from haf_plug_play.tools import normalize_types
 from haf_plug_play.tools import UTC_TIMESTAMP_FORMAT
 
@@ -11,13 +11,13 @@ class SystemStatus:
 
     @classmethod
     def get_sync_status(cls):
-        glob_props = normalize_types(get_global_latest_state())
+        glob_props = normalize_types(get_haf_sync_head())
         plugs = normalize_types(get_plugs_status())
-        cls.sync_status['system'] = glob_props
+        cls.sync_status['haf_system'] = glob_props
         cls.sync_status['plugs'] = plugs
         timestamp = datetime.utcnow().strftime(UTC_TIMESTAMP_FORMAT)
         cur_time = datetime.strptime(timestamp, UTC_TIMESTAMP_FORMAT)
-        sys_time = datetime.strptime(cls.sync_status['system']['latest_block_time'], UTC_TIMESTAMP_FORMAT)
+        sys_time = datetime.strptime(cls.sync_status['haf_system']['head_block_time'], UTC_TIMESTAMP_FORMAT)
         diff = cur_time - sys_time
         health = "GOOD"
         if 'plugs' in cls.sync_status:

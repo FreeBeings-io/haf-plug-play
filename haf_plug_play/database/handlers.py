@@ -1,16 +1,12 @@
 from haf_plug_play.database.access import select
 
-HPP_GLOBAL_PROPS_FIELDS = [
-    'latest_block_num', 'latest_block_time', 'sync_enabled'
-]
 HPP_PLUG_STATE_FIELDS = ['latest_block_num', 'run_start', 'run_finish']
 
-def get_global_latest_state():
-    fields = ", ".join(HPP_GLOBAL_PROPS_FIELDS)
+def get_haf_sync_head():
     sql = f"""
-        SELECT {fields} FROM hpp.global_props;
+        SELECT num, created_at FROM hive.blocks ORDER BY num DESC LIMIT 1;
     """
-    res = select(sql, HPP_GLOBAL_PROPS_FIELDS)
+    res = select(sql, ['head_block_num', 'head_block_time'])
     return res[0]
 
 def get_plugs_status():
