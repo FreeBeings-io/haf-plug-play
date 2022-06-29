@@ -1,4 +1,5 @@
 import json
+from threading import Thread
 import time
 from typing import Dict
 
@@ -46,11 +47,11 @@ class Plug:
         return enabled
 
     def is_connection_open(self):
-        return self.db_conn.is_open()
+        return self.db_conn.is_open() is True and self.db_conn.is_open() is True
     
     def running(self):
         running = self.db_conn.select_exists(
-            f"SELECT * FROM hpp.plug_state WHERE plug = '{self.name}' AND run_start=true AND run_finish=false")
+            f"SELECT * FROM hpp.plug_state WHERE plug = '{self.name}' AND check_in >= NOW() - INTERVAL '1 min'")
         return running
     
     def start(self):
@@ -61,6 +62,8 @@ class Plug:
             print(f"Plug error: '{self.name}'")
             print(err)
             self.error = True
+            self.disable()
+            self.db_conn.conn.close()
             self.db_conn.conn.close()
 
 class AvailablePlugs:
@@ -76,13 +79,11 @@ class AvailablePlugs:
         while True:
             for _plug in cls.plugs.items():
                 plug = cls.plugs[_plug[0]]
-                if not plug.running() or not plug.is_connection_open():
-                    if plug.is_enabled():
+                if not plug.error:
+                    good = plug.is_connection_open()
+                    if good is False:
                         print(f"{_plug[0]}:: creating new DB connection.")
                         plug.create_new_connection()
-                        if plug.error is True:
-                            plug.disable()
-                            plug.error = False
-                        else:
-                            plug.start()
+                    if plug.running() is False:
+                        Thread(target=plug.start).start()
             time.sleep(60)
