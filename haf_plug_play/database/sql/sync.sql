@@ -25,7 +25,6 @@ CREATE OR REPLACE PROCEDURE hpp.sync_plug(_plug_name VARCHAR(64))
             IF NOT hive.app_context_is_attached(_app_context) THEN
                 PERFORM hive.app_context_attach(_app_context, _latest_block_num);
             END IF;
-            -- check latest hive_opid
             -- SELECT latest_hive_opid INTO _latest_hive_opid FROM hpp.plug_state WHERE plug = _plug_name;
             -- SELECT MAX(id) INTO _head_hive_opid FROM hive.operations; -- TODO reversible if in def
             -- start process
@@ -78,7 +77,6 @@ CREATE OR REPLACE PROCEDURE hpp.process_block_range(_plug_name VARCHAR, _app_con
 
                 RAISE NOTICE 'Attempting to process a block range: <%, %>', _first_block, _last_block;
                 -- record run start
-                UPDATE hpp.plug_state SET run_start = true WHERE plug = _plug_name;
                     -- select records and pass records to relevant functions
                 FOR temprow IN
                     EXECUTE FORMAT('
@@ -105,6 +103,7 @@ CREATE OR REPLACE PROCEDURE hpp.process_block_range(_plug_name VARCHAR, _app_con
                 END LOOP;
                 -- save done as run end
                 RAISE NOTICE 'Block range: <%, %> processed successfully.', _first_block, _last_block;
+                UPDATE hpp.plug_state SET check_in = NOW() WHERE plug = _plug_name;
                 UPDATE hpp.plug_state SET latest_block_num = _last_block WHERE plug = _plug_name;
                 COMMIT;
             END LOOP;
