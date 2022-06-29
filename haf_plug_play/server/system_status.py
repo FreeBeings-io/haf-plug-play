@@ -1,7 +1,6 @@
 from datetime import datetime
-from glob import glob
 
-from haf_plug_play.database.handlers import get_global_latest_state, get_haf_sync_head, get_plugs_status
+from haf_plug_play.database.handlers import get_haf_sync_head, get_plugs_status
 from haf_plug_play.tools import normalize_types
 from haf_plug_play.tools import UTC_TIMESTAMP_FORMAT
 

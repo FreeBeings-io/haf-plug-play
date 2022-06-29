@@ -1,6 +1,5 @@
 """Plug endpoints for the polls protocol."""
 import re
-from unittest import result
 
 from fastapi import HTTPException, APIRouter
 

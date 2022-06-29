@@ -1,6 +1,5 @@
 """Plug endpoints for podping."""
 from fastapi import APIRouter, HTTPException
-from haf_plug_play.database.core import DbSession
 
 from haf_plug_play.plugs.podping.podping import SearchQuery, StateQuery
 from haf_plug_play.database.access import select

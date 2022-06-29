@@ -1,9 +1,7 @@
-from datetime import datetime
 
 import uvicorn
 from fastapi import FastAPI
 
-from haf_plug_play.server.plug_endpoints import polls, podping
 from haf_plug_play.server.plug_endpoints.podping import router_podping
 
 from haf_plug_play.server.system_status import SystemStatus
