@@ -94,7 +94,7 @@ class Haf:
         cls.db.execute(sync)
         cls.db.execute(
             """
-                INSERT INTO hpp.global_props (latest_block_num)
+                INSERT INTO hpp.global_props (head_block_num)
                 SELECT '0'
                 WHERE NOT EXISTS (SELECT * FROM hpp.global_props);
             """, None
