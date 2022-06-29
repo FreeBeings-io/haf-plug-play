@@ -18,7 +18,7 @@ class DbSession:
             keepalives_interval=2,
             keepalives_count=2
         )
-        self.conn.autocommit = False
+        self.conn.autocommit = True
 
     def select(self, sql):
         cur = self.conn.cursor()
