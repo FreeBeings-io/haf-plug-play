@@ -1,6 +1,6 @@
 from haf_plug_play.database.access import select
 
-HPP_PLUG_STATE_FIELDS = ['latest_block_num', 'run_start', 'run_finish']
+HPP_PLUG_STATE_FIELDS = ['plug', 'latest_block_num', 'check_in']
 
 def get_haf_sync_head():
     sql = f"""
