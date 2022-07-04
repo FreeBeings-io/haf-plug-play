@@ -1,8 +1,12 @@
 """Plug endpoints for podping."""
+import imp
+import json
 from fastapi import APIRouter, HTTPException
+from datetime import datetime
 
 from haf_plug_play.plugs.podping.podping import SearchQuery, StateQuery
 from haf_plug_play.database.access import select
+from haf_plug_play.tools import UTC_TIMESTAMP_FORMAT
 
 router_podping = APIRouter()
 
@@ -20,6 +24,7 @@ async def get_podping_counts(block_range=None, limit: int = 20):
     ```
     """
     if block_range:
+        block_range = json.loads(block_range)
         if not isinstance(block_range, list):
             raise HTTPException(status_code=400, detail="Block range must be an array")
         for block_num in block_range:
@@ -28,14 +33,14 @@ async def get_podping_counts(block_range=None, limit: int = 20):
                     status_code=400, detail="Block range items must be integers"
                 )
     sql = StateQuery.get_podping_counts(block_range, limit)
-    result = select(sql, ['url', 'count'])
+    result = select(sql, ['url', 'count']) or []
     return result
 
-@router_podping.get("/api/podping/history/latest/url", tags=['podping'])
-async def get_podping_url_latest(url:str, limit: int = 5):
+@router_podping.get("/api/podping/history/latest/iri", tags=['podping'])
+async def get_podping_url_latest(iri:str, limit: int = 5):
     """Returns the latest feed update from a given URL.
 
-    - `url` <string(500)>: the url of the podping
+    - `iri` <string(500)>: the url of the podping
     - `limit` <int> (default = 5): max number of results to return
 
     **Example params:**
@@ -44,8 +49,11 @@ async def get_podping_url_latest(url:str, limit: int = 5):
     url=https%3A%2F%2Ffeeds.captivate.fm%2Felmatutinodela91
     ```
     """
-    sql_feed_update = StateQuery.get_podping_url_latest_feed_update(url, limit)
+    sql_feed_update = StateQuery.get_podping_url_latest_feed_update(iri, limit)
     result = {}
-    feed_updates = select(sql_feed_update, ['trx_id', 'block_num', 'created'])
+    feed_updates = select(sql_feed_update, ['trx_id', 'block_num', 'created', 'reason', 'medium'])
     result["feed_updates"] = feed_updates
+    result["iri"] = iri
+    _time_since = datetime.utcnow() - datetime.strptime(feed_updates[0]['created'], UTC_TIMESTAMP_FORMAT)
+    result["time_since_last_update"] = _time_since.seconds
     return result
