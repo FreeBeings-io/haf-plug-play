@@ -1,7 +1,7 @@
 {
     "name": "polls",
     "props":{
-        "enabled": true,
+        "enabled": false,
         "schema": "polls",
         "context": "polls",
         "start_block": 59594882
