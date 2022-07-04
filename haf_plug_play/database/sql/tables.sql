@@ -9,5 +9,6 @@ CREATE TABLE IF NOT EXISTS hpp.plug_state(
     plug VARCHAR(64) PRIMARY KEY,
     defs JSON,
     latest_block_num BIGINT DEFAULT 0,
+    latest_block_time TIMESTAMP,
     check_in TIMESTAMP
 );
