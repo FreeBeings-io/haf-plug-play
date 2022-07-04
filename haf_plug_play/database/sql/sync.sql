@@ -37,8 +37,6 @@ CREATE OR REPLACE PROCEDURE hpp.sync_plug(_plug_name VARCHAR(64))
                     CALL hpp.process_block_range(_plug_name, _app_context, _next_block_range.first_block, _next_block_range.last_block, _ops, _op_ids);
                 END IF;
             END LOOP;
-            UPDATE hpp.plug_state SET run_start = false WHERE plug = _plug_name;
-            UPDATE hpp.plug_state SET run_finish = false WHERE plug = _plug_name;
             COMMIT;
         END;
     $$;
@@ -54,6 +52,7 @@ CREATE OR REPLACE PROCEDURE hpp.process_block_range(_plug_name VARCHAR, _app_con
             _massive BOOLEAN;
             _first_block INTEGER;
             _last_block INTEGER;
+            _last_block_time TIMESTAMP;
             _step INTEGER;
         BEGIN
             _step := 1000;
@@ -100,11 +99,13 @@ CREATE OR REPLACE PROCEDURE hpp.process_block_range(_plug_name VARCHAR, _app_con
                 LOOP
                     EXECUTE FORMAT('SELECT %s ($1,$2,$3,$4);', (_ops->>(temprow.op_type_id::varchar)))
                         USING temprow.block_num, temprow.timestamp, temprow.trx_hash, temprow.body;
+                    _last_block_time := temprow.timestamp;
                 END LOOP;
                 -- save done as run end
                 RAISE NOTICE 'Block range: <%, %> processed successfully.', _first_block, _last_block;
-                UPDATE hpp.plug_state SET check_in = NOW() WHERE plug = _plug_name;
-                UPDATE hpp.plug_state SET latest_block_num = _last_block WHERE plug = _plug_name;
+                UPDATE hpp.plug_state
+                    SET check_in = NOW(), latest_block_time = _last_block_time, latest_block_num = _last_block
+                    WHERE plug = _plug_name;
                 COMMIT;
             END LOOP;
             IF _massive = true THEN
