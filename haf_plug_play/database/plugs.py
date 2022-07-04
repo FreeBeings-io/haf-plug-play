@@ -47,7 +47,7 @@ class Plug:
         return enabled
 
     def is_connection_open(self):
-        return self.db_conn.is_open() is True and self.db_conn.is_open() is True
+        return self.db_conn.is_open()
     
     def running(self):
         running = self.db_conn.select_exists(
