@@ -50,7 +50,7 @@ class Plug:
         return self.db_conn.is_open()
     
     def running(self):
-        running = self.db_conn.select(
+        running = self.db_conn.select_one(
             f"SELECT hpp.plug_running('{self.name}');")
         return running
     

@@ -1,6 +1,6 @@
 from haf_plug_play.database.access import select
 
-HPP_PLUG_STATE_FIELDS = ['plug', 'latest_block_num', 'check_in']
+HPP_PLUG_STATE_FIELDS = ['plug', 'latest_block_num', 'check_in', "defs->'props'->'enabled'"]
 
 def get_haf_sync_head():
     sql = f"""
@@ -14,7 +14,7 @@ def get_plugs_status():
     sql = f"""
         SELECT {fields} FROM hpp.plug_state;
     """
-    res = select(sql, HPP_PLUG_STATE_FIELDS)
+    res = select(sql, ['plug', 'latest_block_num', 'check_in', 'enabled'])
     return res
 
 def get_plug_status(plug):
