@@ -50,8 +50,8 @@ class Plug:
         return self.db_conn.is_open()
     
     def running(self):
-        running = self.db_conn.select_exists(
-            f"SELECT * FROM hpp.plug_state WHERE plug = '{self.name}' AND check_in >= NOW() - INTERVAL '1 min'")
+        running = self.db_conn.select(
+            f"SELECT hpp.plug_running('{self.name}');")
         return running
     
     def start(self):

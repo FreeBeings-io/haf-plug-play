@@ -16,3 +16,18 @@ CREATE OR REPLACE FUNCTION hpp.plug_enabled( _plug VARCHAR)
             RETURN (SELECT defs->'props'->>'enabled' FROM hpp.plug_state WHERE plug=_plug);
         END;
     $function$;
+
+CREATE OR REPLACE FUNCTION hpp.plug_running( _plug VARCHAR)
+    RETURNS BOOLEAN
+    LANGUAGE plpgsql
+    VOLATILE AS $function$
+        BEGIN
+            RETURN (
+                SELECT EXISTS (
+                    SELECT * FROM hpp.plug_state
+                    WHERE plug = _plug
+                    AND check_in >= NOW() - INTERVAL '1 min'
+                )
+            );
+        END;
+    $function$;
