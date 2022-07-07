@@ -104,7 +104,7 @@ CREATE OR REPLACE PROCEDURE hpp.process_block_range(_plug_name VARCHAR, _app_con
                 -- save done as run end
                 RAISE NOTICE 'Block range: <%, %> processed successfully.', _first_block, _last_block;
                 UPDATE hpp.plug_state
-                    SET check_in = NOW(), latest_block_time = _last_block_time, latest_block_num = _last_block
+                    SET check_in = (NOW() AT TIME ZONE 'UTC'), latest_block_time = _last_block_time, latest_block_num = _last_block
                     WHERE plug = _plug_name;
                 COMMIT;
             END LOOP;
