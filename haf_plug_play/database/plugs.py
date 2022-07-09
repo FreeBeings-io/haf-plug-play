@@ -47,17 +47,18 @@ class Plug:
         return enabled
 
     def is_connection_open(self):
-        return self.db_conn.is_open() is True and self.db_conn.is_open() is True
+        return self.db_conn.is_open()
     
     def running(self):
-        running = self.db_conn.select_exists(
-            f"SELECT * FROM hpp.plug_state WHERE plug = '{self.name}' AND check_in >= NOW() - INTERVAL '1 min'")
+        running = self.db_conn.select_one(
+            f"SELECT hpp.plug_running('{self.name}');")
         return running
     
     def start(self):
         try:
-            print(f"{self.name}:: starting")
-            self.db_conn.execute(f"CALL hpp.sync_plug( '{self.name}' );")
+            if self.is_enabled():
+                print(f"{self.name}:: starting")
+                self.db_conn.execute(f"CALL hpp.sync_plug( '{self.name}' );")
         except Exception as err:
             print(f"Plug error: '{self.name}'")
             print(err)

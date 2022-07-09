@@ -37,8 +37,6 @@ CREATE OR REPLACE PROCEDURE hpp.sync_plug(_plug_name VARCHAR(64))
                     CALL hpp.process_block_range(_plug_name, _app_context, _next_block_range.first_block, _next_block_range.last_block, _ops, _op_ids);
                 END IF;
             END LOOP;
-            UPDATE hpp.plug_state SET run_start = false WHERE plug = _plug_name;
-            UPDATE hpp.plug_state SET run_finish = false WHERE plug = _plug_name;
             COMMIT;
         END;
     $$;
@@ -51,17 +49,20 @@ CREATE OR REPLACE PROCEDURE hpp.process_block_range(_plug_name VARCHAR, _app_con
             temprow RECORD;
             _plug_schema VARCHAR;
             _done BOOLEAN;
-            _massive BOOLEAN;
+            _to_attach BOOLEAN;
             _first_block INTEGER;
             _last_block INTEGER;
+            _last_block_time TIMESTAMP;
             _step INTEGER;
         BEGIN
-            _step := 1000;
+            _to_attach := false;
+            _step := 10000;
             -- determine if massive sync is needed
             IF _end - _start > 0 THEN
                 -- detach context
                 PERFORM hive.app_context_detach(_app_context);
-                _massive := true;
+                RAISE NOTICE 'Context detached.';
+                _to_attach := true;
             END IF;
             -- get defs
             -- _arr := ARRAY(SELECT json_array_elements_text(_ops));
@@ -100,16 +101,19 @@ CREATE OR REPLACE PROCEDURE hpp.process_block_range(_plug_name VARCHAR, _app_con
                 LOOP
                     EXECUTE FORMAT('SELECT %s ($1,$2,$3,$4);', (_ops->>(temprow.op_type_id::varchar)))
                         USING temprow.block_num, temprow.timestamp, temprow.trx_hash, temprow.body;
+                    _last_block_time := temprow.timestamp;
                 END LOOP;
                 -- save done as run end
                 RAISE NOTICE 'Block range: <%, %> processed successfully.', _first_block, _last_block;
-                UPDATE hpp.plug_state SET check_in = NOW() WHERE plug = _plug_name;
-                UPDATE hpp.plug_state SET latest_block_num = _last_block WHERE plug = _plug_name;
+                UPDATE hpp.plug_state
+                    SET check_in = (NOW() AT TIME ZONE 'UTC'), latest_block_time = _last_block_time, latest_block_num = _last_block
+                    WHERE plug = _plug_name;
                 COMMIT;
             END LOOP;
-            IF _massive = true THEN
+            IF _to_attach = true THEN
                 -- attach context
                 PERFORM hive.app_context_attach(_app_context, _last_block);
+                RAISE NOTICE 'Context attached.';
             END IF;
         END;
     $$;

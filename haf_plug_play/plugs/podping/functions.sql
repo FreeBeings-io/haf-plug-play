@@ -1,6 +1,6 @@
 -- VERSION 0.3
 
-CREATE OR REPLACE FUNCTION podping.feed_update(_podping_id BIGINT, _block_num BIGINT, _created TIMESTAMP, _payload JSON)
+CREATE OR REPLACE FUNCTION podping.update(_podping_id BIGINT, _block_num BIGINT, _created TIMESTAMP, _payload JSON)
     RETURNS void
     LANGUAGE plpgsql
     VOLATILE AS $function$
@@ -9,15 +9,27 @@ CREATE OR REPLACE FUNCTION podping.feed_update(_podping_id BIGINT, _block_num BI
             _version VARCHAR;
             _urls VARCHAR(500)[];
             _url VARCHAR(500);
+            _reason VARCHAR;
+            _medium VARCHAR;
         BEGIN
             _version := _payload ->> 'version';
+            _reason := _payload ->> 'reason';
+            _medium := _payload ->> 'medium';
             IF _version = '0.3' THEN
                 _urls := ARRAY (SELECT json_array_elements_text((_payload ->> 'urls')::json));
                 FOREACH _url IN ARRAY (_urls)
                 LOOP
                     --RAISE NOTICE '%', _url;
-                    INSERT INTO podping.feed_updates(podping_id, block_num, created, url)
-                    VALUES (_podping_id, _block_num, _created, _url);
+                    INSERT INTO podping.updates(podping_id, block_num, created, url, reason, medium)
+                    VALUES (_podping_id, _block_num, _created, _url, _reason, 'blog');
+                END LOOP;
+            ELSIF _version = '1.0' THEN
+                _urls := ARRAY (SELECT json_array_elements_text((_payload ->> 'iris')::json));
+                FOREACH _url IN ARRAY (_urls)
+                LOOP
+                    --RAISE NOTICE '%', _url;
+                    INSERT INTO podping.updates(podping_id, block_num, created, url, reason, medium)
+                    VALUES (_podping_id, _block_num, _created, _url, _reason, _medium);
                 END LOOP;
             END IF;
         END;
@@ -33,7 +45,6 @@ CREATE OR REPLACE FUNCTION podping.save_op(_block_num BIGINT, _created TIMESTAMP
 
         DECLARE
             _reason VARCHAR;
-            _urls VARCHAR(500)[];
             _new_id BIGINT;
         BEGIN
             WITH _ins AS (
@@ -63,7 +74,6 @@ CREATE OR REPLACE FUNCTION podping.process_cjop(_block_num INTEGER, _created TIM
             _required_posting_auths VARCHAR(16)[];
             _op_id VARCHAR;
             _op_payload JSON;
-            _reason VARCHAR;
             _version VARCHAR;
             _saved_id BIGINT;
         BEGIN
@@ -72,13 +82,16 @@ CREATE OR REPLACE FUNCTION podping.process_cjop(_block_num INTEGER, _created TIM
             _op_id := _body -> 'value' ->> 'id';
             _op_payload := (_body -> 'value'->>'json')::json;
             -- process by Custom JSON ID  TODO: implement defs based filters
-            IF _op_id = 'podping' THEN
+            IF _op_id IN ('podping','pp_video_update') THEN
                 -- save op
                 _saved_id := podping.save_op(_block_num, _created, _hash, _required_auths, _required_posting_auths, _op_id, _op_payload);
-                _reason := _op_payload ->> 'reason';
-                IF _reason = 'feed_update' THEN
-                        PERFORM podping.feed_update(_saved_id, _block_num, _created, _op_payload);
-                END IF;
+                PERFORM podping.update(_saved_id, _block_num, _created, _op_payload);
             END IF;
+
+        EXCEPTION WHEN SQLSTATE '22P02' THEN
+            -- invalid JSON input
+            RAISE NOTICE E'Got exception:
+            SQLSTATE: % 
+            SQLERRM: %', SQLSTATE, SQLERRM;
         END;
     $function$;

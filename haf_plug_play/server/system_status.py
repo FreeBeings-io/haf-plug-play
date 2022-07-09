@@ -19,10 +19,9 @@ class SystemStatus:
         sys_time = datetime.strptime(cls.sync_status['haf_system']['head_block_time'], UTC_TIMESTAMP_FORMAT)
         diff = cur_time - sys_time
         health = "GOOD"
-        if 'plugs' in cls.sync_status:
-            for s in cls.sync_status['plugs']:
-                if s['latest_block_num'] < glob_props['latest_block_num']:
-                    health = "BAD"
+        for s in cls.sync_status['plugs']:
+            if s['latest_block_num'] < glob_props['head_block_num'] and s['enabled'] is True:
+                health = "BAD"
         if diff.seconds > 30:
             health = "BAD"
         cls.sync_status['health'] = health
@@ -31,11 +30,7 @@ class SystemStatus:
 
     @classmethod
     def get_latest_block(cls):
-        status = cls.get_sync_status()
-        if 'system' in status:
-            if 'head_block_num' in status['system']:
-                return status['system']['head_block_num']
-        return None
+        return get_haf_sync_head()['head_block_num']
     
     @classmethod
     def is_healthy(cls):
