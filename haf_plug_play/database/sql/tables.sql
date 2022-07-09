@@ -10,5 +10,6 @@ CREATE TABLE IF NOT EXISTS hpp.plug_state(
     defs JSON,
     latest_block_num BIGINT DEFAULT 0,
     latest_block_time TIMESTAMP,
-    check_in TIMESTAMP
+    check_in TIMESTAMP,
+    massive_synced BOOLEAN DEFAULT false
 );

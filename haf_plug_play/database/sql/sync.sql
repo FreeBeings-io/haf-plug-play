@@ -49,18 +49,20 @@ CREATE OR REPLACE PROCEDURE hpp.process_block_range(_plug_name VARCHAR, _app_con
             temprow RECORD;
             _plug_schema VARCHAR;
             _done BOOLEAN;
-            _massive BOOLEAN;
+            _to_attach BOOLEAN;
             _first_block INTEGER;
             _last_block INTEGER;
             _last_block_time TIMESTAMP;
             _step INTEGER;
         BEGIN
-            _step := 1000;
+            _to_attach := false;
+            _step := 10000;
             -- determine if massive sync is needed
             IF _end - _start > 0 THEN
                 -- detach context
                 PERFORM hive.app_context_detach(_app_context);
-                _massive := true;
+                RAISE NOTICE 'Context detached.';
+                _to_attach := true;
             END IF;
             -- get defs
             -- _arr := ARRAY(SELECT json_array_elements_text(_ops));
@@ -108,9 +110,10 @@ CREATE OR REPLACE PROCEDURE hpp.process_block_range(_plug_name VARCHAR, _app_con
                     WHERE plug = _plug_name;
                 COMMIT;
             END LOOP;
-            IF _massive = true THEN
+            IF _to_attach = true THEN
                 -- attach context
                 PERFORM hive.app_context_attach(_app_context, _last_block);
+                RAISE NOTICE 'Context attached.';
             END IF;
         END;
     $$;
