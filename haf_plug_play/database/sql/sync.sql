@@ -56,7 +56,7 @@ CREATE OR REPLACE PROCEDURE hpp.process_block_range(_plug_name VARCHAR, _app_con
             _step INTEGER;
         BEGIN
             _to_attach := false;
-            _step := 10000;
+            _step := 100;
             -- determine if massive sync is needed
             IF _end - _start > 0 THEN
                 -- detach context
