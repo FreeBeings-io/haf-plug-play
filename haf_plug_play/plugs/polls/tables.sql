@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS polls.content(
     expires TIMESTAMP,
     tag VARCHAR(500),
     deleted BOOLEAN DEFAULT false
-) INHERITS( hive.hpp );
+);
 
 CREATE TABLE IF NOT EXISTS polls.votes(
     pp_poll_opid BIGINT NOT NULL UNIQUE REFERENCES polls.ops(id) ON DELETE CASCADE DEFERRABLE,
@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS polls.votes(
     created TIMESTAMP,
     account VARCHAR(16),
     answer SMALLINT
-) INHERITS( hive.hpp );
+);
 
 
 CREATE INDEX IF NOT EXISTS ops_ix_op_type
