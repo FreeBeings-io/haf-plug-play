@@ -38,6 +38,11 @@ class Plug:
         )
         self.db_conn.commit()
     
+    def terminate_sync(self):
+        self.db_conn.execute(
+            f"SELECT hpp.terminate_sync({self.name});"
+        )
+    
     def is_enabled(self):
         enabled = bool(
             self.db_conn.select_one(
@@ -53,6 +58,11 @@ class Plug:
         running = self.db_conn.select_one(
             f"SELECT hpp.plug_running('{self.name}');")
         return running
+    
+    def is_long_running(self):
+        long_running = self.db_conn.select_one(
+            f"SELECT hpp.plug_long_running('{self.name}');")
+        return long_running
     
     def start(self):
         try:
@@ -87,4 +97,6 @@ class AvailablePlugs:
                         plug.create_new_connection()
                     if plug.running() is False:
                         Thread(target=plug.start).start()
+                    elif plug.is_long_running():
+                        plug.terminate_sync()
             time.sleep(60)
