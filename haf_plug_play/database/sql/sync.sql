@@ -82,21 +82,21 @@ CREATE OR REPLACE PROCEDURE hpp.process_block_range(_plug_name VARCHAR, _app_con
                 FOR temprow IN
                     EXECUTE FORMAT('
                         SELECT
-                            %1$sov.id,
-                            %1$sov.op_type_id,
-                            %1$sov.block_num,
-                            %1$sov.timestamp,
-                            %1$sov.trx_in_block,
-                            %1$stv.trx_hash,
-                            %1$sov.body::json
-                        FROM hive.%1$s_operations_view %1$sov
-                        LEFT JOIN hive.%1$s_transactions_view %1$stv
-                            ON %1$stv.block_num = %1$sov.block_num
-                            AND %1$stv.trx_in_block = %1$sov.trx_in_block
-                        WHERE %1$sov.block_num >= $1
-                            AND %1$sov.block_num <= $2
-                            AND %1$sov.op_type_id = ANY ($3)
-                        ORDER BY %1$sov.block_num, trx_in_block, %1$sov.id;', _app_context)
+                            ov.id,
+                            ov.op_type_id,
+                            ov.block_num,
+                            ov.timestamp,
+                            ov.trx_in_block,
+                            tv.trx_hash,
+                            ov.body::json
+                        FROM hive.operations_view ov
+                        LEFT JOIN hive.transactions_view tv
+                            ON tv.block_num = ov.block_num
+                            AND tv.trx_in_block = ov.trx_in_block
+                        WHERE ov.block_num >= $1
+                            AND ov.block_num <= $2
+                            AND ov.op_type_id = ANY ($3)
+                        ORDER BY ov.block_num, trx_in_block, ov.id;')
                     USING _first_block, _last_block, _op_ids
                 LOOP
                     EXECUTE FORMAT('SELECT %s ($1,$2,$3,$4);', (_ops->>(temprow.op_type_id::varchar)))
