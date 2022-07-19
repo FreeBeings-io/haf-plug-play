@@ -53,8 +53,8 @@ CREATE OR REPLACE FUNCTION hpp.terminate_sync( _plug VARCHAR)
         DECLARE
             _pid INTEGER;
         BEGIN
-            _pid := SELECT pid FROM pg_stat_activity
-                    WHERE query = FORMAT('CALL hpp.sync_plug( ''%s'' );', _plug)
+            SELECT pid INTO _pid FROM pg_stat_activity
+                WHERE query = FORMAT('CALL hpp.sync_plug( ''%s'' );', _plug);
             IF _pid IS NOT NULL THEN
                 SELECT pg_cancel_backend(_pid);
             END IF;
