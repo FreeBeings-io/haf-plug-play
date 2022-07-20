@@ -20,7 +20,7 @@ class SystemStatus:
         diff = cur_time - sys_time
         health = "GOOD"
         for s in cls.sync_status['plugs']:
-            if s['latest_block_num'] < glob_props['head_block_num'] and s['enabled'] is True:
+            if s['latest_block_num'] < (glob_props['head_block_num']-10) and s['enabled'] is True:
                 health = "BAD"
         if diff.seconds > 30:
             health = "BAD"
