@@ -14,6 +14,7 @@ VERSION = "1.0"
 
 CONTACT = {
     "name": "FreeBeings.io",
+    "url": "https://github.com/FreeBeings-io/haf-plug-play",
     "email": "developers@freebeings.io",
 }
 
