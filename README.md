@@ -82,4 +82,4 @@ To create a config file, refer to the [sample_config](/sample_config.ini) file.
 To run Plug & Play, use either:
 
 - `haf_plug_play`
-- or `python3 run_play_play.py`
+- or `python3 run_plug_play.py`
