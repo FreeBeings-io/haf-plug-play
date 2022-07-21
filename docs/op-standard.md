@@ -1,5 +1,7 @@
 # Custom JSON Op Standard (CJOS-01)
 
+This is a proposed standard for designing `custom_json` operations that dApps can use. It is designed to allow for easy protocol upgrades through an internal op versioning system.
+
 ### IDs
 
 Applications or protocols use their own IDs to broadcast their `custom_json` ops. For example:
