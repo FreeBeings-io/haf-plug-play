@@ -1,6 +1,8 @@
 # Defining your plug's defs.json
 
-The `defs.json` file is used to setup your plug. Below is an example file used by the `podping` plug:
+The `defs.json` file is used to setup your plug. Create it in your plug's subdirectory under the `../haf_plug_play/plugs` directory. For example: `../haf_plug_play/plugs/podping/defs.json`. The file is loaded every time Plug & Play boots up.
+
+Below is an example file used by the `podping` plug:
 
 ```
 {
