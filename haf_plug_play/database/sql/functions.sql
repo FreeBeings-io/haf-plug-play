@@ -24,6 +24,20 @@ CREATE OR REPLACE FUNCTION hpp.plug_running( _plug VARCHAR)
         BEGIN
             RETURN (
                 SELECT EXISTS (
+                    SELECT pid FROM pg_stat_activity
+                    WHERE query = FORMAT('CALL hpp.sync_plug( ''%s'' );', _plug)
+                )
+            );
+        END;
+    $function$;
+
+CREATE OR REPLACE FUNCTION hpp.plug_long_running( _plug VARCHAR)
+    RETURNS BOOLEAN
+    LANGUAGE plpgsql
+    VOLATILE AS $function$
+        BEGIN
+            RETURN (
+                SELECT EXISTS (
                     SELECT * FROM hpp.plug_state
                     WHERE plug = _plug
                     AND check_in >= NOW() - INTERVAL '1 min'
@@ -31,6 +45,22 @@ CREATE OR REPLACE FUNCTION hpp.plug_running( _plug VARCHAR)
             );
         END;
     $function$;
+
+CREATE OR REPLACE FUNCTION hpp.terminate_sync( _plug VARCHAR)
+    RETURNS void
+    LANGUAGE plpgsql
+    VOLATILE AS $function$
+        DECLARE
+            _pid INTEGER;
+        BEGIN
+            SELECT pid INTO _pid FROM pg_stat_activity
+                WHERE query = FORMAT('CALL hpp.sync_plug( ''%s'' );', _plug);
+            IF _pid IS NOT NULL THEN
+                SELECT pg_cancel_backend(_pid);
+            END IF;
+        END;
+    $function$;
+
 
 CREATE OR REPLACE FUNCTION hpp.plug_massive_synced( _plug VARCHAR)
     RETURNS BOOLEAN

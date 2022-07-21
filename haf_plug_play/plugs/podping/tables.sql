@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS podping.updates(
     url VARCHAR(500),
     reason VARCHAR,
     medium VARCHAR
-) INHERITS( hive.podping );
+);
 
 
 CREATE INDEX IF NOT EXISTS updates_ix_block_num

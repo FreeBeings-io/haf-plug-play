@@ -16,7 +16,8 @@ app = FastAPI(
     contact=CONTACT,
     license_info=LICENSE,
     openapi_tags=TAGS_METADATA,
-    openapi_url="/api/openapi.json"
+    openapi_url="/api/openapi.json",
+    docs_url="/"
 )
 
 app.include_router(router_podping)

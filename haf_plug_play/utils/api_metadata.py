@@ -5,17 +5,17 @@
 TITLE = "Hive Plug & Play (API)"
 
 DESCRIPTION = """
-    **A customizable layer 2 microservice that simplifies buidling custom_json centric dApps on the Hive blockchain.**
+    **A turnkey tool to extract and process custom data sets from the Hive blockchain and create APIs for them.**
 
-    Each "plug" has it's own root endpoint path, under `/api` and sub-endpoints under it.
+    Each enabled "plug" has it's own root endpoint path, under `/api` and sub-endpoints under it.
 """
 
 VERSION = "1.0"
 
 CONTACT = {
-    "name": "imwatsi",
-    "url": "https://hive.blog/@imwatsi",
-    "email": "imwatsi@outlook.com",
+    "name": "FreeBeings.io",
+    "url": "https://github.com/FreeBeings-io/haf-plug-play",
+    "email": "developers@freebeings.io",
 }
 
 LICENSE = {
@@ -29,14 +29,6 @@ TAGS_METADATA = [
     {
         "name": "system",
         "description": "System endpoints"
-    },
-    {
-        "name": "polls",
-        "description": "Endpoints for `polls`, a decentralized protocol for polls on the Hive blockchain",
-        "externalDocs": {
-            "description": "Broadcast Ops",
-            "url": "https://github.com/imwatsi/haf-plug-play/blob/master/docs/protocols/polls.md"
-        }
     },
     {
         "name": "podping",
