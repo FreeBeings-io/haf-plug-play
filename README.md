@@ -18,16 +18,16 @@ A production environment to succesfully run Plug & Play requires:
 
 - Install HAF on a server: https://gitlab.syncad.com/hive/haf
 - The HAF database can be on the same server as `hived` or on another server
-- Set appropriate psql-filters if needed: [HAF PSQL Filtering](/docs/haf-psql-filtering.md)
+- Set appropriate psql-filters if needed: [HAF PSQL Filtering Examples](https://gitlab.syncad.com/hive/haf/-/tree/develop/tests/integration/replay/patterns)
 - Run `hived` and allow it to run in live mode (synced to the `head_block` block)
 
 ### Plug & Play installed
 
 - Clone the repository
-- Install: `pip3 install .`
+- Install: `pip3 install -e .` 
 - Create a config file, refer to the [sample_config](/sample_config.ini) file
 - Set the config directory: for example `export PLUG_PLAY_HOME=/home/ubuntu/.config/hpp/config.ini`
-- Configure the plugs you want to support: [Configuring the plugs](/docs/plug-configuration.md)
+- Enable the plugs you want to support by setting the `enabled` key to True in the plug's `defs.json` file. See the [Podping defs.json](/haf_plug_play/plugs/podping/defs.json) for example.
 - Run Plug & Play: `haf_plug_play`
 
 ---
@@ -82,4 +82,4 @@ To create a config file, refer to the [sample_config](/sample_config.ini) file.
 To run Plug & Play, use either:
 
 - `haf_plug_play`
-- or `python3 run_plug_play.py`
+- or `python3 run_play_play.py`
