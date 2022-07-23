@@ -8,7 +8,7 @@
 
 Documentation can be found here:
 
-- [API Documentation](https://plug-play.imwatsi.com/docs)
+- [Podping API Documentation](https://podping.hpp.freebeings.io)
 
 ## Production Setup
 
