@@ -21,7 +21,7 @@ CREATE OR REPLACE FUNCTION podping.update(_podping_id BIGINT, _block_num BIGINT,
                 LOOP
                     --RAISE NOTICE '%', _url;
                     INSERT INTO podping.updates(podping_id, block_num, created, url, reason, medium)
-                    VALUES (_podping_id, _block_num, _created, _url, _reason, 'blog');
+                    VALUES (_podping_id, _block_num, _created, _url, _reason, 'podcast');
                 END LOOP;
             ELSIF _version = '1.0' THEN
                 _urls := ARRAY (SELECT json_array_elements_text((_payload ->> 'iris')::json));
