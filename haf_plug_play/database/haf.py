@@ -4,6 +4,7 @@ import re
 from threading import Thread
 from haf_plug_play.database.core import DbSession
 from haf_plug_play.database.plugs import AvailablePlugs, Plug
+from haf_plug_play.config import Config
 
 from haf_plug_play.tools import INSTALL_DIR
 
@@ -11,10 +12,11 @@ SOURCE_DIR = os.path.dirname(__file__) + "/sql"
 
 MAIN_CONTEXT = "hpp"
 
+config = Config.config
 
 class Haf:
 
-    db = DbSession()
+    db = DbSession("main")
     plug_list = []
 
     @classmethod
@@ -55,12 +57,12 @@ class Haf:
         for op in defs['ops'].keys():
             _op_ids.append(op)
         defs['op_ids'] = _op_ids
-        defs = json.dumps(defs)
+        defs['props']['enabled'] = plug in config['plugs']
         if has is False:
             cls.db.execute(
                 f"""
                     INSERT INTO hpp.plug_state (plug, defs, latest_block_num)
-                    VALUES ('{plug}', '{defs}', {_block});
+                    VALUES ('{plug}', '{json.dumps(defs)}', {_block});
                 """)
         else:
             cls.db.execute(
@@ -68,6 +70,7 @@ class Haf:
                     UPDATE hpp.plug_state SET defs='{defs}' WHERE plug='{plug}';
                 """
             )
+        return defs
 
     @classmethod
     def _init_plugs(cls):
@@ -77,11 +80,12 @@ class Haf:
             defs = json.loads(open(f'{working_dir}/{plug}/defs.json', 'r', encoding='UTF-8').read())
             functions = open(f'{working_dir}/{plug}/functions.sql', 'r', encoding='UTF-8').read()
             tables = open(f'{working_dir}/{plug}/tables.sql', 'r', encoding='UTF-8').read()
-            cls._check_context(plug, defs['props']['start_block'])
-            cls._check_schema(plug, tables)
-            cls._check_defs(plug, defs)
-            cls._update_functions(functions)
-            AvailablePlugs.add_plug(plug, Plug(plug, defs))
+            updated_defs = cls._check_defs(plug, defs)
+            if updated_defs['props']['enabled'] is True:
+                cls._check_context(plug, defs['props']['start_block'])
+                cls._check_schema(plug, tables)
+                cls._update_functions(functions)
+                AvailablePlugs.add_plug(plug, Plug(plug, updated_defs))
 
     @classmethod
     def _init_hpp(cls):
