@@ -1,7 +1,6 @@
 {
     "name": "podping",
     "props":{
-        "enabled": true,
         "schema": "podping",
         "context": "podping",
         "start_block": 53690004
