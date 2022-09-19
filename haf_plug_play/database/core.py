@@ -6,7 +6,7 @@ from haf_plug_play.config import Config
 config = Config.config
 
 class DbSession:
-    def __init__(self):
+    def __init__(self, app):
         self.conn = psycopg2.connect(
             host=config['db_host'],
             database=config['db_name'],

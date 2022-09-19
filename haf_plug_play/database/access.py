@@ -1,7 +1,7 @@
 from haf_plug_play.database.core import DbSession
 from haf_plug_play.tools import populate_by_schema, normalize_types
 
-_read_db = DbSession()
+_read_db = DbSession("read")
 
 def select(sql:str, schema:list, one:bool = False):
     _res = _read_db.select(sql)

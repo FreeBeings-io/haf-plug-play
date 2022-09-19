@@ -11,13 +11,13 @@ class Plug:
     def __init__(self, name, defs) -> None:
         self.name = name
         self.defs = defs
-        self.db_conn = DbSession()
+        self.db_conn = DbSession(self.name)
         self.error = False
     
     def create_new_connection(self):
         if self.error == False:
             del self.db_conn
-            self.db_conn = DbSession()
+            self.db_conn = DbSession(self.name)
 
     def get_defs(self):
         return self.defs
