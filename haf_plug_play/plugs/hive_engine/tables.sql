@@ -8,12 +8,13 @@ CREATE TABLE IF NOT EXISTS hive_engine.ops(
     req_auths VARCHAR(16)[],
     req_posting_auths VARCHAR(16)[],
     op_id VARCHAR,
-    op_payload JSON
-) INHERITS( hive.hive_engine );
+    op_payload JSON,
+    valid BOOLEAN
+);
 
 CREATE TABLE IF NOT EXISTS hive_engine.transfers(
     id BIGSERIAL PRIMARY KEY,
-    he_id BIGINT NOT NULL REFERENCES hive_engine.ops(id) ON DELETE CASCADE DEFERRABLE,
+    he_id BIGINT NOT NULL REFERENCES hive_engine.ops(id),
     block_num INTEGER NOT NULL,
     created TIMESTAMP NOT NULL,
     symbol VARCHAR,
@@ -21,40 +22,37 @@ CREATE TABLE IF NOT EXISTS hive_engine.transfers(
     to VARCHAR(16),
     qty NUMERIC(18,10),
     memo VARCHAR
-) INHERITS( hive.hive_engine );
+);
 
 CREATE TABLE IF NOT EXISTS hive_engine.nfts(
     id BIGSERIAL PRIMARY KEY,
-    he_id BIGINT NOT NULL REFERENCES hive_engine.ops(id) ON DELETE CASCADE DEFERRABLE,
-    owners VARCHAR(16)[],
-    issuer_accs VARCHAR(16)[],
-    issuer_conts VARCHAR(16)[],
+    he_id BIGINT NOT NULL REFERENCES hive_engine.ops(id),
     details JSON
-) INHERITS( hive.hive_engine );
+);
 
 CREATE TABLE IF NOT EXISTS hive_engine.transfers(
     id BIGSERIAL PRIMARY KEY,
-    he_id BIGINT NOT NULL REFERENCES hive_engine.ops(id) ON DELETE CASCADE DEFERRABLE,
+    he_id BIGINT NOT NULL REFERENCES hive_engine.ops(id),
     details JSON -- TODO: investigate expanding
-) INHERITS( hive.hive_engine );
+);
 
 CREATE TABLE IF NOT EXISTS hive_engine.issuances(
     id BIGSERIAL PRIMARY KEY,
-    he_id BIGINT NOT NULL REFERENCES hive_engine.ops(id) ON DELETE CASCADE DEFERRABLE,
+    he_id BIGINT NOT NULL REFERENCES hive_engine.ops(id),
     details JSON -- TODO: investigate expanding
-) INHERITS( hive.hive_engine );
+);
 
 CREATE TABLE IF NOT EXISTS hive_engine.transfers(
     id BIGSERIAL PRIMARY KEY,
-    he_id BIGINT NOT NULL REFERENCES hive_engine.ops(id) ON DELETE CASCADE DEFERRABLE,
+    he_id BIGINT NOT NULL REFERENCES hive_engine.ops(id),
     details JSON -- TODO: investigate expanding
-) INHERITS( hive.hive_engine );
+);
 
 CREATE TABLE IF NOT EXISTS hive_engine.burns(
     id BIGSERIAL PRIMARY KEY,
-    he_id BIGINT NOT NULL REFERENCES hive_engine.ops(id) ON DELETE CASCADE DEFERRABLE,
+    he_id BIGINT NOT NULL REFERENCES hive_engine.ops(id),
     details JSON -- TODO: investigate expanding
-) INHERITS( hive.hive_engine );
+);
 
 -- INDEXES: TRANSFERS
 
