@@ -56,7 +56,7 @@ CREATE OR REPLACE PROCEDURE hpp.process_block_range(_plug_name VARCHAR, _app_con
             _step INTEGER;
         BEGIN
             _to_attach := false;
-            _step := 100;
+            _step := 1000;
             -- determine if massive sync is needed
             IF _end - _start > 0 THEN
                 -- detach context
@@ -96,7 +96,7 @@ CREATE OR REPLACE PROCEDURE hpp.process_block_range(_plug_name VARCHAR, _app_con
                         WHERE ov.block_num >= $1
                             AND ov.block_num <= $2
                             AND ov.op_type_id = ANY ($3)
-                        ORDER BY ov.block_num, trx_in_block, ov.id;')
+                        ORDER BY ov.block_num, ov.id;')
                     USING _first_block, _last_block, _op_ids
                 LOOP
                     EXECUTE FORMAT('SELECT %s ($1,$2,$3,$4);', (_ops->>(temprow.op_type_id::varchar)))
