@@ -1,7 +1,6 @@
 {
     "name": "hive_engine",
     "props":{
-        "enabled": true,
         "schema": "hive_engine",
         "context": "hive_engine",
         "start_block": 60100000
