@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS podping.ops(
     req_posting_auths VARCHAR(16)[],
     op_id VARCHAR,
     op_payload JSON
-) INHERITS( hive.podping );
+);
 
 CREATE TABLE IF NOT EXISTS podping.updates(
     id BIGSERIAL PRIMARY KEY,

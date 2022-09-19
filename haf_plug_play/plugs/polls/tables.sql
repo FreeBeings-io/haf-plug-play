@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS polls.ops(
     op_header JSON,
     op_type VARCHAR(16),
     op_payload JSON
-) INHERITS( hive.hpp );
+);
 
 CREATE TABLE IF NOT EXISTS polls.content(
     poll_opid BIGINT NOT NULL UNIQUE REFERENCES polls.ops(id) ON DELETE CASCADE DEFERRABLE,
