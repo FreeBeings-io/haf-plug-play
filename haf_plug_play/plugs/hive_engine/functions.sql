@@ -7,13 +7,10 @@ CREATE OR REPLACE FUNCTION hive_engine.nfts(_he_id BIGINT, _block_num BIGINT, _c
 
         DECLARE
             _action VARCHAR;
-            _symbol VARCHAR(10);
-            _to VARCHAR(16);
-            _quantity 
         BEGIN
             IF _action = 'create' THEN
-                INSERT INTO hive_engine.nfts(he_id, block_num, created, owners, issuer_accs, issuer_conts)
-                VALUES (_he_id, _block_num, _created, );
+                INSERT INTO hive_engine.nfts(he_id, block_num, created, details)
+                VALUES (_he_id, _block_num, _created, _payload);
         END;
     $function$;
 
@@ -29,17 +26,12 @@ CREATE OR REPLACE FUNCTION hive_engine.save_op(_block_num BIGINT, _created TIMES
             _urls VARCHAR(500)[];
             _new_id BIGINT;
         BEGIN
-            WITH _ins AS (
-                INSERT INTO hive_engine.ops(
-                    block_num, created, trx_id, req_auths,
-                    req_posting_auths, op_id, op_payload)
-                VALUES
-                    (_block_num, _created, _hash, _required_auths,
-                    _required_posting_auths, _op_id, _op_payload)
-                RETURNING id
-            )
-            SELECT id INTO _new_id FROM _ins;
-            RETURN _new_id;
+            INSERT INTO hive_engine.ops
+                (block_num, created, trx_id, req_auths,
+                req_posting_auths, op_id, op_payload)
+            VALUES
+                (_block_num, _created, _hash, _required_auths,
+                _required_posting_auths, _op_id, _op_payload);
         END;
     $function$;
 
@@ -66,13 +58,7 @@ CREATE OR REPLACE FUNCTION hive_engine.process_cjop(_block_num INTEGER, _created
             -- process by Custom JSON ID  TODO: implement defs based filters
             IF _op_id = 'ssc-mainnet-hive' THEN
                 -- save op
-                _saved_id := hive_engine.save_op(_block_num, _created, _hash, _required_auths, _required_posting_auths, _op_id, _op_payload);
-                _contract := _op_payload ->> 'contractName';
-                IF _contract = 'tokens' THEN
-                    PERFORM hive_engine.tokens(_saved_id, _block_num, _created, _op_payload);
-                ELSIF _contract = 'nft' THEN
-                    PERFORM hive_engine.nfts(_saved_id, _block_num, _created, _op_payload);
-                END IF;
+                hive_engine.save_op(_block_num, _created, _hash, _required_auths, _required_posting_auths, _op_id, _op_payload);
             END IF;
         END;
     $function$;
