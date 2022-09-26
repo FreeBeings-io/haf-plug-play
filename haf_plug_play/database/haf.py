@@ -16,7 +16,7 @@ config = Config.config
 
 class Haf:
 
-    db = DbSession("main")
+    db = DbSession("hpp-main")
     plug_list = []
 
     @classmethod
@@ -61,13 +61,13 @@ class Haf:
         if has is False:
             cls.db.execute(
                 f"""
-                    INSERT INTO hpp.plug_state (plug, defs, latest_block_num)
-                    VALUES ('{plug}', '{json.dumps(defs)}', {_block});
+                    INSERT INTO hpp.plug_state (plug, defs, latest_block_num, enabled)
+                    VALUES ('{plug}', '{json.dumps(json.dumps(defs))}', {_block}, {defs['props']['enabled']});
                 """)
         else:
             cls.db.execute(
                 f"""
-                    UPDATE hpp.plug_state SET defs='{defs}' WHERE plug='{plug}';
+                    UPDATE hpp.plug_state SET defs='{json.dumps(defs)}', enabled={defs['props']['enabled']} WHERE plug='{plug}';
                 """
             )
         return defs
@@ -82,7 +82,6 @@ class Haf:
             tables = open(f'{working_dir}/{plug}/tables.sql', 'r', encoding='UTF-8').read()
             updated_defs = cls._check_defs(plug, defs)
             if updated_defs['props']['enabled'] is True:
-                cls._check_context(plug, defs['props']['start_block'])
                 cls._check_schema(plug, tables)
                 cls._update_functions(functions)
                 AvailablePlugs.add_plug(plug, Plug(plug, updated_defs))
@@ -98,15 +97,20 @@ class Haf:
         cls.db.execute(sync)
         cls.db.execute(
             """
-                INSERT INTO hpp.global_props (head_block_num)
-                SELECT '0'
+                INSERT INTO hpp.global_props (sync_enabled)
+                SELECT 'true'
                 WHERE NOT EXISTS (SELECT * FROM hpp.global_props);
             """, None
         )
         cls.db.commit()
 
     @classmethod
+    def _start_sync(cls):
+        print("Starting main sync process...")
+        cls.db.execute(f"CALL hpp.sync_main();")
+
+    @classmethod
     def init(cls):
         cls._init_hpp()
         cls._init_plugs()
-        Thread(target=AvailablePlugs.plug_watch).start()
+        Thread(target=cls._start_sync).start()
