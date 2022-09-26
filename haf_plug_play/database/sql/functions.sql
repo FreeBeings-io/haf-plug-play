@@ -1,3 +1,12 @@
+CREATE OR REPLACE FUNCTION hpp.get_haf_head_block()
+    RETURNS INTEGER
+    LANGUAGE plpgsql
+    VOLATILE AS $function$
+        BEGIN
+            RETURN (SELECT MAX(block_num) FROM hive.hpp_operations_view);
+        END;
+    $function$;
+
 CREATE OR REPLACE FUNCTION hpp.get_op_id( _operation VARCHAR )
     RETURNS SMALLINT
     LANGUAGE plpgsql
@@ -46,18 +55,12 @@ CREATE OR REPLACE FUNCTION hpp.plug_long_running( _plug VARCHAR)
         END;
     $function$;
 
-CREATE OR REPLACE FUNCTION hpp.terminate_sync( _plug VARCHAR)
-    RETURNS void
+CREATE OR REPLACE FUNCTION hpp.sync_enabled()
+    RETURNS BOOLEAN
     LANGUAGE plpgsql
     VOLATILE AS $function$
-        DECLARE
-            _pid INTEGER;
         BEGIN
-            SELECT pid INTO _pid FROM pg_stat_activity
-                WHERE query = FORMAT('CALL hpp.sync_plug( ''%s'' );', _plug);
-            IF _pid IS NOT NULL THEN
-                SELECT pg_cancel_backend(_pid);
-            END IF;
+            RETURN (SELECT sync_enabled FROM hpp.global_props);
         END;
     $function$;
 
