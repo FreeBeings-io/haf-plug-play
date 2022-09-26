@@ -2,7 +2,6 @@
     "name": "hive_engine",
     "props":{
         "schema": "hive_engine",
-        "context": "hive_engine",
         "start_block": 60100000
     },
     "ops": {"18": "hive_engine.process_cjop"}

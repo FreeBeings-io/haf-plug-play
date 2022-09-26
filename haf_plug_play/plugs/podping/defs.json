@@ -2,7 +2,6 @@
     "name": "podping",
     "props":{
         "schema": "podping",
-        "context": "podping",
         "start_block": 53690004
     },
     "ops": {"18": "podping.process_cjop"}
