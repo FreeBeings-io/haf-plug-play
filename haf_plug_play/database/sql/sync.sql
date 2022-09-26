@@ -1,5 +1,25 @@
 -- check context
 
+CREATE OR REPLACE PROCEDURE hpp.sync_main()
+    LANGUAGE plpgsql
+    AS $$
+        DECLARE
+            tempplug RECORD;
+        BEGIN
+            WHILE hpp.sync_enabled() LOOP
+                FOR tempplug IN
+                    SELECT * FROM hpp.plug_state 
+                LOOP
+                    IF tempplug.enabled = true THEN
+                        RAISE NOTICE 'Attempting to sync plug: %', tempplug.plug;
+                        CALL hpp.sync_plug(tempplug.plug);
+                        RAISE NOTICE 'Plug synced: %', tempplug.plug;
+                    END IF;
+                END LOOP;
+            END LOOP;
+        END;
+    $$;
+
 CREATE OR REPLACE PROCEDURE hpp.sync_plug(_plug_name VARCHAR(64))
     LANGUAGE plpgsql
     AS $$
@@ -8,36 +28,31 @@ CREATE OR REPLACE PROCEDURE hpp.sync_plug(_plug_name VARCHAR(64))
             _app_context VARCHAR;
             _ops JSON;
             _op_ids SMALLINT[];
-            _next_block_range hive.blocks_range;
             _latest_block_num INTEGER;
             _range BIGINT[];
+            _batch_size INTEGER := 1000;
+            _head INTEGER;
+            _end INTEGER;
         BEGIN
             SELECT defs->'props'->>'context' INTO _app_context FROM hpp.plug_state WHERE plug = _plug_name;
             SELECT defs->'ops' INTO _ops FROM hpp.plug_state WHERE plug = _plug_name;
             SELECT ARRAY (SELECT json_array_elements_text(defs->'op_ids')) INTO _op_ids FROM hpp.plug_state WHERE plug = _plug_name;
 
-            IF _app_context IS NULL THEN
-                RAISE NOTICE 'Could not start sync for plug: %. DB entry not found.', _plug_name;
-                RETURN;
-            END IF;
-
             SELECT latest_block_num INTO _latest_block_num FROM hpp.plug_state WHERE plug = _plug_name;
-            IF NOT hive.app_context_is_attached(_app_context) THEN
-                PERFORM hive.app_context_attach(_app_context, _latest_block_num);
-            END IF;
             -- SELECT latest_hive_opid INTO _latest_hive_opid FROM hpp.plug_state WHERE plug = _plug_name;
             -- SELECT MAX(id) INTO _head_hive_opid FROM hive.operations; -- TODO reversible if in def
             -- start process
-            WHILE hpp.plug_enabled(_plug_name) LOOP
-                _next_block_range := hive.app_next_block(_app_context);
-                IF _next_block_range IS NULL THEN
-                    RAISE WARNING 'Waiting for next block...';
+            --RAISE NOTICE 'Attempting to process block range: <%,%>', _next_block_range.first_block, _next_block_range.last_block;
+            _head := hpp.get_haf_head_block();
+            IF _latest_block_num+1 < _head THEN
+                IF _latest_block_num+_batch_size > _head THEN
+                    _end := _head;
                 ELSE
-                    RAISE NOTICE 'Attempting to process block range: <%,%>', _next_block_range.first_block, _next_block_range.last_block;
-                    CALL hpp.process_block_range(_plug_name, _app_context, _next_block_range.first_block, _next_block_range.last_block, _ops, _op_ids);
+                    _end := _latest_block_num+_batch_size;
                 END IF;
-            END LOOP;
-            COMMIT;
+                CALL hpp.process_block_range(_plug_name, _app_context, _latest_block_num+1, _end, _ops, _op_ids);
+                COMMIT;
+            END IF;
         END;
     $$;
 
@@ -49,21 +64,13 @@ CREATE OR REPLACE PROCEDURE hpp.process_block_range(_plug_name VARCHAR, _app_con
             temprow RECORD;
             _plug_schema VARCHAR;
             _done BOOLEAN;
-            _to_attach BOOLEAN;
             _first_block INTEGER;
             _last_block INTEGER;
             _last_block_time TIMESTAMP;
             _step INTEGER;
         BEGIN
-            _to_attach := false;
-            _step := 1000;
+            _step := 100000;
             -- determine if massive sync is needed
-            IF _end - _start > 0 THEN
-                -- detach context
-                PERFORM hive.app_context_detach(_app_context);
-                RAISE NOTICE 'Context detached.';
-                _to_attach := true;
-            END IF;
             -- get defs
             -- _arr := ARRAY(SELECT json_array_elements_text(_ops));
             -- _op_ids := array_agg(SELECT unnest(_arr[1:999][1]));
@@ -89,8 +96,8 @@ CREATE OR REPLACE PROCEDURE hpp.process_block_range(_plug_name VARCHAR, _app_con
                             ov.trx_in_block,
                             tv.trx_hash,
                             ov.body::json
-                        FROM hive.operations_view ov
-                        LEFT JOIN hive.transactions_view tv
+                        FROM hive.hpp_operations_view ov
+                        LEFT JOIN hive.hpp_transactions_view tv
                             ON tv.block_num = ov.block_num
                             AND tv.trx_in_block = ov.trx_in_block
                         WHERE ov.block_num >= $1
@@ -110,10 +117,5 @@ CREATE OR REPLACE PROCEDURE hpp.process_block_range(_plug_name VARCHAR, _app_con
                     WHERE plug = _plug_name;
                 COMMIT;
             END LOOP;
-            IF _to_attach = true THEN
-                -- attach context
-                PERFORM hive.app_context_attach(_app_context, _last_block);
-                RAISE NOTICE 'Context attached.';
-            END IF;
         END;
     $$;
