@@ -4,7 +4,7 @@ HPP_PLUG_STATE_FIELDS = ['plug', 'latest_block_num', 'check_in', "defs->'props'-
 
 def get_haf_sync_head():
     sql = f"""
-        SELECT block_num, timestamp FROM hive.operations_view ORDER BY block_num DESC LIMIT 1;
+        SELECT block_num, timestamp FROM hive.hpp_operations_view ORDER BY block_num DESC LIMIT 1;
     """
     res = select(sql, ['head_block_num', 'head_block_time'])
     return res[0]
