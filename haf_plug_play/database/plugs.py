@@ -84,19 +84,3 @@ class AvailablePlugs:
     @classmethod
     def add_plug(cls, plug_name, plug:Plug):
         cls.plugs[plug_name] = plug
-
-    @classmethod
-    def plug_watch(cls):
-        while True:
-            for _plug in cls.plugs.items():
-                plug = cls.plugs[_plug[0]]
-                if not plug.error:
-                    good = plug.is_connection_open()
-                    if good is False:
-                        print(f"{_plug[0]}:: creating new DB connection.")
-                        plug.create_new_connection()
-                    if plug.running() is False:
-                        Thread(target=plug.start).start()
-                    elif plug.is_long_running():
-                        plug.terminate_sync()
-            time.sleep(60)
