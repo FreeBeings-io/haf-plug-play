@@ -1,7 +1,4 @@
 import json
-from threading import Thread
-import time
-from typing import Dict
 
 from haf_plug_play.database.core import DbSession
 
@@ -63,19 +60,6 @@ class Plug:
         long_running = self.db_conn.select_one(
             f"SELECT hpp.plug_long_running('{self.name}');")
         return long_running
-    
-    def start(self):
-        try:
-            if self.is_enabled():
-                print(f"{self.name}:: starting")
-                self.db_conn.execute(f"CALL hpp.sync_plug( '{self.name}' );")
-        except Exception as err:
-            print(f"Plug error: '{self.name}'")
-            print(err)
-            self.error = True
-            self.disable()
-            self.db_conn.conn.close()
-            self.db_conn.conn.close()
 
 class AvailablePlugs:
 
