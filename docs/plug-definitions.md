@@ -10,7 +10,6 @@ Below is an example file used by the `podping` plug:
     "props":{
         "enabled": true,
         "schema": "podping",
-        "context": "podping",
         "start_block": 53690004
     },
     "ops": {"18": "podping.process_cjop"}
@@ -21,7 +20,6 @@ Below is an example file used by the `podping` plug:
 - `props`: the properties of your plug
     - `enabled`: the default state of the plug (on or off)
     - `schema`: the name to use for the PostgreSQL schema that holds all your plug's data
-    - `context`: the name to use for the HAF context
     - `start_block`: at which block should sync begin
 - `ops`: HAF internal operation IDs and their mapped functions for processing
     - `18` is for `custom_json` operations
