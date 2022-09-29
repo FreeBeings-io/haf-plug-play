@@ -1,4 +1,5 @@
 import sys
+import time
 
 
 from haf_plug_play.config import Config
@@ -13,6 +14,7 @@ def run():
         print("---   Hive Plug & Play (HAF) started   ---")
         # start haf sync
         Haf.init()
+        time.sleep(5)
         # run server
         run_server(config)
     except KeyboardInterrupt:
