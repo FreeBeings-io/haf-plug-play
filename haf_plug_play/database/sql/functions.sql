@@ -82,3 +82,18 @@ CREATE OR REPLACE FUNCTION hpp.plug_flag_massive_synced( _plug VARCHAR)
             UPDATE hpp.plug_state SET massive_synced = true WHERE plug=_plug;
         END;
     $function$;
+
+CREATE OR REPLACE FUNCTION hpp.terminate_main_sync(app_desc VARCHAR)
+    RETURNS void
+    LANGUAGE plpgsql
+    VOLATILE AS $function$
+        DECLARE
+            _pid INTEGER;
+        BEGIN
+            SELECT pid INTO _pid FROM pg_stat_activity
+                WHERE application_name = app_desc;
+            IF _pid IS NOT NULL THEN
+                PERFORM pg_cancel_backend(_pid);
+            END IF;
+        END;
+    $function$;
