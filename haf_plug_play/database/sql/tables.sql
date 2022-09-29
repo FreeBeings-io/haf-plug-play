@@ -1,5 +1,3 @@
-CREATE SCHEMA IF NOT EXISTS hpp;
-
 CREATE TABLE IF NOT EXISTS hpp.global_props(
     sync_enabled BOOLEAN DEFAULT true
 );
