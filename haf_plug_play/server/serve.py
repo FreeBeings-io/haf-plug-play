@@ -1,6 +1,7 @@
 
 import uvicorn
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from haf_plug_play.server.plug_endpoints.podping import router_podping
 
@@ -18,6 +19,13 @@ app = FastAPI(
     openapi_tags=TAGS_METADATA,
     openapi_url="/api/openapi.json",
     docs_url="/"
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 app.include_router(router_podping)
@@ -41,6 +49,5 @@ def run_server(config):
         host=config['server_host'],
         port=int(config['server_port']),
         log_level="info",
-        reload=True,
-        workers=50
+        reload=True
     )
