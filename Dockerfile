@@ -16,6 +16,6 @@ WORKDIR $APP_HOME
 COPY . ./
 
 # Install production dependencies.
-RUN pip install --no-cache-dir .
+RUN pip install --no-cache-dir -e .
 
 CMD haf_plug_play
