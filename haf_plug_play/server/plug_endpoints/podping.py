@@ -1,5 +1,4 @@
 """Plug endpoints for podping."""
-import imp
 import json
 from fastapi import APIRouter, HTTPException
 from datetime import datetime

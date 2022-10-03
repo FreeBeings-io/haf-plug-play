@@ -97,3 +97,18 @@ CREATE OR REPLACE FUNCTION hpp.terminate_main_sync(app_desc VARCHAR)
             END IF;
         END;
     $function$;
+
+CREATE OR REPLACE FUNCTION hpp.is_sync_running(app_desc VARCHAR)
+    RETURNS BOOLEAN
+    LANGUAGE plpgsql
+    VOLATILE AS $function$
+        DECLARE
+        BEGIN
+            RETURN (
+                SELECT EXISTS (
+                    SELECT * FROM pg_stat_activity
+                    WHERE application_name = app_desc
+                )
+            );
+        END;
+    $function$;
