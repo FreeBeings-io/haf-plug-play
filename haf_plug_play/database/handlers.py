@@ -3,11 +3,9 @@ from haf_plug_play.database.access import select
 HPP_PLUG_STATE_FIELDS = ['plug', 'latest_block_num', 'check_in', "defs->'props'->'enabled'"]
 
 def get_haf_sync_head():
-    sql = f"""
-        SELECT block_num, timestamp FROM hive.hpp_operations_view ORDER BY block_num DESC LIMIT 1;
-    """
-    res = select(sql, ['head_block_num', 'head_block_time'])
-    return res[0]
+    sql = f"SELECT hive.app_get_irreversible_block();"
+    res = select(sql, ['head_block_num'])
+    return res[0][0]
 
 def get_plugs_status():
     fields = ", ".join(HPP_PLUG_STATE_FIELDS)

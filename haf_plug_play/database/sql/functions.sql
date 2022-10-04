@@ -1,11 +1,3 @@
-CREATE OR REPLACE FUNCTION hpp.get_haf_head_block()
-    RETURNS INTEGER
-    LANGUAGE plpgsql
-    VOLATILE AS $function$
-        BEGIN
-            RETURN (SELECT MAX(block_num) FROM hive.hpp_operations_view);
-        END;
-    $function$;
 
 CREATE OR REPLACE FUNCTION hpp.get_op_id( _operation VARCHAR )
     RETURNS SMALLINT
