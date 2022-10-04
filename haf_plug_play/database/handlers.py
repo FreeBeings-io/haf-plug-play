@@ -5,7 +5,7 @@ HPP_PLUG_STATE_FIELDS = ['plug', 'latest_block_num', 'check_in', "defs->'props'-
 def get_haf_sync_head():
     sql = f"SELECT hive.app_get_irreversible_block();"
     res = select(sql, ['head_block_num'])
-    return res[0][0]
+    return res[0]
 
 def get_plugs_status():
     fields = ", ".join(HPP_PLUG_STATE_FIELDS)

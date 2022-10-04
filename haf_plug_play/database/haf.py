@@ -14,7 +14,7 @@ config = Config.config
 
 class Haf:
 
-    db = DbSession(f"{config['schema']}-main")
+    db = DbSession(f"{config['schema']}-setup")
     plug_list = []
 
     @classmethod
@@ -108,10 +108,12 @@ class Haf:
     @classmethod
     def _start_sync(cls):
         print("Starting main sync process...")
-        cls.db.execute(f"CALL {config['schema']}.sync_main();")
+        db_main = DbSession(f"{config['schema']}-main")
+        db_main.execute(f"CALL {config['schema']}.sync_main();")
 
     @classmethod
     def init(cls):
         cls._init_hpp()
+        cls._cleanup()
         cls._init_plugs()
         Thread(target=cls._start_sync).start()

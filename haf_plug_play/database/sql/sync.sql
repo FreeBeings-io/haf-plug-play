@@ -39,7 +39,7 @@ CREATE OR REPLACE PROCEDURE hpp.sync_plug(_plug_name VARCHAR(64))
             -- SELECT latest_hive_opid INTO _latest_hive_opid FROM hpp.plug_state WHERE plug = _plug_name;
             -- SELECT MAX(id) INTO _head_hive_opid FROM hive.operations; -- TODO reversible if in def
             -- start process
-            --RAISE NOTICE 'Attempting to process block range: <%,%>', _next_block_range.first_block, _next_block_range.last_block;
+            -- RAISE NOTICE 'Attempting to process block range: <%,%>', _next_block_range.first_block, _next_block_range.last_block;
             _head := hive.app_get_irreversible_block();
             IF _latest_block_num+1 < _head THEN
                 IF _latest_block_num+_batch_size > _head THEN
