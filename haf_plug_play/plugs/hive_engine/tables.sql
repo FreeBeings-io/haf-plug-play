@@ -14,12 +14,11 @@ CREATE TABLE IF NOT EXISTS hive_engine.ops(
 
 CREATE TABLE IF NOT EXISTS hive_engine.transfers(
     id BIGSERIAL PRIMARY KEY,
-    he_id BIGINT NOT NULL REFERENCES hive_engine.ops(id),
     block_num INTEGER NOT NULL,
     created TIMESTAMP NOT NULL,
     symbol VARCHAR,
-    from VARCHAR(16),
-    to VARCHAR(16),
+    from_acc VARCHAR(16),
+    to_acc VARCHAR(16),
     qty NUMERIC(18,10),
     memo VARCHAR
 );
@@ -53,6 +52,11 @@ CREATE TABLE IF NOT EXISTS hive_engine.burns(
     he_id BIGINT NOT NULL REFERENCES hive_engine.ops(id),
     details JSON -- TODO: investigate expanding
 );
+
+-- INDEXES: OPS
+
+CREATE INDEX IF NOT EXISTS ops_ix_contract_name ON hive_engine.ops USING HASH((op_payload->'contractName'));
+CREATE INDEX IF NOT EXISTS ops_ix_contract_action ON hive_engine.ops USING HASH((op_payload->'contractAction'));
 
 -- INDEXES: TRANSFERS
 
