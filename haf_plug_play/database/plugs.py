@@ -1,6 +1,10 @@
 import json
 
+from haf_plug_play.config import Config
+
 from haf_plug_play.database.core import DbSession
+
+config = Config.config
 
 
 class Plug:
@@ -8,13 +12,13 @@ class Plug:
     def __init__(self, name, defs) -> None:
         self.name = name
         self.defs = defs
-        self.db_conn = DbSession(self.name)
+        self.db_conn = DbSession(f"{config['schema']}-{self.name}")
         self.error = False
     
     def create_new_connection(self):
         if self.error == False:
             del self.db_conn
-            self.db_conn = DbSession(self.name)
+            self.db_conn = DbSession(f"{config['schema']}-{self.name}")
 
     def get_defs(self):
         return self.defs
