@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from haf_plug_play.server.plug_endpoints.podping import router_podping
+from haf_plug_play.server.plug_endpoints.hive_engine import router_hive_engine
 
 from haf_plug_play.server.system_status import SystemStatus
 from haf_plug_play.tools import normalize_types
@@ -29,6 +30,7 @@ app.add_middleware(
 )
 
 app.include_router(router_podping)
+app.include_router(router_hive_engine)
 
 async def root():
     """Reports the status of Hive Plug & Play."""

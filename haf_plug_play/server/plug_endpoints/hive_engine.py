@@ -9,10 +9,9 @@ from haf_plug_play.tools import UTC_TIMESTAMP_FORMAT
 
 router_hive_engine = APIRouter()
 
-@router_hive_engine.get("/api/hive-engine/nft", tags=['hive-engine'])
-async def get_nft(symbol:str):
-    """Returns details about an NFT.
-
-    """
-    pass
-
+@router_hive_engine.get("/api/hive-engine/ops", tags=['hive-engine'])
+async def get_ops(contract_name:str, contract_action:str):
+    """Returns operations based on filter options."""
+    sql = SearchQuery.get_he_ops(contract_name, contract_action)
+    res = select(sql, ['created', 'block_num', 'payload', 'req_auths', 'req_posting_auths'])
+    return res

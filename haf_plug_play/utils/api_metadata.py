@@ -15,7 +15,7 @@ VERSION = "1.0"
 CONTACT = {
     "name": "FreeBeings.io",
     "url": "https://github.com/FreeBeings-io/haf-plug-play",
-    "email": "developers@freebeings.io",
+    "email": "info@freebeings.io",
 }
 
 LICENSE = {
@@ -33,5 +33,9 @@ TAGS_METADATA = [
     {
         "name": "podping",
         "description": "Podping is a distributed notification system for new podcast episodes based on the Hive blockchain",
+    },
+    {
+        "name": "hive-engine",
+        "description": "Hive Engine data"
     }
 ]

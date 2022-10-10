@@ -16,7 +16,17 @@ class Processor:
         # if valid then process immediately
 
 class SearchQuery:
-    pass
+
+    @classmethod
+    def get_he_ops(cls, contract_name:str, contract_action:str, limit:int=100):
+        query = f"""
+            SELECT block_num, created, op_payload->'contractPayload', req_auths, req_posting_auths
+            FROM hive_engine.ops
+            WHERE op_payload->>'contractName' = '{contract_name}' AND op_payload->>'contractAction' = '{contract_action}'
+            ORDER BY id DESC
+            LIMIT {limit};
+        """
+        return query
 
 class StateQuery:
 
