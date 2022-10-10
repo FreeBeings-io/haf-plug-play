@@ -12,6 +12,7 @@ CREATE OR REPLACE PROCEDURE hpp.sync_main()
                     IF tempplug.enabled = true THEN
                         RAISE NOTICE 'Attempting to sync plug: %', tempplug.plug;
                         CALL hpp.sync_plug(tempplug.plug);
+                        COMMIT;
                         RAISE NOTICE 'Plug synced: %', tempplug.plug;
                     END IF;
                 END LOOP;
@@ -48,7 +49,6 @@ CREATE OR REPLACE PROCEDURE hpp.sync_plug(_plug_name VARCHAR(64))
                     _end := _latest_block_num+_batch_size;
                 END IF;
                 CALL hpp.process_block_range(_plug_name, _latest_block_num+1, _end, _ops, _op_ids);
-                COMMIT;
             END IF;
         END;
     $$;
@@ -93,9 +93,9 @@ CREATE OR REPLACE PROCEDURE hpp.process_block_range(_plug_name VARCHAR, _start I
                 _last_block_time := temprow.timestamp;
             END LOOP;
             -- save done as run end
-            RAISE NOTICE '%:  Block range: <%, %> processed successfully.', _plug_name, _first_block, _last_block;
+            RAISE NOTICE '%:  Block range: <%, %> processed successfully.', _plug_name, _start, _end;
             UPDATE hpp.plug_state
-                SET check_in = (NOW() AT TIME ZONE 'UTC'), latest_block_time = _last_block_time, latest_block_num = _last_block
+                SET check_in = (NOW() AT TIME ZONE 'UTC'), latest_block_time = _last_block_time, latest_block_num = _end
                 WHERE plug = _plug_name;
         END;
     $$;
