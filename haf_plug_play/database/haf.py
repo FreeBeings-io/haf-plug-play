@@ -19,7 +19,7 @@ class Haf:
 
     @classmethod
     def _is_valid_plug(cls, module):
-        return bool(re.match(r'^[a-z]+[_]*$', module))
+        return bool(re.match(r'^[a-z]+[_]*[a-z]*', module))
     
     @classmethod
     def _check_schema(cls, plug, tables):
@@ -47,7 +47,7 @@ class Haf:
             cls.db.execute(
                 f"""
                     INSERT INTO {config['schema']}.plug_state (plug, defs, latest_block_num, enabled)
-                    VALUES ('{plug}', '{json.dumps(json.dumps(defs))}', {_block}, {defs['props']['enabled']});
+                    VALUES ('{plug}', '{json.dumps(defs)}', {_block}, {defs['props']['enabled']});
                 """)
         else:
             cls.db.execute(
@@ -55,6 +55,7 @@ class Haf:
                     UPDATE {config['schema']}.plug_state SET defs='{json.dumps(defs)}', enabled={defs['props']['enabled']} WHERE plug='{plug}';
                 """
             )
+        cls.db.commit()
         return defs
 
     @classmethod
@@ -104,6 +105,7 @@ class Haf:
                     cls.db.execute(cmd)
                 except Exception as err:
                     print(f"Reset encountered error: {err}")
+            cls._init_hpp()
 
     @classmethod
     def _start_sync(cls):
