@@ -82,7 +82,7 @@ CREATE OR REPLACE FUNCTION podping.process_cjop(_block_num INTEGER, _created TIM
             _op_id := _body -> 'value' ->> 'id';
             _op_payload := (_body -> 'value'->>'json')::json;
             -- process by Custom JSON ID  TODO: implement defs based filters
-            IF _op_id IN ('podping','pp_video_update') THEN
+            IF _op_id IN ('podping','pp_video_update', 'pp_podcast_live') THEN
                 -- save op
                 _saved_id := podping.save_op(_block_num, _created, _hash, _required_auths, _required_posting_auths, _op_id, _op_payload);
                 PERFORM podping.update(_saved_id, _block_num, _created, _op_payload);
