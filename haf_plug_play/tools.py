@@ -2,6 +2,7 @@ import decimal
 import os
 
 from datetime import datetime
+import re
 
 HIVE_NODES = [
     "https://api.hive.blog",
@@ -14,6 +15,14 @@ HIVE_NODES = [
 
 UTC_TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S"
 INSTALL_DIR = os.path.dirname(__file__)
+
+def _is_valid_plug(module):
+    return bool(re.match(r'^[a-z]+[_]*[a-z]*', module))
+
+def get_plug_list():
+    working_dir = f'{INSTALL_DIR}/plugs'
+    plug_list = [f.name for f in os.scandir(working_dir) if _is_valid_plug(f.name)]
+    return plug_list
 
 def check_required_keys(required, provided_keys, op_context):
     missing = []
