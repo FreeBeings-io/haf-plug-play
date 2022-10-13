@@ -23,8 +23,9 @@ class Haf:
     
     @classmethod
     def _check_schema(cls, plug, tables):
-        exists = cls.db.select(f"SELECT schema_name FROM information_schema.schemata WHERE schema_name='{plug}';")
+        exists = cls.db.select(f"SELECT schema_name FROM information_schema.schemata WHERE schema_name='{config['schema']}_{plug}';")
         if exists is None:
+            cls.db.execute(f"CREATE SCHEMA IF NOT EXISTS {config['schema']}_{plug}")
             cls.db.execute(tables, None)
             cls.db.commit()
     
@@ -64,8 +65,8 @@ class Haf:
         cls.plug_list = [f.name for f in os.scandir(working_dir) if cls._is_valid_plug(f.name)]
         for plug in cls.plug_list:
             defs = json.loads(open(f'{working_dir}/{plug}/defs.json', 'r', encoding='UTF-8').read())
-            functions = open(f'{working_dir}/{plug}/functions.sql', 'r', encoding='UTF-8').read()
-            tables = open(f'{working_dir}/{plug}/tables.sql', 'r', encoding='UTF-8').read()
+            functions = open(f'{working_dir}/{plug}/functions.sql', 'r', encoding='UTF-8').read().replace(f"{plug}.", f"{config['schema']}_{plug}.")
+            tables = open(f'{working_dir}/{plug}/tables.sql', 'r', encoding='UTF-8').read().replace(f"{plug}.", f"{config['schema']}_{plug}.")
             updated_defs = cls._check_defs(plug, defs)
             if updated_defs['props']['enabled'] is True:
                 cls._check_schema(plug, tables)
@@ -99,6 +100,10 @@ class Haf:
         cmds = [
             f"DROP SCHEMA {config['schema']} CASCADE;",
         ]
+        working_dir = f'{INSTALL_DIR}/plugs'
+        cls.plug_list = [f.name for f in os.scandir(working_dir) if cls._is_valid_plug(f.name)]
+        for plug in cls.plug_list:
+            cmds.append(f"DROP SCHEMA {config['schema']}_{plug} CASCADE")
         if config['reset'] == 'true':
             for cmd in cmds:
                 try:
