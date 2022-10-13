@@ -6,7 +6,7 @@ from haf_plug_play.database.core import DbSession
 from haf_plug_play.database.plugs import AvailablePlugs, Plug
 from haf_plug_play.config import Config
 
-from haf_plug_play.tools import INSTALL_DIR
+from haf_plug_play.tools import INSTALL_DIR, get_plug_list
 
 SOURCE_DIR = os.path.dirname(__file__) + "/sql"
 
@@ -62,8 +62,7 @@ class Haf:
     @classmethod
     def _init_plugs(cls):
         working_dir = f'{INSTALL_DIR}/plugs'
-        cls.plug_list = [f.name for f in os.scandir(working_dir) if cls._is_valid_plug(f.name)]
-        for plug in cls.plug_list:
+        for plug in get_plug_list():
             defs = json.loads(open(f'{working_dir}/{plug}/defs.json', 'r', encoding='UTF-8').read())
             functions = open(f'{working_dir}/{plug}/functions.sql', 'r', encoding='UTF-8').read().replace(f"{plug}.", f"{config['schema']}_{plug}.")
             tables = open(f'{working_dir}/{plug}/tables.sql', 'r', encoding='UTF-8').read().replace(f"{plug}.", f"{config['schema']}_{plug}.")
