@@ -1,5 +1,3 @@
-CREATE SCHEMA IF NOT EXISTS hive_engine;
-
 CREATE TABLE IF NOT EXISTS hive_engine.ops(
     id BIGSERIAL PRIMARY KEY,
     block_num INTEGER NOT NULL,
