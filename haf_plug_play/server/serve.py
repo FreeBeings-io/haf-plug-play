@@ -1,8 +1,7 @@
-
-from distutils.command.config import config
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from haf_plug_play import config
 
 from haf_plug_play.server.plug_endpoints.podping import router_podping
 from haf_plug_play.server.plug_endpoints.hive_engine import router_hive_engine
@@ -15,6 +14,8 @@ PLUG_ROUTERS = {
     'podping': router_podping,
     'hive_engine': router_hive_engine
 }
+
+config = config.Config.config
 
 app = FastAPI(
     title=TITLE,
@@ -50,7 +51,7 @@ async def root():
 
 app.add_api_route("/api", root, tags=["system"], methods=["GET"], summary="System status")
 
-def run_server(config):
+def run_server():
     """Run server."""
     uvicorn.run(
         "haf_plug_play.server.serve:app",
