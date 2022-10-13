@@ -51,8 +51,11 @@ async def get_podping_url_latest(iri:str, limit: int = 5):
     sql_feed_update = StateQuery.get_podping_url_latest_feed_update(iri, limit)
     result = {}
     feed_updates = select(sql_feed_update, ['trx_id', 'block_num', 'created', 'reason', 'medium'])
-    result["feed_updates"] = feed_updates
-    result["iri"] = iri
-    _time_since = datetime.utcnow() - datetime.strptime(feed_updates[0]['created'], UTC_TIMESTAMP_FORMAT)
-    result["seconds_since_last_update"] = _time_since.seconds
+    if feed_updates:
+        result["feed_updates"] = feed_updates
+        result["iri"] = iri
+        _time_since = datetime.utcnow() - datetime.strptime(feed_updates[0]['created'], UTC_TIMESTAMP_FORMAT)
+        result["seconds_since_last_update"] = _time_since.seconds
+    else:
+        return "No results found for given IRI"
     return result
