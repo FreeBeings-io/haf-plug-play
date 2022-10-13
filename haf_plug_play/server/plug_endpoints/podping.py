@@ -54,5 +54,5 @@ async def get_podping_url_latest(iri:str, limit: int = 5):
     result["feed_updates"] = feed_updates
     result["iri"] = iri
     _time_since = datetime.utcnow() - datetime.strptime(feed_updates[0]['created'], UTC_TIMESTAMP_FORMAT)
-    result["time_since_last_update"] = _time_since.seconds
+    result["seconds_since_last_update"] = _time_since.seconds
     return result
