@@ -10,25 +10,46 @@ Documentation can be found here:
 
 - [Podping API Documentation](https://podping.hpp.freebeings.io)
 
-## Production Setup
+## Production Deployment
 
 A production environment to succesfully run Plug & Play requires:
 
 ### A configured HAF server populating a HAF database
 
 - Install HAF on a server: https://gitlab.syncad.com/hive/haf
+- Setup the HAF database according to instructions on the repo above
 - The HAF database can be on the same server as `hived` or on another server
 - Set appropriate psql-filters if needed: [HAF PSQL Filtering Examples](https://gitlab.syncad.com/hive/haf/-/tree/develop/tests/integration/replay/patterns)
-- Run `hived` and allow it to run in live mode (synced to the `head_block` block)
+- Run `hived` and allow it to run in live mode (synced to `head_block`)
 
-### Plug & Play installed
+### Build from Docker
 
-- Clone the repository
-- Install: `pip3 install -e .` 
-- Create a config file, refer to the [sample_config](/sample_config.ini) file
-- Set the config directory: for example `export PLUG_PLAY_HOME=/home/ubuntu/.config/hpp/config.ini`
-- Enable the plugs you want to support by setting the `enabled` key to True in the plug's `defs.json` file. See the [Podping defs.json](/haf_plug_play/plugs/podping/defs.json) for example.
-- Run Plug & Play: `haf_plug_play`
+Simply build from the Dockerfile and run the container with the following variables passed:
+
+```
+DB_HOST=ip_address_of_haf_db_server
+DB_NAME=your_haf_db_name
+DB_USERNAME=username
+DB_PASSWORD=password
+SERVER_HOST=127.0.0.1
+SERVER_PORT=8080
+SCHEMA=hpp
+PLUGS=podping
+RESET=false
+```
+
+**Example**
+
+Create `.env` file with the above variables in the root folder and run:
+
+```
+docker build -t hpp-podping .
+docker run -d -p 8080:8080 --env-file .env hpp-podping
+```
+
+The configuration above runs a Plug & Play service, with only the `podping` plug enabled. To enable multiple plugs, use something like this: `PLUGS=podping,hive_engine`.
+
+To reset the database on startup, set the `RESET` variable to true.
 
 ---
 
@@ -68,18 +89,3 @@ cd haf-plug-play
 pip3 install -e .
 ```
 
-### Configure Hive Plug & Play (HAF)
-
-Hive Plug & Play requires a `config.ini` file to exist in either:
-  - Default file location of `/etc/hive-plug-play` 
-  - Or use any custom folder by setting an environment variable: `export PLUG_PLAY_HOME=~/.config/hive-plug-play`.
-
-To create a config file, refer to the [sample_config](/sample_config.ini) file.
-
-
-### Run HAF Plug & Play
-
-To run Plug & Play, use either:
-
-- `haf_plug_play`
-- or `python3 run_play_play.py`

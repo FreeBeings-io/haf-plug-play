@@ -6,8 +6,6 @@ from haf_plug_play.config import Config
 from haf_plug_play.server.serve import run_server
 from haf_plug_play.database.haf import Haf
 
-config = Config.config
-
 def run():
     try:
         """Runs main application processes and server."""
@@ -16,7 +14,7 @@ def run():
         Haf.init()
         time.sleep(5)
         # run server
-        run_server(config)
+        run_server()
     except KeyboardInterrupt:
         # shutdown
         sys.exit()

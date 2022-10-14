@@ -1,6 +1,7 @@
 import os
 
 from haf_plug_play.server.system_status import SystemStatus
+from haf_plug_play.tools import schemafy
 
 WDIR_PODPING = os.path.dirname(__file__)
 
@@ -24,7 +25,7 @@ class StateQuery:
                     ORDER BY url_count DESC
                     LIMIT {limit};
         """
-        return query
+        return schemafy(query, 'podping')
 
     @classmethod
     def get_podping_url_latest_feed_update(cls, url: str, limit: int = 5):
@@ -36,4 +37,4 @@ class StateQuery:
             ORDER BY fu.podping_id DESC
             LIMIT {limit};
         """
-        return query
+        return schemafy(query, 'podping')
