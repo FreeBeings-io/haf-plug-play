@@ -6,7 +6,7 @@ from haf_plug_play.database.core import DbSession
 from haf_plug_play.database.plugs import AvailablePlugs, Plug
 from haf_plug_play.config import Config
 
-from haf_plug_play.tools import INSTALL_DIR, get_plug_list
+from haf_plug_play.tools import INSTALL_DIR, get_plug_list, schemafy
 
 SOURCE_DIR = os.path.dirname(__file__) + "/sql"
 
@@ -42,6 +42,7 @@ class Haf:
         _op_ids = []
         for op in defs['ops'].keys():
             _op_ids.append(op)
+            defs['ops'][op] = defs['ops'][op].replace(f"{plug}.", f"{config['schema']}_{plug}.")
         defs['op_ids'] = _op_ids
         defs['props']['enabled'] = plug in config['plugs']
         if has is False:
@@ -64,8 +65,8 @@ class Haf:
         working_dir = f'{INSTALL_DIR}/plugs'
         for plug in get_plug_list():
             defs = json.loads(open(f'{working_dir}/{plug}/defs.json', 'r', encoding='UTF-8').read())
-            functions = open(f'{working_dir}/{plug}/functions.sql', 'r', encoding='UTF-8').read().replace(f"{plug}.", f"{config['schema']}_{plug}.")
-            tables = open(f'{working_dir}/{plug}/tables.sql', 'r', encoding='UTF-8').read().replace(f"{plug}.", f"{config['schema']}_{plug}.")
+            functions = schemafy(open(f'{working_dir}/{plug}/functions.sql', 'r', encoding='UTF-8').read(), plug)
+            tables = schemafy(open(f'{working_dir}/{plug}/tables.sql', 'r', encoding='UTF-8').read(), plug)
             updated_defs = cls._check_defs(plug, defs)
             if updated_defs['props']['enabled'] is True:
                 cls._check_schema(plug, tables)
@@ -75,9 +76,9 @@ class Haf:
     @classmethod
     def _init_hpp(cls):
         cls.db.execute(f"CREATE SCHEMA IF NOT EXISTS {config['schema']};")
-        tables = open(f'{SOURCE_DIR}/tables.sql', 'r', encoding='UTF-8').read().replace('hpp.', f"{config['schema']}.")
-        functions = open(f'{SOURCE_DIR}/functions.sql', 'r', encoding='UTF-8').read().replace('hpp.', f"{config['schema']}.")
-        sync = open(f'{SOURCE_DIR}/sync.sql', 'r', encoding='UTF-8').read().replace('hpp.', f"{config['schema']}.")
+        tables = schemafy(open(f'{SOURCE_DIR}/tables.sql', 'r', encoding='UTF-8').read())
+        functions = schemafy(open(f'{SOURCE_DIR}/functions.sql', 'r', encoding='UTF-8').read())
+        sync = schemafy(open(f'{SOURCE_DIR}/sync.sql', 'r', encoding='UTF-8').read())
         cls.db.execute(tables)
         cls.db.execute(functions)
         cls.db.execute(sync)

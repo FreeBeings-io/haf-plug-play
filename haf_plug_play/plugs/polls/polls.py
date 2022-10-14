@@ -3,6 +3,7 @@
 import os
 
 from haf_plug_play.server.system_status import SystemStatus
+from haf_plug_play.tools import schemafy
 
 WDIR_POLLS = os.path.dirname(__file__)
 
@@ -24,7 +25,7 @@ class SearchQuery:
         if op_type:
             query += f"AND op_type = '{op_type}';"
 
-        return query
+        return schemafy(query, 'polls')
 
 
 class StateQuery:
@@ -42,7 +43,7 @@ class StateQuery:
         """
         if tag:
             query += f" AND tag = '{tag}';"
-        return query
+        return schemafy(query, 'polls')
 
     @classmethod
     def get_poll(cls, author, permlink):
@@ -53,7 +54,7 @@ class StateQuery:
             FROM hpp.polls_content
             WHERE author = '{author}' AND permlink = '{permlink}' AND deleted = false;
         """
-        return query
+        return schemafy(query, 'polls')
 
     @classmethod
     def get_poll_votes_summary(cls, author, permlink):
@@ -70,7 +71,7 @@ class StateQuery:
                     t_content.expires, t_content.created - INTERVAL '7 DAYS')
             GROUP BY parsed_answer;
         """
-        return query
+        return schemafy(query, 'polls')
 
     @classmethod
     def get_poll_votes(cls, author, permlink):
@@ -81,7 +82,7 @@ class StateQuery:
             JOIN hpp.polls_votes t_votes ON t_content.author = t_votes.author AND t_content.permlink = t_votes.permlink
             WHERE t_content.author = '{author}' AND t_content.permlink = '{permlink}' AND t_content.deleted = false;
         """
-        return query
+        return schemafy(query, 'polls')
     
     @classmethod
     def get_polls_user(cls, author, active=False, tag=None):
@@ -98,4 +99,4 @@ class StateQuery:
         if tag:
             query += f" AND tag = '{tag}'"
         query += " ORDER BY created DESC;"
-        return query
+        return schemafy(query, 'polls')
