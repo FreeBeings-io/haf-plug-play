@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS hive_engine.ops(
     req_auths VARCHAR(16)[],
     req_posting_auths VARCHAR(16)[],
     op_id VARCHAR,
-    op_payload JSON,
+    op_payload JSONB,
     valid BOOLEAN
 );
 
@@ -24,31 +24,31 @@ CREATE TABLE IF NOT EXISTS hive_engine.transfers(
 CREATE TABLE IF NOT EXISTS hive_engine.nfts(
     id BIGSERIAL PRIMARY KEY,
     he_id BIGINT NOT NULL REFERENCES hive_engine.ops(id),
-    details JSON
+    details JSONB
 );
 
 CREATE TABLE IF NOT EXISTS hive_engine.transfers(
     id BIGSERIAL PRIMARY KEY,
     he_id BIGINT NOT NULL REFERENCES hive_engine.ops(id),
-    details JSON -- TODO: investigate expanding
+    details JSONB -- TODO: investigate expanding
 );
 
 CREATE TABLE IF NOT EXISTS hive_engine.issuances(
     id BIGSERIAL PRIMARY KEY,
     he_id BIGINT NOT NULL REFERENCES hive_engine.ops(id),
-    details JSON -- TODO: investigate expanding
+    details JSONB -- TODO: investigate expanding
 );
 
 CREATE TABLE IF NOT EXISTS hive_engine.transfers(
     id BIGSERIAL PRIMARY KEY,
     he_id BIGINT NOT NULL REFERENCES hive_engine.ops(id),
-    details JSON -- TODO: investigate expanding
+    details JSONB -- TODO: investigate expanding
 );
 
 CREATE TABLE IF NOT EXISTS hive_engine.burns(
     id BIGSERIAL PRIMARY KEY,
     he_id BIGINT NOT NULL REFERENCES hive_engine.ops(id),
-    details JSON -- TODO: investigate expanding
+    details JSONB -- TODO: investigate expanding
 );
 
 -- INDEXES: OPS
