@@ -23,7 +23,7 @@ class DbSession:
         self.conn.autocommit = True
 
     def select(self, sql):
-        cur = self.conn.cursor(name=f"cur-sel:{self.app}")
+        cur = self.conn.cursor()
         try:
             cur.execute(sql)
             res = cur.fetchall()
@@ -40,7 +40,7 @@ class DbSession:
             return res
 
     def select_one(self, sql):
-        cur = self.conn.cursor(name=f"cur-sel-one:{self.app}")
+        cur = self.conn.cursor()
         try:
             cur.execute(sql)
             res = cur.fetchone()
@@ -61,7 +61,7 @@ class DbSession:
         return res
 
     def execute(self, sql,  data=None):
-        cur = self.conn.cursor(name=f"cur-exec:{self.app}")
+        cur = self.conn.cursor()
         try:
             if data:
                 cur.execute(sql, data)
