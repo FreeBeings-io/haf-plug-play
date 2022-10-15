@@ -21,4 +21,6 @@ COPY . ./
 # Install production dependencies.
 RUN pip install --no-cache-dir -e .
 
-CMD haf_plug_play
+CMD python3 haf_plug_play/run_plug_play.py
+
+EXPOSE ${SERVER_PORT}
