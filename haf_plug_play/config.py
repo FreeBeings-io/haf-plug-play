@@ -18,5 +18,6 @@ class Config:
         cls.config['reset'] = os.environ.get('RESET')
         cls.config['schema'] = os.environ.get('SCHEMA')
         cls.config['plugs'] = os.environ.get('PLUGS')
+        cls.config['server_workers'] = os.environ.get('SERVER_WORKERS')
 
 Config.load_config()
