@@ -123,4 +123,4 @@ class Haf:
         cls._init_hpp()
         cls._cleanup()
         cls._init_plugs()
-        Thread(target=cls._start_sync).start()
+        Thread(target=cls._start_sync, name="sync").start()
