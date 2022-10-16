@@ -4,16 +4,18 @@ CREATE OR REPLACE PROCEDURE hpp.sync_main()
     AS $$
         DECLARE
             tempplug RECORD;
+            plugs VARCHAR(64)[];
+            _plug VARCHAR(64);
         BEGIN
+            SELECT ARRAY(SELECT plug FROM hpp.plug_state) INTO plugs;
             WHILE hpp.sync_enabled() LOOP
-                FOR tempplug IN
-                    SELECT * FROM hpp.plug_state 
+                FOREACH _plug IN ARRAY plugs
                 LOOP
-                    IF tempplug.enabled = true THEN
-                        RAISE NOTICE 'Attempting to sync plug: %', tempplug.plug;
-                        CALL hpp.sync_plug(tempplug.plug);
+                    IF hpp.plug_enabled(_plug) = true THEN
+                        RAISE NOTICE 'Attempting to sync plug: %', _plug;
+                        CALL hpp.sync_plug(_plug);
                         COMMIT;
-                        RAISE NOTICE 'Plug synced: %', tempplug.plug;
+                        RAISE NOTICE 'Plug synced: %', _plug;
                     END IF;
                 END LOOP;
             END LOOP;
