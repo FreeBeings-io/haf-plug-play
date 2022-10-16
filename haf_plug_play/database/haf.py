@@ -72,6 +72,7 @@ class Haf:
                 cls._check_schema(plug, tables)
                 cls._update_functions(functions)
                 AvailablePlugs.add_plug(plug, Plug(plug, updated_defs))
+                AvailablePlugs.launch(plug)
 
     @classmethod
     def _init_hpp(cls):
@@ -123,4 +124,4 @@ class Haf:
         cls._init_hpp()
         cls._cleanup()
         cls._init_plugs()
-        Thread(target=cls._start_sync, name="sync").start()
+        #Thread(target=cls._start_sync, name="sync").start()

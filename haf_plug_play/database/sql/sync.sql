@@ -31,7 +31,7 @@ CREATE OR REPLACE PROCEDURE hpp.sync_plug(_plug_name VARCHAR(64))
             _op_ids SMALLINT[];
             _latest_block_num INTEGER;
             _range BIGINT[];
-            _batch_size INTEGER := 100;
+            _batch_size INTEGER := 1000;
             _head INTEGER;
             _end INTEGER;
         BEGIN
