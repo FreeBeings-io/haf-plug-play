@@ -1,4 +1,6 @@
 import json
+from threading import Thread
+import time
 
 from haf_plug_play.config import Config
 
@@ -64,6 +66,13 @@ class Plug:
         long_running = self.db_conn.select_one(
             f"SELECT hpp.plug_long_running('{self.name}');")
         return long_running
+    
+    def launch(self):
+        print(f"Starting plug: {self.name}...")
+        while True:
+            self.db_conn.execute(f"CALL {config['schema']}.sync_plug('{self.name}');")
+            self.db_conn.commit()
+            time.sleep(0.5)
 
 class AvailablePlugs:
 
@@ -72,3 +81,7 @@ class AvailablePlugs:
     @classmethod
     def add_plug(cls, plug_name, plug:Plug):
         cls.plugs[plug_name] = plug
+    
+    @classmethod
+    def launch(cls, plug_name):
+        Thread(target=cls.plugs[plug_name].launch).start()
