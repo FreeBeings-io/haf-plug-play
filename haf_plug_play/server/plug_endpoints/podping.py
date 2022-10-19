@@ -75,7 +75,7 @@ async def get_podping_acc_latest(acc:str, limit: int = 5):
     """
     if len(acc) > 16:
         raise HTTPException(status_code=400, detail="Hive account must be no more than 16 chars")
-    sql_feed_update = StateQuery.get_podping_acc_latest_feed_update(limit, acc)
+    sql_feed_update = StateQuery.get_podping_acc_latest_feed_update(acc, limit)
     result = {}
     feed_updates = select(sql_feed_update, ['trx_id', 'block_num', 'created', 'url', 'reason', 'medium'])
     if feed_updates:
