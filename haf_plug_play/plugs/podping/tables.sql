@@ -19,6 +19,8 @@ CREATE TABLE IF NOT EXISTS podping.updates(
     medium VARCHAR
 );
 
+CREATE INDEX IF NOT EXISTS ops_ix_posting_auths
+    ON podping.ops USING GIN(req_posting_auths);
 
 CREATE INDEX IF NOT EXISTS updates_ix_block_num
     ON podping.updates (block_num);
