@@ -61,7 +61,7 @@ async def get_podping_url_latest(iri:str, limit: int = 5):
     return result
 
 @router_podping.get("/api/podping/history/latest/account", tags=['podping'])
-async def get_podping_acc_latest(iri:str, limit: int = 5, acc:str = None):
+async def get_podping_acc_latest(acc:str, limit: int = 5):
     """Returns the latest feed update from a given account.
 
     - `acc` <string(16)>: the account that made the podping
@@ -73,14 +73,14 @@ async def get_podping_acc_latest(iri:str, limit: int = 5, acc:str = None):
     acc=podping.aaa
     ```
     """
-    if acc is not None and len(acc) > 16:
+    if len(acc) > 16:
         raise HTTPException(status_code=400, detail="Hive account must be no more than 16 chars")
     sql_feed_update = StateQuery.get_podping_acc_latest_feed_update(limit, acc)
     result = {}
-    feed_updates = select(sql_feed_update, ['trx_id', 'block_num', 'created', 'reason', 'medium'])
+    feed_updates = select(sql_feed_update, ['trx_id', 'block_num', 'created', 'url', 'reason', 'medium'])
     if feed_updates:
         result["feed_updates"] = feed_updates
-        result["iri"] = iri
+        result["account"] = acc
         _time_since = datetime.utcnow() - datetime.strptime(feed_updates[0]['created'], UTC_TIMESTAMP_FORMAT)
         result["seconds_since_last_update"] = _time_since.seconds
     else:
