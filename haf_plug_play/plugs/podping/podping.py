@@ -43,8 +43,8 @@ class StateQuery:
     def get_podping_acc_latest_feed_update(cls,  acc: str = None, limit: int = 5):
         query = f"""
             SELECT encode(po.trx_id, 'hex'), fu.block_num, fu.created, fu.url, fu.reason, fu.medium
-            FROM plug_play_podping_prod_podping.ops po
-            LEFT JOIN plug_play_podping_prod_podping.updates fu ON po.id = fu.podping_id
+            FROM podping.ops po
+            LEFT JOIN podping.updates fu ON po.id = fu.podping_id
             WHERE '{acc}' = ANY (po.req_posting_auths)
             ORDER BY fu.podping_id DESC
             LIMIT {limit};
