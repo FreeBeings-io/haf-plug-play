@@ -14,6 +14,9 @@ CREATE TABLE IF NOT EXISTS podping.updates(
     podping_id BIGINT NOT NULL REFERENCES podping.ops(id) ON DELETE CASCADE DEFERRABLE,
     block_num INTEGER NOT NULL,
     created TIMESTAMP NOT NULL,
+    trx_id BYTEA NOT NULL,
+    req_auths VARCHAR(16)[],
+    req_posting_auths VARCHAR(16)[],
     url VARCHAR(500),
     reason VARCHAR,
     medium VARCHAR

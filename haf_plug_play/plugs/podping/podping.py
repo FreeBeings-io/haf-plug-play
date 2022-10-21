@@ -30,11 +30,10 @@ class StateQuery:
     @classmethod
     def get_podping_url_latest_feed_update(cls, url: str, limit: int = 5):
         query = f"""
-            SELECT encode(po.trx_id, 'hex'), fu.block_num, fu.created, fu.reason, fu.medium
-            FROM podping.updates fu
-            JOIN podping.ops po ON po.id = fu.podping_id
+            SELECT encode(trx_id, 'hex'), block_num, created, reason, medium
+            FROM podping.updates
             WHERE url = '{url}'
-            ORDER BY fu.podping_id DESC
+            ORDER BY id DESC
             LIMIT {limit};
         """
         return schemafy(query, 'podping')
@@ -42,11 +41,10 @@ class StateQuery:
     @classmethod
     def get_podping_acc_latest_feed_update(cls,  acc: str = None, limit: int = 5):
         query = f"""
-            SELECT encode(po.trx_id, 'hex'), fu.block_num, fu.created, fu.url, fu.reason, fu.medium
-            FROM podping.ops po
-            LEFT JOIN podping.updates fu ON po.id = fu.podping_id
-            WHERE '{acc}' = ANY (po.req_posting_auths)
-            ORDER BY fu.podping_id DESC
+            SELECT encode(trx_id, 'hex'), block_num, created, url, reason, medium
+            FROM podping.updates
+            WHERE '{acc}' = ANY (req_posting_auths)
+            ORDER BY id DESC
             LIMIT {limit};
         """
         return schemafy(query, 'podping')
