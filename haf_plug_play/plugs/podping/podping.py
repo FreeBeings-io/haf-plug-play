@@ -32,19 +32,19 @@ class StateQuery:
         query = f"""
             SELECT encode(trx_id, 'hex'), block_num, created, reason, medium
             FROM podping.updates
-            WHERE url = '{url}'
+            WHERE url = '$_url_$'
             ORDER BY id DESC
             LIMIT {limit};
         """
-        return schemafy(query, 'podping')
+        return schemafy(query, 'podping').replace("$_url_$", url)
 
     @classmethod
     def get_podping_acc_latest_feed_update(cls,  acc: str = None, limit: int = 5):
         query = f"""
             SELECT encode(trx_id, 'hex'), block_num, created, url, reason, medium
             FROM podping.updates
-            WHERE '{acc}' = ANY (req_posting_auths)
+            WHERE '$_acc_$' = ANY (req_posting_auths)
             ORDER BY id DESC
             LIMIT {limit};
         """
-        return schemafy(query, 'podping')
+        return schemafy(query, 'podping').replace("$_acc_$", acc)
