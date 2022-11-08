@@ -81,7 +81,7 @@ CREATE OR REPLACE PROCEDURE hpp.process_block_range(_plug_name VARCHAR, _start I
                         tv.trx_hash,
                         ov.body::json
                     FROM hive.operations_view ov
-                    LEFT JOIN hive.transactions_view tv
+                    JOIN hive.transactions_view tv
                         ON tv.block_num = ov.block_num
                         AND tv.trx_in_block = ov.trx_in_block
                     WHERE ov.block_num >= $1
