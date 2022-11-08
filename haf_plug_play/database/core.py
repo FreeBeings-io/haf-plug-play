@@ -7,19 +7,22 @@ config = Config.config
 
 class DbSession:
     def __init__(self, app):
+        self.app = app
+        self.new_conn()
+    
+    def new_conn(self):
         self.conn = psycopg2.connect(
             host=config['db_host'],
             database=config['db_name'],
             user=config['db_username'],
             password=config['db_password'],
             connect_timeout=5,
-            application_name=app,
+            application_name=self.app,
             keepalives=1,
             keepalives_idle=5,
             keepalives_interval=2,
             keepalives_count=2
         )
-        self.app = app
         self.conn.autocommit = True
 
     def select(self, sql):
@@ -61,20 +64,31 @@ class DbSession:
         return res
 
     def execute(self, sql,  data=None):
-        cur = self.conn.cursor()
-        try:
-            if data:
-                cur.execute(sql, data)
-            else:
-                cur.execute(sql)
-            cur.close()
-        except Exception as e:
-            print(e)
-            print(f"SQL:  {sql}")
-            print(f"DATA:   {data}")
-            self.conn.rollback()
-            cur.close()
-            raise Exception({'data': data, 'sql': sql})
+        err_count = 0
+        while True:
+            cur = self.conn.cursor()
+            try:
+                if data:
+                    cur.execute(sql, data)
+                else:
+                    cur.execute(sql)
+                cur.close()
+                break
+            except psycopg2.OperationalError as err:
+                if "connection" in err.args[0] and "closed" in err.args[0]:
+                    print(f"Connection lost. Reconnecting...")
+                    self.new_conn()
+                    continue
+            except Exception as e:
+                print(e)
+                print(f"SQL:  {sql}")
+                print(f"DATA:   {data}")
+                self.conn.rollback()
+                cur.close()
+                #raise Exception({'data': data, 'sql': sql})
+            err_count += 1
+            if err_count == 3:
+                break
 
     def commit(self):
         self.conn.commit()

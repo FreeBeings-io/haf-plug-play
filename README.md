@@ -40,7 +40,7 @@ RESET=false
 
 **Example**
 
-Create `.env` file with the above variables in the root folder and run:
+Create `.env` file with the above variables in the root folder of the repo and run:
 
 ```
 docker build -t hpp-podping .
