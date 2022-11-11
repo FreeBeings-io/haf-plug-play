@@ -64,31 +64,30 @@ class DbSession:
         return res
 
     def execute(self, sql,  data=None):
-        err_count = 0
-        while True:
-            cur = self.conn.cursor()
-            try:
+        cur = self.conn.cursor()
+        try:
+            if data:
+                cur.execute(sql, data)
+            else:
+                cur.execute(sql)
+            cur.close()
+        except psycopg2.OperationalError as err:
+            if "connection" in err.args[0] and "closed" in err.args[0]:
+                print(f"Connection lost. Reconnecting...")
+                self.new_conn()
+                cur = self.conn.cursor()
                 if data:
                     cur.execute(sql, data)
                 else:
                     cur.execute(sql)
                 cur.close()
-                break
-            except psycopg2.OperationalError as err:
-                if "connection" in err.args[0] and "closed" in err.args[0]:
-                    print(f"Connection lost. Reconnecting...")
-                    self.new_conn()
-                    continue
-            except Exception as e:
-                print(e)
-                print(f"SQL:  {sql}")
-                print(f"DATA:   {data}")
-                self.conn.rollback()
-                cur.close()
-                #raise Exception({'data': data, 'sql': sql})
-            err_count += 1
-            if err_count == 3:
-                break
+        except Exception as e:
+            print(e)
+            print(f"SQL:  {sql}")
+            print(f"DATA:   {data}")
+            self.conn.rollback()
+            cur.close()
+            raise Exception({'data': data, 'sql': sql})
 
     def commit(self):
         self.conn.commit()
