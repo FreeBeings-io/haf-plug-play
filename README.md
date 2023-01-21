@@ -4,11 +4,24 @@
 
 *Plug & Play uses the Hive Application Framework.*
 
-## Documentation
+---
 
-Documentation can be found here:
+## Available Plugs
 
-- [Podping API Documentation](https://podping.hpp.freebeings.io)
+Available plugs that can be run:
+
+- [Podping](docs/plugs/podping.md)
+- [Delegations](docs/plugs/deleg.md)
+
+---
+
+## WIP Plugs
+
+Plugs still under development:
+
+- Hive Engine
+
+---
 
 ## Production Deployment
 
