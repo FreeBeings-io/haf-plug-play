@@ -17,6 +17,6 @@ class StateQuery:
             
             SELECT account, SUM(round((given::numeric)/1000000, 3), SUM(round((received::numeric)/1000000, 3)
             FROM deleg.delegations_balances
-            WHERE account = {account};
+            WHERE account = '{account}';
         """
         return schemafy(query, 'deleg')
