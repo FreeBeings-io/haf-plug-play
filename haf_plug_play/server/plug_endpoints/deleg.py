@@ -12,6 +12,8 @@ router_deleg = APIRouter()
 @router_deleg.get("/api/deleg/account", tags=['deleg'])
 async def get_acc_bals(account:str):
     """Returns delegation balances for account."""
+    if len(account) > 16:
+        raise HTTPException(status_code=400, detail="Hive account must be no more than 16 chars")
     sql = StateQuery.get_deleg_account_bals(account)
     res = select(sql, ['account', 'given', 'received'])
     return res
