@@ -1,0 +1,8 @@
+{
+    "name": "deleg",
+    "props":{
+        "schema": "deleg",
+        "start_block": 10630195
+    },
+    "ops": {"40": "deleg.process_create_deleg", "62": "deleg.process_return_deleg"}
+}
