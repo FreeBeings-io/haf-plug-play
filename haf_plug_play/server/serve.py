@@ -5,6 +5,7 @@ from haf_plug_play import config
 
 from haf_plug_play.server.plug_endpoints.podping import router_podping
 from haf_plug_play.server.plug_endpoints.hive_engine import router_hive_engine
+from haf_plug_play.server.plug_endpoints.deleg import router_deleg
 
 from haf_plug_play.server.system_status import SystemStatus
 from haf_plug_play.tools import normalize_types, get_plug_list
@@ -12,7 +13,8 @@ from haf_plug_play.utils.api_metadata import TITLE, DESCRIPTION, VERSION, CONTAC
 
 PLUG_ROUTERS = {
     'podping': router_podping,
-    'hive_engine': router_hive_engine
+    'hive_engine': router_hive_engine,
+    'deleg': router_deleg
 }
 
 config = config.Config.config
