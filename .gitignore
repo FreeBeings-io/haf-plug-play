@@ -1,4 +1,4 @@
-tests/
+tests_data/
 __pycache__/
 .vscode/
 .venv/
