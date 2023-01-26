@@ -18,6 +18,6 @@ async def get_acc_bals(account:str):
     res = select(sql, ['balances'])
     result = {
         'account': account,
-        'balances': res
+        'balances': res['balances']
     }
     return result
