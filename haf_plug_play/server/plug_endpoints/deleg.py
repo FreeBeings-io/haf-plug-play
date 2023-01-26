@@ -15,5 +15,9 @@ async def get_acc_bals(account:str):
     if len(account) > 16:
         raise HTTPException(status_code=400, detail="Hive account must be no more than 16 chars")
     sql = StateQuery.get_deleg_account_bals(account)
-    res = select(sql, ['account', 'given', 'received'])
-    return res
+    res = select(sql, ['balances'])
+    result = {
+        'account': account,
+        'balances': res
+    }
+    return result

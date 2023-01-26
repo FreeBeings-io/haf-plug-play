@@ -1,13 +1,39 @@
-CREATE OR REPLACE FUNCTION deleg.check_account( _acc VARCHAR(16))
+CREATE OR REPLACE FUNCTION deleg.check_account_pair(_delegator VARCHAR(16), _delegatee VARCHAR(16))
     RETURNS BOOLEAN
     LANGUAGE plpgsql
     VOLATILE AS $function$
         BEGIN
             RETURN (
                 SELECT EXISTS (
-                    SELECT account FROM deleg.delegations_balances
-                    WHERE account = _acc
+                    SELECT amount FROM deleg.delegations_balances
+                    WHERE delegator = _delegator AND delegatee = _delegatee
                 )
+            );
+        END;
+    $function$;
+
+CREATE OR REPLACE FUNCTION deleg.get_acc_bals(_acc VARCHAR(16))
+    RETURNS JSONB
+    LANGUAGE plpgsql
+    VOLATILE AS $function$
+
+        DECLARE
+            _received BIGINT;
+            _given BIGINT;
+        BEGIN
+            SELECT SUM(amount)
+            INTO _received
+            FROM deleg.delegations_balances
+            WHERE delegatee = _acc;
+
+            SELECT SUM(amount)
+            INTO _given
+            FROM deleg.delegations_balances
+            WHERE delegator = _acc;
+            
+            RETURN jsonb_build_object(
+                'received',round((_received::numeric)/1000000, 3),
+                'given',round((_given::numeric)/1000000, 3)
             );
         END;
     $function$;
@@ -48,24 +74,15 @@ CREATE OR REPLACE FUNCTION deleg.process_create_deleg(_block_num INTEGER, _creat
                 INSERT INTO deleg.delegations_balances(account, given, received)
                 VALUES (_delegator, _amount, 0);
 */
-            -- TODO check account and create if not exists
-            IF deleg.check_account(_delegatee) = false THEN
-                INSERT INTO deleg.delegations_balances(account, given, received)
-                VALUES (_delegatee, 0, _amount);
+            -- TODO check account pair and create if not exists
+            IF deleg.check_account_pair(_delegator, _delegatee) = false THEN
+                INSERT INTO deleg.delegations_balances(delegator, delegatee, amount)
+                VALUES (_delegator, _delegatee, _amount);
             ELSE
-                -- add to received
+                -- update amount
                 UPDATE deleg.delegations_balances SET
-                    received = received + _amount
-                WHERE account = _delegatee;
-            END IF;
-            IF deleg.check_account(_delegator) = false THEN
-                INSERT INTO deleg.delegations_balances(account, given, received)
-                VALUES (_delegator, _amount, 0);
-            ELSE
-                -- add to given
-                UPDATE deleg.delegations_balances SET
-                    given = given + _amount
-                WHERE account = _delegator;
+                    amount = _amount
+                WHERE delegator = _delegator AND delegatee = _delegatee;
             END IF;
         END;
     $function$;

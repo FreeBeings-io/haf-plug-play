@@ -21,10 +21,10 @@ CREATE TABLE IF NOT EXISTS deleg.delegations_vesting_returns(
 
 CREATE TABLE IF NOT EXISTS deleg.delegations_balances(
     id BIGSERIAL PRIMARY KEY,
-    account VARCHAR(16) NOT NULL,
-    given BIGINT DEFAULT 0,
-    received BIGINT DEFAULT 0,
-    UNIQUE (account)
+    delegator VARCHAR(16) NOT NULL,
+    delegatee VARCHAR(16) NOT NULL,
+    amount BIGINT DEFAULT 0,
+    UNIQUE (delegator,delegatee)
 );
 
 
@@ -45,6 +45,3 @@ CREATE INDEX IF NOT EXISTS delegs_ix_accs
 
 CREATE INDEX IF NOT EXISTS delegs_return_ix_accs
     ON deleg.delegations_vesting_returns (account);
-
-CREATE INDEX IF NOT EXISTS delegs_bals_ix_accs
-    ON deleg.delegations_balances (account);

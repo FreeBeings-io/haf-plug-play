@@ -14,9 +14,6 @@ class StateQuery:
     @classmethod
     def get_deleg_account_bals(cls, account:str):
         query = f"""
-            
-            SELECT account, round((given::numeric)/1000000, 3), round((received::numeric)/1000000, 3)
-            FROM deleg.delegations_balances
-            WHERE account = '{account}';
+            SELECT deleg.get_acc_bals('{account}')
         """
         return schemafy(query, 'deleg')
