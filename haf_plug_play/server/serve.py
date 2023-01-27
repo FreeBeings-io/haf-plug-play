@@ -27,7 +27,7 @@ app = FastAPI(
     license_info=LICENSE,
     openapi_tags=TAGS_METADATA,
     openapi_url="/api/openapi.json",
-    docs_url="/docs"
+    docs_url="/"
 )
 
 app.add_middleware(

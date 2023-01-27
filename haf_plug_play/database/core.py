@@ -16,7 +16,7 @@ class DbSession:
             database=config['db_name'],
             user=config['db_username'],
             password=config['db_password'],
-            connect_timeout=5,
+            connect_timeout=20,
             application_name=self.app,
             keepalives=1,
             keepalives_idle=5,
@@ -27,16 +27,9 @@ class DbSession:
 
     def select(self, sql):
         cur = self.conn.cursor()
-        try:
-            cur.execute(sql)
-            res = cur.fetchall()
-            cur.close()
-        except Exception as e:
-            print(e)
-            print(f"SQL:  {sql}")
-            self.conn.rollback()
-            cur.close()
-            raise Exception ('DB error occurred')
+        cur.execute(sql)
+        res = cur.fetchall()
+        cur.close()
         if len(res) == 0:
             return None
         else:
@@ -44,16 +37,9 @@ class DbSession:
 
     def select_one(self, sql):
         cur = self.conn.cursor()
-        try:
-            cur.execute(sql)
-            res = cur.fetchone()
-            cur.close()
-        except Exception as e:
-            print(e)
-            print(f"SQL:  {sql}")
-            self.conn.rollback()
-            cur.close()
-            raise Exception ('DB error occurred')
+        cur.execute(sql)
+        res = cur.fetchone()
+        cur.close()
         if len(res) == 0:
             return None
         else:
@@ -106,7 +92,7 @@ class DbSetup:
             database=config['db_name'],
             user=config['db_username'],
             password=config['db_password'],
-            connect_timeout=3,
+            connect_timeout=20,
             keepalives=1,
             keepalives_idle=5,
             keepalives_interval=2,
