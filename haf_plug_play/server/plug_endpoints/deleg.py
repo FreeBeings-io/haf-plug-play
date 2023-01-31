@@ -7,8 +7,8 @@ from haf_plug_play.plugs.deleg.deleg import SearchQuery, StateQuery
 from haf_plug_play.database.access import select
 from haf_plug_play.tools import UTC_TIMESTAMP_FORMAT
 
-SCHEMA_DELEG_IN = ['id', 'created', 'delegator', 'amount']
-SCHEMA_DELEG_IN = ['id', 'created', 'delegatee', 'amount']
+SCHEMA_DELEG_HIST = ['id', 'created', 'delegator', 'amount']
+SCHEMA_DELEG = ['id', 'delegator', 'amount']
 
 router_deleg = APIRouter()
 
@@ -31,7 +31,7 @@ async def get_acc_in(account:str):
     if len(account) > 16:
         raise HTTPException(status_code=400, detail="Hive account must be no more than 16 chars")
     sql = StateQuery.get_deleg_in(account)
-    res = select(sql, SCHEMA_DELEG_IN)
+    res = select(sql, SCHEMA_DELEG)
     return res
 
 @router_deleg.get('/api/deleg/account/out', tags=['deleg'])
@@ -40,7 +40,7 @@ async def get_acc_out(account:str):
     if len(account) > 16:
         raise HTTPException(status_code=400, detail="Hive account must be no more than 16 chars")
     sql = StateQuery.get_deleg_out(account)
-    res = select(sql, SCHEMA_DELEG_IN)
+    res = select(sql, SCHEMA_DELEG)
     return res
 
 @router_deleg.get('/api/deleg/history/in', tags=['deleg'])
@@ -49,7 +49,7 @@ async def get_history_in(account:str):
     if len(account) > 16:
         raise HTTPException(status_code=400, detail="Hive account must be no more than 16 chars")
     sql = SearchQuery.get_deleg_in(account)
-    res = select(sql, SCHEMA_DELEG_IN)
+    res = select(sql, SCHEMA_DELEG_HIST)
     return res
 
 @router_deleg.get('/api/deleg/history/out', tags=['deleg'])
@@ -58,5 +58,5 @@ async def get_history_out(account:str):
     if len(account) > 16:
         raise HTTPException(status_code=400, detail="Hive account must be no more than 16 chars")
     sql = SearchQuery.get_deleg_out(account)
-    res = select(sql, SCHEMA_DELEG_IN)
+    res = select(sql, SCHEMA_DELEG_HIST)
     return res
