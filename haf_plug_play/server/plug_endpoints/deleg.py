@@ -25,7 +25,7 @@ async def get_acc_bals(account:str):
     }
     return result
 
-@router_deleg.get('/api/deleg/in', tags=['deleg'])
+@router_deleg.get('/api/deleg/account/in', tags=['deleg'])
 async def get_acc_in(account:str):
     """Returns current delegations made to given account."""
     if len(account) > 16:
@@ -34,11 +34,29 @@ async def get_acc_in(account:str):
     res = select(sql, SCHEMA_DELEG_IN)
     return res
 
-@router_deleg.get('/api/deleg/out', tags=['deleg'])
+@router_deleg.get('/api/deleg/account/out', tags=['deleg'])
 async def get_acc_out(account:str):
     """Returns current delegations made from a given account."""
     if len(account) > 16:
         raise HTTPException(status_code=400, detail="Hive account must be no more than 16 chars")
     sql = StateQuery.get_deleg_out(account)
+    res = select(sql, SCHEMA_DELEG_IN)
+    return res
+
+@router_deleg.get('/api/deleg/history/in', tags=['deleg'])
+async def get_history_in(account:str):
+    """Returns historical delegations made to given account."""
+    if len(account) > 16:
+        raise HTTPException(status_code=400, detail="Hive account must be no more than 16 chars")
+    sql = SearchQuery.get_deleg_in(account)
+    res = select(sql, SCHEMA_DELEG_IN)
+    return res
+
+@router_deleg.get('/api/deleg/history/out', tags=['deleg'])
+async def get_history_out(account:str):
+    """Returns historical delegations made from a given account."""
+    if len(account) > 16:
+        raise HTTPException(status_code=400, detail="Hive account must be no more than 16 chars")
+    sql = SearchQuery.get_deleg_out(account)
     res = select(sql, SCHEMA_DELEG_IN)
     return res
