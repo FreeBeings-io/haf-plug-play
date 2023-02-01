@@ -32,8 +32,8 @@ CREATE OR REPLACE FUNCTION deleg.get_acc_bals(_acc VARCHAR(16))
             WHERE delegator = _acc;
             
             RETURN jsonb_build_object(
-                'in',round((_received::numeric)/1000000, 6),
-                'out',round((_given::numeric)/1000000, 6)
+                'in',COALESCE(round((_received::numeric)/1000000, 6),0),
+                'out',COALESCE(round((_given::numeric)/1000000, 6),0)
             );
         END;
     $function$;
