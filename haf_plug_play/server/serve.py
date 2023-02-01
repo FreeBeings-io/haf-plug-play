@@ -1,7 +1,8 @@
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from haf_plug_play import config
+from haf_plug_play.server.buffer import Buffer
 
 from haf_plug_play.server.plug_endpoints.podping import router_podping
 from haf_plug_play.server.plug_endpoints.hive_engine import router_hive_engine
@@ -41,12 +42,16 @@ for plug in get_plug_list():
     if plug in config['plugs']:
         app.include_router(PLUG_ROUTERS[plug])
 
-async def root():
+async def root(request: Request):
     """Reports the status of Hive Plug & Play."""
+    _buffer = Buffer.check_buffer(request['path'])
+    if _buffer is not None:
+        return _buffer
     report = {
         'name': 'Hive Plug & Play',
         'status': normalize_types(SystemStatus.get_sync_status())
     }
+    Buffer.update_buffer(request['path'], report)
     return report
 
 # SYSTEM
