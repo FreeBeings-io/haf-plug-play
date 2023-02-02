@@ -29,7 +29,7 @@ async def get_acc_bals(request: Request, account:str):
     Buffer.update_buffer(request['path'], result)
     return result
 
-@router_deleg.get('/api/deleg/account/in', tags=['deleg'])
+@router_deleg.get('/api/deleg/in', tags=['deleg'])
 async def get_acc_in(request: Request, account:str, limit:int=100):
     """Returns current delegations made to given account."""
     limit = 100 if limit > 100 else limit
@@ -45,7 +45,7 @@ async def get_acc_in(request: Request, account:str, limit:int=100):
     Buffer.update_buffer(request['path'], result)
     return result
 
-@router_deleg.get('/api/deleg/account/out', tags=['deleg'])
+@router_deleg.get('/api/deleg/out', tags=['deleg'])
 async def get_acc_out(request: Request, account:str, limit:int=100):
     """Returns current delegations made from a given account."""
     limit = 100 if limit > 100 else limit
