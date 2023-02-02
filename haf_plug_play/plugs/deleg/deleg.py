@@ -8,23 +8,25 @@ WDIR_DELEG = os.path.dirname(__file__)
 class SearchQuery:
 
     @classmethod
-    def get_deleg_in(cls, account:str, limit:int):
+    def get_deleg_in(cls, account:str, limit:int, descending:bool):
+        order = "DESC" if descending is True else "ASC"
         query = f"""
             SELECT id, created, delegator, round((amount::numeric)/1000000, 6)
             FROM deleg.delegations_vesting
             WHERE amount > 0 AND delegatee = '{account}'
-            ORDER BY id ASC
+            ORDER BY id {order}
             LIMIT {limit}
         """
         return schemafy(query, 'deleg')
     
     @classmethod
-    def get_deleg_out(cls, account:str, limit:int):
+    def get_deleg_out(cls, account:str, limit:int, descending:bool):
+        order = "DESC" if descending is True else "ASC"
         query = f"""
             SELECT id, created, delegatee, round((amount::numeric)/1000000, 6)
             FROM deleg.delegations_vesting
             WHERE amount > 0 AND delegator = '{account}'
-            ORDER BY id ASC
+            ORDER BY id {order}
             LIMIT {limit}
         """
         return schemafy(query, 'deleg')
