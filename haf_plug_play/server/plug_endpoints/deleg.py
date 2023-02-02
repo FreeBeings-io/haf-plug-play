@@ -30,7 +30,7 @@ async def get_acc_bals(request: Request, account:str):
     return result
 
 @router_deleg.get('/api/deleg/account/in', tags=['deleg'])
-async def get_acc_in(request: Request, account:str):
+async def get_acc_in(request: Request, account:str, limit:int=100):
     """Returns current delegations made to given account."""
     if len(account) > 16:
         raise HTTPException(status_code=400, detail="Hive account must be no more than 16 chars")
@@ -39,13 +39,13 @@ async def get_acc_in(request: Request, account:str):
     if _buffer is not None:
         return _buffer
     # prrocess request
-    sql = StateQuery.get_deleg_in(account)
+    sql = StateQuery.get_deleg_in(account, limit)
     result = select(sql, SCHEMA_DELEG) or []
     Buffer.update_buffer(request['path'], result)
     return result
 
 @router_deleg.get('/api/deleg/account/out', tags=['deleg'])
-async def get_acc_out(request: Request, account:str):
+async def get_acc_out(request: Request, account:str, limit:int=100):
     """Returns current delegations made from a given account."""
     if len(account) > 16:
         raise HTTPException(status_code=400, detail="Hive account must be no more than 16 chars")
@@ -54,13 +54,13 @@ async def get_acc_out(request: Request, account:str):
     if _buffer is not None:
         return _buffer
     # prrocess request
-    sql = StateQuery.get_deleg_out(account)
+    sql = StateQuery.get_deleg_out(account, limit)
     result = select(sql, SCHEMA_DELEG) or []
     Buffer.update_buffer(request['path'], result)
     return result
 
 @router_deleg.get('/api/deleg/history/in', tags=['deleg'])
-async def get_history_in(request: Request, account:str):
+async def get_history_in(request: Request, account:str, limit:int=100):
     """Returns historical delegations made to given account."""
     if len(account) > 16:
         raise HTTPException(status_code=400, detail="Hive account must be no more than 16 chars")
@@ -69,13 +69,13 @@ async def get_history_in(request: Request, account:str):
     if _buffer is not None:
         return _buffer
     # prrocess request
-    sql = SearchQuery.get_deleg_in(account)
+    sql = SearchQuery.get_deleg_in(account, limit)
     result = select(sql, SCHEMA_DELEG_HIST) or []
     Buffer.update_buffer(request['path'], result)
     return result
 
 @router_deleg.get('/api/deleg/history/out', tags=['deleg'])
-async def get_history_out(request: Request, account:str):
+async def get_history_out(request: Request, account:str, limit:int=100):
     """Returns historical delegations made from a given account."""
     if len(account) > 16:
         raise HTTPException(status_code=400, detail="Hive account must be no more than 16 chars")
@@ -84,7 +84,7 @@ async def get_history_out(request: Request, account:str):
     if _buffer is not None:
         return _buffer
     # prrocess request
-    sql = SearchQuery.get_deleg_out(account)
+    sql = SearchQuery.get_deleg_out(account, limit)
     result = select(sql, SCHEMA_DELEG_HIST) or []
     Buffer.update_buffer(request['path'], result)
     return result
